@@ -1,0 +1,11 @@
+# The compositor config generator, split by concern.
+#
+# Singletons rather than instantiable types: these are pure text emitters with
+# no state to hold, and a singleton is the shape that says so.
+#
+# ⚠️ NOT named Binds/Settings. config/Binds.qml is already a singleton by that
+# name and tools/hypr.qml imports both directories — the clash is silent, and
+# what you get is whichever import came last.
+singleton Lua 1.0 Lua.qml
+singleton EmitSettings 1.0 EmitSettings.qml
+singleton EmitBinds 1.0 EmitBinds.qml

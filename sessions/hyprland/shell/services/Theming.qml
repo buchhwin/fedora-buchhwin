@@ -164,7 +164,7 @@ Singleton {
                 l.opacityApp,
                 l.fontUi, l.fontMono, l.fontSize, l.profile,
                 g.enabled, g.mode,
-                g.gtk, g.qt, g.kitty, g.alacritty, g.niri, g.btop, g.bat,
+                g.gtk, g.qt, g.kitty, g.alacritty, g.hypr, g.btop, g.bat,
                 g.fastfetch, g.delta, g.tmux, g.starship, g.lazygit, g.vscode,
                 // ⚠️ Brave, and it belongs here for the ordinary reason —
                 // render.qml reads it — but it is worth naming because this is
@@ -503,28 +503,33 @@ Singleton {
         debounce.restart()
     }
 
-    // ⚠️ THE NIRI HALF ON ITS OWN, and it exists because of a rule this project
-    // set itself: no key without an answer. Key bindings are deliberately NOT in
-    // the fingerprint — a palette change must not rewrite config.kdl — so
-    // nothing at all happened when they changed, and the only way to make a
-    // rebinding real was to type `bhctl niri apply` in a terminal. A settings
-    // window that needs a terminal afterwards has not finished the job.
+    // ⚠️ THE COMPOSITOR HALF ON ITS OWN, and it exists because of a rule this
+    // project set itself: no key without an answer. Key bindings are
+    // deliberately NOT in the fingerprint — a palette change must not rewrite
+    // the bindings — so nothing at all happened when they changed, and the only
+    // way to make a rebinding real was to type a command in a terminal. A
+    // settings window that needs a terminal afterwards has not finished the job.
+    //
+    // ⚠️⚠️ AND THIS FUNCTION USED TO SKIP THE GENERATOR ENTIRELY. It ran
+    // `hyprctl reload` and nothing else, which reloaded a config that contained
+    // none of the bindings — so every rebind was a no-op that looked like a
+    // success. The generator is the whole point of the call.
     //
     // Only the generator runs, not the renderer: a moved shortcut has nothing to
-    // do with colours, and re-rendering fifteen foreign configs to move one line
-    // in config.kdl is the kind of cost that is invisible until it is on a
-    // battery. tools/niri.qml compares before it writes, so an unchanged config
-    // still costs nothing but the process.
+    // do with colours, and re-rendering fifteen foreign configs to move one
+    // binding is the kind of cost that is invisible until it is on a battery.
+    // tools/hypr.qml compares before it writes, so an unchanged config still
+    // costs nothing but the process.
     function applyHyprland() {
         if (root.busy) {
             // A render is mid-flight and it ends with this same generator, so
             // the change is already going to be picked up.
-            root.log("niri apply asked for while busy — the running pass covers it")
+            root.log("compositor apply asked for while busy — the running pass covers it")
             return
         }
         root.busy = true
-        root.log("reloading Hyprland")
-        hyprlandProc.running = true
+        root.log("generating the compositor config")
+        generatorProc.running = true
     }
 
     function render() {
@@ -556,29 +561,68 @@ Singleton {
             // reached anything, reported as success.
             root.lastError = code === 0 ? "" : "render exited " + code
             root.log(code === 0 ? "render finished" : "RENDER FAILED, exit " + code)
-            // ⚠️ `busy` STAYS TRUE until the niri pass is done too, or a second
-            // change arriving in between would start a render while this one is
-            // still finishing its other half.
-            hyprlandProc.running = true
+            // ⚠️ `busy` STAYS TRUE until the compositor pass is done too, or a
+            // second change arriving in between would start a render while this
+            // one is still finishing its other half.
+            generatorProc.running = true
         }
     }
 
     // The second half, and it is not optional.
     //
-    // ⚠️ THE RENDERER DOES NOT WRITE config.kdl. It writes colours, including
-    // niri's `colors.kdl`, and config.kdl is a separate generator — so every
-    // niri-side setting (blur rules, window rules, gaps, shadows, corner radii)
-    // had NO watcher at all and only reached the machine when somebody typed
-    // `bhctl niri apply`. That is the same "a key with no reader" fault this
-    // project has now found six times, one level up: a key with a reader that
-    // nothing calls.
+    // ⚠️ THE RENDERER DOES NOT WRITE THE COMPOSITOR CONFIG. It writes colours,
+    // including the compositor's, and the config itself is a separate
+    // generator — so every compositor-side setting (gaps, borders, blur,
+    // shadows, monitor layout, and every keybinding) had NO watcher at all and
+    // only reached the machine when somebody ran a command by hand. That is the
+    // same "a key with no reader" fault this project has now found six times,
+    // one level up: a key with a reader that nothing calls.
     //
     // Running it unconditionally after every render is affordable because
-    // tools/niri.qml compares before writing — tests/niri-config.sh has a check
-    // named "second run writes nothing" for exactly this — so an unchanged
+    // tools/hypr.qml compares before writing — tests/hypr-config.sh has a check
+    // named "a second run writes nothing" for exactly this — so an unchanged
     // config costs one process and no compositor reload.
     Process {
-        id: hyprlandProc
+        id: generatorProc
+        command: ["env", "BUCHHWIN_TOOL=hypr", "QT_QPA_PLATFORM=offscreen",
+                  "qs", "-p", Quickshell.shellPath("")]
+
+        onExited: function (code) {
+            // ⚠️ THE TOOL EXITS 0 EVEN WHEN IT REFUSES TO WRITE. quickshell has
+            // no exit code to set, so the log is the truth: a refusal writes a
+            // line starting "buchhwin hypr — ABORT:". Reloading after a refusal
+            // would reload the config that was just put back, which is harmless
+            // but reports success for a change that did not happen.
+            if (code !== 0) {
+                root.busy = false
+                root.lastError = "the compositor generator exited " + code
+                root.log("GENERATOR FAILED, exit " + code)
+                return
+            }
+            generatorLog.reload()
+            var text = String(generatorLog.text() || "")
+            var refusal = text.match(/^buchhwin hypr — ABORT:.*$/m)
+            if (refusal) {
+                root.busy = false
+                root.lastError = String(refusal[0]).replace(/^buchhwin hypr — ABORT:\s*/, "")
+                root.log("GENERATOR REFUSED: " + root.lastError)
+                return
+            }
+            root.log("compositor config generated")
+            reloadProc.running = true
+        }
+    }
+
+    // What the generator said. Read once, after it exits — not watched, because
+    // the only writer is a process this service started.
+    FileView {
+        id: generatorLog
+        path: "/tmp/buchhwin-hypr.log"
+        printErrors: false
+    }
+
+    Process {
+        id: reloadProc
         command: ["hyprctl", "reload"]
 
         onExited: function (code) {

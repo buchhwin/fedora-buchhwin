@@ -394,7 +394,7 @@ Item {
             // The thirteen names, written out here on purpose: this is the one
             // place a SECOND list is right, because its whole job is to disagree
             // with the page if the page ever loses one.
-            var want = ["gtk", "qt", "kitty", "alacritty", "niri", "btop", "bat",
+            var want = ["gtk", "qt", "kitty", "alacritty", "hypr", "btop", "bat",
                         "fastfetch", "delta", "tmux", "starship", "lazygit", "vscode"]
             var missed = []
             for (var i = 0; i < want.length; i++)

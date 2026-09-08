@@ -2,6 +2,9 @@
 # file outside its own directory.
 singleton Config 1.0 Config.qml
 singleton Migrations 1.0 Migrations.qml
+# The default keybindings, on their own. Split out of Config.qml so the file
+# everybody reads is about settings rather than about sixty rows of table.
+singleton Binds 1.0 Binds.qml
 # Export, import and reset. Separate from Config because they act on the FILE
 # rather than on a setting — see the note at the top of Backup.qml.
 singleton Backup 1.0 Backup.qml
