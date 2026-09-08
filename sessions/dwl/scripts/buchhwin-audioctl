@@ -1,0 +1,89 @@
+#!/usr/bin/env bash
+# Machine-readable audio device and stream control for the Quickshell UI.
+# Replaces pavucontrol; output is one record per line, fields separated by "|".
+set -euo pipefail
+
+usage() {
+  cat >&2 <<'EOF'
+usage: buchhwin-audioctl <command> [args]
+
+  sinks                       list outputs   -> name|description|volume|mute|default
+  sources                     list inputs    -> name|description|volume|mute|default
+  streams                     list app audio -> id|application|volume|mute
+  default-sink NAME           make an output the default
+  default-source NAME         make an input the default
+  sink-volume NAME VALUE      e.g. 5%+ / 5%- / 50%
+  source-volume NAME VALUE
+  stream-volume ID VALUE
+  sink-mute NAME              toggle
+  source-mute NAME            toggle
+  stream-mute ID              toggle
+EOF
+  exit 2
+}
+
+need_pactl() {
+  command -v pactl >/dev/null 2>&1 || {
+    echo "buchhwin-audioctl: pactl not found (install pulseaudio-utils)" >&2
+    exit 1
+  }
+}
+
+# pactl prints one indented block per device. Volume appears several times
+# (per channel and as base volume); the first percentage on the Volume line is
+# the one the UI wants.
+list_devices() {
+  local kind="$1" default_name
+  default_name="$(pactl "get-default-$kind" 2>/dev/null || true)"
+  pactl list "${kind}s" 2>/dev/null | awk -v def="$default_name" '
+    /^(Sink|Source) #/ { name=""; desc=""; mute=""; vol="" }
+    /^[ \t]+Name: /        { name=$2 }
+    /^[ \t]+Description: / { sub(/^[ \t]+Description: /, ""); desc=$0 }
+    /^[ \t]+Mute: /        { mute=$2 }
+    /^[ \t]+Volume: /      { if (vol == "") { for (i=1; i<=NF; i++) if ($i ~ /%$/) { vol=$i; break } } }
+    /^[ \t]+Properties:/   {
+      if (name != "") {
+        if (desc == "") desc = name
+        printf "%s|%s|%s|%s|%s\n", name, desc, vol, mute, (name == def ? "yes" : "no")
+        name=""
+      }
+    }
+  '
+}
+
+list_streams() {
+  pactl list sink-inputs 2>/dev/null | awk '
+    /^Sink Input #/        { id=substr($3, 2); app=""; mute=""; vol="" }
+    /^[ \t]+Mute: /        { mute=$2 }
+    /^[ \t]+Volume: /      { if (vol == "") { for (i=1; i<=NF; i++) if ($i ~ /%$/) { vol=$i; break } } }
+    /application\.name = / {
+      if (id != "") {
+        line=$0
+        sub(/.*application\.name = "/, "", line)
+        sub(/".*/, "", line)
+        app=line
+        printf "%s|%s|%s|%s\n", id, app, vol, mute
+        id=""
+      }
+    }
+  '
+}
+
+need_pactl
+command="${1:-}"
+shift || true
+
+case "$command" in
+  sinks)   list_devices sink ;;
+  sources) list_devices source ;;
+  streams) list_streams ;;
+  default-sink)   [[ $# -eq 1 ]] || usage; pactl set-default-sink "$1" ;;
+  default-source) [[ $# -eq 1 ]] || usage; pactl set-default-source "$1" ;;
+  sink-volume)    [[ $# -eq 2 ]] || usage; pactl set-sink-volume "$1" "$2" ;;
+  source-volume)  [[ $# -eq 2 ]] || usage; pactl set-source-volume "$1" "$2" ;;
+  stream-volume)  [[ $# -eq 2 ]] || usage; pactl set-sink-input-volume "$1" "$2" ;;
+  sink-mute)      [[ $# -eq 1 ]] || usage; pactl set-sink-mute "$1" toggle ;;
+  source-mute)    [[ $# -eq 1 ]] || usage; pactl set-source-mute "$1" toggle ;;
+  stream-mute)    [[ $# -eq 1 ]] || usage; pactl set-sink-input-mute "$1" toggle ;;
+  *) usage ;;
+esac

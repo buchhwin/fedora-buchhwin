@@ -1,0 +1,7 @@
+# The one surface: bar and island as a single drawn shape. See ../../common/qmldir.
+Silhouette 1.0 Silhouette.qml
+ShellSurface 1.0 ShellSurface.qml
+ClickCatcher 1.0 ClickCatcher.qml
+OverlaySurface 1.0 OverlaySurface.qml
+HotCorner 1.0 HotCorner.qml
+ScreenCorner 1.0 ScreenCorner.qml

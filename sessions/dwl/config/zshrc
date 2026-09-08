@@ -1,0 +1,35 @@
+# Dedicated shell configuration for the Fedora dwl session.
+# It deliberately does not source the account's personal dotfiles.
+export PATH="$HOME/.local/bin:$PATH"
+
+# Use the dedicated dwl configuration for manual calls too.
+fastfetch() {
+  command fastfetch --config "$HOME/.config/buchhwin-dwl/fastfetch.jsonc" "$@"
+}
+alias ff=fastfetch
+
+if [[ -o interactive ]]; then
+  # Keep history and completion state inside the dedicated shell profile.
+  HISTFILE="${ZDOTDIR:-$HOME/.config/buchhwin-dwl/zsh}/.zsh_history"
+  HISTSIZE=10000
+  SAVEHIST=10000
+  setopt APPEND_HISTORY HIST_IGNORE_DUPS HIST_IGNORE_SPACE SHARE_HISTORY
+
+  autoload -Uz compinit
+  compinit -d "${ZDOTDIR:-$HOME/.config/buchhwin-dwl/zsh}/.zcompdump"
+  zstyle ':completion:*' menu select
+  zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}'
+  bindkey '^I' expand-or-complete
+
+  fastfetch_start_file="${ZDOTDIR:-$HOME/.config/buchhwin-dwl/zsh}/../fastfetch-on-start"
+  if [[ ! -r "$fastfetch_start_file" || "$(<$fastfetch_start_file)" != "0" ]]; then
+    command -v fastfetch >/dev/null 2>&1 && fastfetch
+  fi
+  command -v starship >/dev/null 2>&1 && eval "$(starship init zsh)"
+
+  [[ -r /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh ]] \
+    && source /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+  # Load highlighting last so it can wrap all previously registered widgets.
+  [[ -r /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]] \
+    && source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+fi

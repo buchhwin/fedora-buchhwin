@@ -1,0 +1,58 @@
+# Shared surface pieces. See ../../common/qmldir for why this file must exist.
+Strut 1.0 Strut.qml
+Pill 1.0 Pill.qml
+Icon 1.0 Icon.qml
+# The three notch status symbols only, in Microsoft's open Fluent set. A type of
+# its own rather than a family property on Icon, so tests/icons.sh can tell the
+# two fonts apart — a second family behind the same component would walk past
+# the glyph check entirely.
+FluentIcon 1.0 FluentIcon.qml
+BarText 1.0 BarText.qml
+LevelRow 1.0 LevelRow.qml
+LocationPicker 1.0 LocationPicker.qml
+GlassPane 1.0 GlassPane.qml
+AppIcon 1.0 AppIcon.qml
+SignalBars 1.0 SignalBars.qml
+# A wired connection, drawn for the same reason SignalBars is: Material Icons
+# Round has no ethernet glyph anybody recognises. See the file for the measured
+# list of names that are not in it.
+WiredIcon 1.0 WiredIcon.qml
+# The network symbol — wired, four wifi grades, off — in ONE place, because the
+# island and the quick panel's tile were drawing two different answers to the
+# same question. Reported as "das wifi icon ist voll komisch".
+NetIcon 1.0 NetIcon.qml
+IconRail 1.0 IconRail.qml
+# The two-stage lock/greeter face: clock alone, then clock lifted with identity
+# underneath. ONE component for both screens on his instruction — the screen
+# before logging in and the one after locking must not look like two products.
+StagedFace 1.0 StagedFace.qml
+# ⚠️ A SIBLING of the Flickable it reports on, never a child — a child lands in
+# the contentItem and scrolls away instead of indicating. The file spells out
+# the arithmetic; it shipped the wrong way round in the settings window.
+ScrollIndicator 1.0 ScrollIndicator.qml
+Tooltip 1.0 Tooltip.qml
+Toggle 1.0 Toggle.qml
+TextField 1.0 TextField.qml
+# Which popup list is open, so the WINDOW can close it on the next press. A
+# popup is its own Wayland surface and cannot see the click beside it — measured
+# in tools/popup-close-check.qml, after three attempts to detect it from inside.
+singleton OpenMenu 1.0 OpenMenu.qml
+Dropdown 1.0 Dropdown.qml
+# The open counterpart of Dropdown: a typeable field whose suggestions live
+# behind a ▾ instead of in a Flow of pills. Dropdown is for a CLOSED list of
+# four or more; this is for `pick`, `picks` and `command`, where a value the
+# machine has never seen is still legal.
+SuggestField 1.0 SuggestField.qml
+# Choose a directory without GTK — A4. Qt.labs.folderlistmodel does the reading,
+# so there is no process per navigation step; the package is already quickshell's
+# own runtime.
+FolderPicker 1.0 FolderPicker.qml
+# A colour of your own, for the one row where a list of prepared swatches would
+# be the same closed set the palettes already are.
+ColourPicker 1.0 ColourPicker.qml
+# The password field of the lock screen and the greeter — ONE component, because
+# B24 says they are one face. It was built twice, near enough identically that
+# the two would have drifted the first time either was adjusted. Transparent and
+# smaller than a normal pill (his request), and it knows how to shake, which is
+# what a wrong password does instead of printing a sentence.
+PasswordField 1.0 PasswordField.qml

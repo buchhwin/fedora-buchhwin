@@ -1,0 +1,7 @@
+# See ../../common/qmldir.
+#
+# The picker used to live here as a full-screen window. It is now a page of the
+# island (ui/notch/pages/WallpaperPage.qml), because the island turns INTO what
+# you asked for instead of summoning a second window. Only the layer that draws
+# the image is left.
+WallpaperSurface 1.0 WallpaperSurface.qml

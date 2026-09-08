@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+command -v wdisplays >/dev/null || {
+  notify-send "Display settings" "wdisplays is not installed"
+  exit 1
+}
+
+wdisplays
+if buchhwin-display-profile save; then
+  notify-send "Display settings" "Layout and scaling saved for future sessions"
+else
+  notify-send -u critical "Display settings" "Could not save the display profile"
+  exit 1
+fi

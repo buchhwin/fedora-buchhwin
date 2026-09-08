@@ -1,0 +1,61 @@
+# Services are singletons with a flat property surface and, without exception,
+# an `available` flag. They may never import ui/ — the dependency runs one way.
+#
+# Registered here because Quickshell loads through a virtual filesystem, where
+# QML's implicit same-folder rule does not apply. See common/qmldir.
+singleton Apps 1.0 Apps.qml
+singleton Compositor 1.0 Compositor.qml
+singleton Niri 1.0 Niri.qml
+singleton Hyprland 1.0 Hyprland.qml
+# Opens the same programs again after a restart. Records while you work, not at
+# shutdown, and restores once per session rather than once per shell start.
+singleton Restore 1.0 Restore.qml
+singleton Power 1.0 Power.qml
+# Lock, suspend, log out, restart, shut down — the list and the command for each,
+# in ONE place. The notch page and the quick panel's corner both read it; a
+# second copy is how a name gets changed in one and not the other. It imports no
+# Ipc: closing the panel belongs to whoever opened it.
+singleton Session 1.0 Session.qml
+# Removable drives, event-driven: `udisksctl monitor` is the trigger and
+# `lsblk -J` is the reading. No polling, no Python, no daemon of ours — udiskie
+# is Python and the project rules rule it out, so this is a different road
+# rather than an exception.
+singleton Disks 1.0 Disks.qml
+singleton Idle 1.0 Idle.qml
+singleton Audio 1.0 Audio.qml
+singleton Net 1.0 Net.qml
+singleton Bt 1.0 Bt.qml
+singleton Media 1.0 Media.qml
+singleton Notifications 1.0 Notifications.qml
+singleton Brightness 1.0 Brightness.qml
+singleton Nightlight 1.0 Nightlight.qml
+singleton Themes 1.0 Themes.qml
+singleton Wallpaper 1.0 Wallpaper.qml
+singleton Ical 1.0 Ical.qml
+singleton Calculator 1.0 Calculator.qml
+singleton Countdown 1.0 Countdown.qml
+singleton Calendar 1.0 Calendar.qml
+singleton Weather 1.0 Weather.qml
+singleton Location 1.0 Location.qml
+singleton Tray 1.0 Tray.qml
+singleton Clipboard 1.0 Clipboard.qml
+singleton Theming 1.0 Theming.qml
+singleton Installed 1.0 Installed.qml
+# The answers this machine already knows, for the settings rows that used to be
+# empty text boxes. Bindings over the services above — no process of its own.
+singleton Suggest 1.0 Suggest.qml
+singleton Gpu 1.0 Gpu.qml
+# What the KERNEL has plugged in, beside what niri is drawing on. The gap
+# between the two lists is what names the layer a missing monitor is missing in
+# — his B2. Asks nothing until the Displays page is opened.
+singleton Connectors 1.0 Connectors.qml
+# Which tree this desktop runs from, and whether the remote has more. Asks
+# nothing until the System page is opened, and nothing again until a button.
+singleton Update 1.0 Update.qml
+singleton Vpn 1.0 Vpn.qml
+singleton Drive 1.0 Drive.qml
+singleton Procs 1.0 Procs.qml
+# What this machine IS — processor, memory, graphics, disk, and the versions of
+# the four things the desktop is built from. His choice of facts, on the System
+# page. Asks nothing until that page is opened, and never asks twice.
+singleton SystemInfo 1.0 SystemInfo.qml

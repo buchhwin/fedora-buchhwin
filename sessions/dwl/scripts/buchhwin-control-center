@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+exec qs -c buchhwin ipc call controlCenter toggle

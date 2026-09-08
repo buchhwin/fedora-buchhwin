@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+set -euo pipefail
+config="${XDG_CONFIG_HOME:-$HOME/.config}"
+state="${XDG_STATE_HOME:-$HOME/.local/state}/buchhwin-dwl/backups"
+case "${1:-}" in
+  create)
+    mkdir -p "$state"
+    file="$state/manual-$(date +%Y%m%d-%H%M%S).tar.gz"
+    tar -C "$config" -czf "$file" buchhwin-dwl quickshell/buchhwin
+    printf '%s\n' "$file" ;;
+  open) mkdir -p "$state"; xdg-open "$state" >/dev/null 2>&1 & ;;
+  restore)
+    archive="$(zenity --file-selection --title='Restore buchhwin backup' --filename="$state/" --file-filter='Backups | *.tar.gz')" || exit 0
+    tar -tzf "$archive" | awk '!/^(buchhwin-dwl|quickshell\/buchhwin)(\/|$)/ { bad=1 } END { exit bad }' || { echo 'Invalid backup contents' >&2; exit 1; }
+    "$0" create >/dev/null
+    tar -C "$config" -xzf "$archive"
+    pkill -TERM -f '^qs -c buchhwin$' || true ;;
+  *) echo 'usage: buchhwin-backup create|open|restore' >&2; exit 2 ;;
+esac

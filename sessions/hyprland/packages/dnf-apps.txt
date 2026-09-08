@@ -1,0 +1,24 @@
+# Applications. Skipped with --minimal.
+brave-browser       # launched Wayland-native; see lib/60-shell.sh for the flags
+code
+
+# Chosen deliberately rather than arriving later as somebody's dependency.
+# Qt was measured and rejected for these: qimgv 29 packages/89 MiB against
+# loupe 5/31, okular 81/221 against papers 8/24. GTK apps are recoloured from
+# our palette anyway, so the toolkit underneath is not something you see.
+gwenview                    # images (KDE)
+vlc                         # video — Qt, and in Fedora's own updates repo
+# No PDF viewer: the browser does it.
+# No archive manager: nautilus hard-requires gnome-autoar and does it itself.
+
+# --- printing (his choice, 08.08.2026) --------------------------------------
+# ⚠️ THIS ONE STARTS A SERVICE, which is why it was asked about rather than
+# added quietly: cupsd listens on localhost:631. Everything else in these lists
+# is a binary that does nothing until it is typed.
+cups
+cups-filters
+plasma-discover
+
+# --- java (he builds BuchhwinEconomy on this machine) ------------------------
+java-latest-openjdk
+java-latest-openjdk-devel

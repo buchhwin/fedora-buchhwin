@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -euo pipefail
+stage="${XDG_DATA_HOME:-$HOME/.local/share}/buchhwin-dwl/build/dwl-scenefx-port"; scene="${XDG_DATA_HOME:-$HOME/.local/share}/buchhwin-dwl/scenefx"
+patcher="${XDG_CONFIG_HOME:-$HOME/.config}/buchhwin-dwl/patch-keybinds.py"
+[[ -f "$stage/config.h" && -x "$patcher" ]] || { echo "SceneFX build tree is missing" >&2; exit 1; }
+python3 "$patcher" "$stage/config.h"
+( cd "$stage"; export PKG_CONFIG_PATH="$scene/lib64/pkgconfig"; make clean >/dev/null; make LDFLAGS="-Wl,-rpath,$scene/lib64" >/dev/null )
+pkexec install -m755 "$stage/dwl" /usr/local/bin/dwl-buchhwin

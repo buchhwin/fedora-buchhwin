@@ -1,0 +1,59 @@
+[general]
+live_config_reload = true
+
+[window]
+padding = { x = 9, y = 9 }
+dynamic_padding = true
+decorations = "None"
+opacity = 0.88
+
+[scrolling]
+history = 100000
+multiplier = 3
+
+[font]
+normal = { family = "MesloLGS Nerd Font Mono", style = "Regular" }
+bold = { family = "MesloLGS Nerd Font Mono", style = "Bold" }
+italic = { family = "MesloLGS Nerd Font Mono", style = "Italic" }
+bold_italic = { family = "MesloLGS Nerd Font Mono", style = "Bold Italic" }
+size = 11.0
+builtin_box_drawing = true
+
+[colors.primary]
+background = "#181818"
+foreground = "#eeeeee"
+
+[colors.cursor]
+text = "#181818"
+cursor = "#d0d0d0"
+
+[colors.selection]
+text = "#eeeeee"
+background = "#505050"
+
+[colors.normal]
+black = "#181818"
+red = "#d16969"
+green = "#a3be8c"
+yellow = "#d7ba7d"
+blue = "#8ca9bf"
+magenta = "#b48ead"
+cyan = "#88c0d0"
+white = "#d0d0d0"
+
+[colors.bright]
+black = "#606060"
+red = "#f38ba8"
+green = "#b8d7a3"
+yellow = "#ead49b"
+blue = "#a9c4d7"
+magenta = "#ccb2c8"
+cyan = "#a6d4dc"
+white = "#ffffff"
+
+[cursor]
+style = { shape = "Block", blinking = "On" }
+blink_interval = 600
+
+[selection]
+save_to_clipboard = true

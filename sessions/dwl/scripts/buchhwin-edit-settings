@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -euo pipefail
+settings="${XDG_CONFIG_HOME:-$HOME/.config}/buchhwin-dwl/settings.env"
+editor="${VISUAL:-${EDITOR:-nano}}"
+exec buchhwin-terminal sh -lc '"$1" "$2"' buchhwin-editor "$editor" "$settings"

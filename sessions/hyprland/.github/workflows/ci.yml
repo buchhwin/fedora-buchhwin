@@ -1,0 +1,526 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  # The design rule that decays fastest, checked first and cheapest.
+  style:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: no literal colours or radii outside shell/theme/
+        run: bash tests/no-literals.sh
+      # ⚠️ AND THE OTHER HALF OF THE LINE ABOVE, which was missing until a page
+      # shipped blank because of it. no-literals.sh demands a token instead of a
+      # bare number and never asks whether the token EXISTS — that is how
+      # `Theme.space10 * 4` got written into the monitor arrangement, where the
+      # grid stops at space6. `undefined * 4` is NaN, the canvas got no height,
+      # and the screens he was meant to drag had nowhere to be drawn. qmllint
+      # was measured on this class before and says nothing about it.
+      - name: every Theme token a file names actually exists
+        run: bash tests/theme-tokens.sh
+      # ⚠️ A scroll bar written INSIDE its Flickable is handed to the contentItem
+      # and scrolls away with the content instead of reporting on it. Both bars
+      # in the settings window shipped that way, identically, and it is visible
+      # at rest — so it looks built. Nothing else notices.
+      # ⚠️ A second `visible:` on one object is not an override — QML refuses to
+      # build the component, and the refusal travels up every type containing it.
+      # Three tiles took the whole shell surface down that way, and every suite
+      # stayed green: nothing crashes, nothing exits non-zero, the desktop simply
+      # comes up with no surfaces.
+      - name: no object declares a property twice
+        run: bash tests/duplicate-props.sh
+      - name: no scroll indicator trapped inside its own Flickable
+        run: bash tests/flickable-children.sh
+      # ⚠️ A section that is `null` in shell.json makes every row over it refuse
+      # to write — one file, twenty dead switches, and nothing on screen said so.
+      # This checks both directions: the null is named, and a healthy or absent
+      # section does NOT raise a warning.
+      - name: doctor names a null config section, and only a null one
+        run: bash tests/settings-nulls.sh
+      # The second boundary that decays: this was written in German and is
+      # published in English, and the next label typed in a hurry is German
+      # again. 275 lines were, when this check was written.
+      - name: no German outside the places that say why
+        run: bash tests/english.sh
+      # Third of the structural tripwires. A TapHandler inside a Pill attaches
+      # to the Pill's inner Item, so most of the button is lit and dead — it
+      # shipped that way in every Pill in the shell before it was measured.
+      - name: no tap handlers hidden inside a Pill
+        run: bash tests/tap-targets.sh
+      # Fourth. A surface that names something from Quickshell.Services without
+      # importing it does not fail — the binding throws and the property keeps
+      # its default, which is how a white square shipped beside every
+      # notification.
+      - name: no surface imports Quickshell.Services directly
+        run: bash tests/ui-imports.sh
+      # Fifth, and it is here rather than in the qml job because it reads
+      # instead of running: a name the lock screen uses that exists nowhere in
+      # the lock screen. `field` instead of `input` threw on every keystroke and
+      # left the password box empty for four rounds, in a file nothing built.
+      - name: every name the lock screen uses exists
+        run: bash tests/lock-idents.sh
+
+      # ⚠️ THESE THREE READ THE REPOSITORY AND NOTHING ELSE, and two of them
+      # were run by hand for weeks — which means they were green whenever
+      # somebody remembered, not whenever the code changed. Neither needs
+      # quickshell, niri or a running desktop, so there was never a reason for
+      # them to sit outside CI. That is the exact argument that moved six suites
+      # into the qml job below.
+      #
+      # config-shape guards a CRASH: a `property var` nested inside a JsonObject
+      # segfaulted quickshell on about half of all starts, and an empty list was
+      # enough to do it.
+      - name: no nested property var, and every section has an alias
+        run: bash tests/config-shape.sh
+      # Every setting is read by something. It found five that nothing read.
+      - name: every setting in shell.json has a reader
+        run: bash tests/key-readers.sh
+      # And the other half of that: every setting is OFFERED by something.
+      - name: every setting has exactly one row in the settings window
+        run: bash tests/setting-rows.sh
+      # ⚠️ THE SAME FAULT REPORTED TWICE IS WHAT THIS IS FOR. The first
+      # workspace is named "scratch" so Super+Ö can focus it by name, and any
+      # surface that prefers the name over the index prints a WORD where every
+      # other slot has a number. The bar was corrected in August and the rule
+      # was written down — as a comment, in that one file. The workspace map
+      # kept doing it until he reported it a second time.
+      - name: every workspace label reads its index, not its name
+        run: bash tests/workspace-labels.sh
+      # ⚠️ A chain that was broken for months with nothing saying so: keys
+      # pressed over the island reached the surface but never the page, so seven
+      # pages carried Esc handlers and three of them could not fire. Found only
+      # because a console.warn printed nothing.
+      - name: keys reach the notch pages, not just the surface
+        run: bash tests/notch-keys.sh
+      # ⚠️ ADDED, AND IT NEEDED NOTHING. Pure awk over shell/**, no quickshell,
+      # no niri — it was outside CI for no reason at all, which is the exact
+      # pattern the comment above this block complains about. It guards the
+      # fault that made the gear on the bar do nothing: an IPC handler reading
+      # `root.<name>` for a property that no longer exists. QML says nothing
+      # when you read a property that is not there.
+      - name: every name an ipc handler reads is declared
+        run: bash tests/ipc-names.sh
+      # And the rescue command, which `doctor` recommends and `usage()` did not
+      # mention — plus the guard that stops it failing silently.
+      - name: bhctl lists what it implements
+        run: bash tests/bhctl-usage.sh
+      # And the one error message somebody meets on a machine that cannot help
+      # itself: a clone from before the history was rewritten shares no ancestor
+      # with origin, `--ff-only` refuses it, and "pull failed" said nothing about
+      # either the cause or the four lines out of it. Builds its own throwaway
+      # clones, so it needs git and no desktop.
+      - name: a clone with no common history is told what to do
+        run: bash tests/update-diverged.sh
+      # And the third axis of the same question: a setting can have a reader and
+      # a row and still do nothing, because nothing regenerates the file its
+      # reader reads. That was true of 28 keys — the whole `input` block
+      # included — until this check existed.
+      - name: every generated key is in the watcher's fingerprint
+        run: bash tests/fingerprint.sh
+
+      # ⚠️ A COMMENT WAS NOT ENOUGH. config/Backup.qml has warned in capitals
+      # that a FileView hands back what it already holds since the day it was
+      # written — and the trap still sprang four more times, the last of which
+      # shipped: tools/niri.qml wrote Brave's desktop file out as code.desktop,
+      # which deletes VS Code from the launcher because a user desktop file
+      # replaces the system one. Static, so it runs without quickshell.
+      - name: a FileView read right after a new path is cleared first
+        run: bash tests/fileview-reuse.sh
+      # ⚠️ THREE FIXES AND THREE REPORTS OF STILL-BROKEN. A popup is its own
+      # Wayland surface, so it cannot see the click beside it — every attempt to
+      # detect that from inside was dead, the last one measured dead on a real
+      # session. This holds the shape that survived: the list announces itself,
+      # the window catches the press, and the catcher is gated so it cannot
+      # become the always-on click-eater this project already deleted once.
+      - name: a popup list can be closed from outside it
+        run: bash tests/popup-close.sh
+      # ⚠️ B20/B10, AND EVERY OTHER CHECK WAS GREEN OVER IT. The row carried a
+      # TapHandler across its whole width and the switch carried one of its own,
+      # so pressing the SWITCH ran both and the second undid the first — the
+      # value flipped and flipped back inside one press. switch-writes.sh drives
+      # all 191 rows and all 191 land, because it calls the write path once and
+      # has no pointer. Nothing that does not click could see this.
+      - name: one press on a switch row is one write
+        run: bash tests/switch-one-writer.sh
+      # ⚠️ THE TRAP THAT ATE A CHECKER'S MOST IMPORTANT FILE, silently.
+      # `… | grep -q` under `set -o pipefail`: grep leaves at the first match,
+      # the writer upstream takes SIGPIPE, and the pipeline reports failure
+      # EXACTLY when the match was found early in a long file. It read as a
+      # clean report with its subject missing. Thirty-one sites carried the
+      # shape across tests/, lib/ and bhctl.
+      - name: no checker pipes into grep -q
+        run: bash tests/pipefail-grep.sh
+
+      # ⚠️⚠️ SIX SUITES THAT NEEDED NOTHING AND RAN NOWHERE. Each of these reads
+      # the repository with awk or grep and no more — no quickshell, no niri, no
+      # session — so they were green whenever somebody remembered, which is not
+      # a check. That is the same argument that moved six others into the qml
+      # job below, applied to the ones it missed.
+      - name: no animation drives a layout size
+        run: bash tests/motion.sh
+      - name: every name the greeter uses exists
+        run: bash tests/greeter-idents.sh
+      # ⚠️ EXIT 2 IS NOT RED. This lane has no quickshell, so the functional
+      # half of this suite says "I cannot run here" and exits 2 — and this
+      # step counted that as a failure, which is why the whole lane was red
+      # over a suite that was working exactly as designed. Every suite in
+      # this repository uses 2 for "cannot run here" and 1 for "found a
+      # fault"; a step that does not tell them apart turns the distinction
+      # off. The structural half still runs here and can still go red.
+      - name: no page writes a setting its reset forgets
+        run: bash tests/reset-page.sh || [ $? -eq 2 ]
+      - name: no shell reaches for the deleted fetch player
+        run: bash tests/no-fetch-animation.sh
+      - name: no python in an installer phase
+        run: bash tests/no-python.sh
+      # ⚠️ A session verb is read, never executed. This is the one suite where a
+      # mistake could power the runner off, and it is safe because it greps.
+      - name: session actions are named, not run
+        run: bash tests/session-actions.sh
+
+      # ⚠️⚠️ TWO MORE THAT READ FILES AND RAN NOWHERE. Same argument as the six
+      # above, applied again to the ones THAT pass missed: `no-foreign-bar.sh`
+      # reads lib/80-shellenv.sh and `quick-drawers.sh` reads QuickSettings.qml,
+      # neither needs a desktop, and both have a tripwire case — so they are
+      # known to be able to go red, and were being run only when somebody
+      # remembered. The comment in the qml job below exists so that "not in CI"
+      # never means "nobody decided"; these two were in neither place.
+      - name: nothing leaves a foreign bar running
+        run: bash tests/no-foreign-bar.sh
+      - name: every quick panel drawer name is validated
+        run: bash tests/quick-drawers.sh
+      # Reads the three places where a TapHandler really is nested, rather than
+      # counting braces to guess. No desktop involved.
+      - name: no nested press reaches the surface under it
+        run: bash tests/nested-taps.sh
+
+      # The static half of the B69 card check. Its functional half needs a
+      # running shell and exits 2 here, same as reset-page above.
+      - name: the notch card is drawn at its surface's size
+        run: bash tests/notch-frame.sh || [ $? -eq 2 ]
+
+  shell:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y shellcheck
+      - name: shellcheck
+        run: |
+          mapfile -t files < <(git ls-files '*.sh' 'bin/*' | grep -vE '\.(qml|json|md)$')
+          (( ${#files[@]} )) || { echo "no shell scripts yet"; exit 0; }
+          printf '%s\n' "${files[@]}"
+          shellcheck -S warning "${files[@]}"
+      - name: bash -n
+        run: |
+          for f in $(git ls-files '*.sh'); do bash -n "$f"; done
+
+      # ⚠️ AND THE INSTALLER IS ACTUALLY RUN, because neither of the two steps
+      # above can see the fault that made this necessary. `lib/20-base.sh`
+      # referenced DRY_RUN, which exists in the predecessor and not here; under
+      # `set -u` that is fatal, so phase_base exited 127 and the seven phases
+      # after it never ran. `bash -n` parses without executing, and
+      # `shellcheck -S warning` did not report it — the only thing that could
+      # was running the thing. Every system command is stubbed and it runs
+      # against a copy of the tree, so this changes nothing on the runner.
+      - name: install.sh runs from top to bottom
+        run: bash tests/install-runs.sh
+
+      # What the installer thinks is a graphics card decides whether the NVIDIA
+      # branch runs at all. It builds its own /sys tree, so the runner's actual
+      # hardware — which has none — cannot make it pass or fail by accident.
+      - name: the GPU detector, against fake PCI trees
+        run: bash tests/gpu-detect.sh
+
+  # qmllint cannot see a missing qmldir entry or a singleton shadowed by a Qt
+  # type — both of which turned the whole desktop black during development.
+  # So the linter runs AND the shell is actually started, headless.
+  qml:
+    runs-on: ubuntu-latest
+    container: fedora:44
+    steps:
+      - uses: actions/checkout@v4
+      - name: install quickshell and niri
+        # install_weak_deps=False is the same guarantee the installer relies on:
+        # Fedora's niri package recommends waybar, alacritty, fuzzel and
+        # swaylock. Asserting it here means every run proves it still holds.
+        # jq is required by tests/all-palettes.sh, which exits 2 without it —
+        # it was never installed explicitly before.
+        # ⚠️ diffutils, because a minimal Fedora image does not ship `diff`.
+        # `bhctl niri diff` discards diff's stderr — it must, or a missing
+        # optional include reads as a difference — so "command not found" was
+        # swallowed and the whole command printed nothing at all. The check
+        # that caught it could only say "0 bytes of output"; bin/bhctl now
+        # tests for the binary rather than relying on the container.
+        # material-icons-fonts is what tests/icons.sh measures glyphs in — the
+        # name in Fedora is "Material Icons Round", NOT the Symbols name the
+        # docs suggest, and that mismatch rendered every icon as tofu once.
+        run: |
+          # ⚠️ The themed toolbox is installed HERE TOO, and not for show:
+          # tests/reachable.sh asks bat, tmux, alacritty and git whether the
+          # colours arrived, and skips those checks where the program is
+          # missing. Without them the suite is green having asked half the
+          # question — which is the exact failure mode qt6ct sat in for months.
+          dnf install -y --setopt=install_weak_deps=False \
+            quickshell qt6-qtdeclarative qt6-qtdeclarative-devel git-core niri jq \
+            diffutils \
+            material-icons-fonts fontconfig \
+            btop bat fastfetch git-delta tmux alacritty
+          # ⚠️ THE LIST COMES FROM THE FILE, not from three words typed here.
+          # It used to be typed, and a fourth entry added to the installer would
+          # have been proven by nothing. Same parser shape as read_list().
+          unwanted="$(grep -vE '^[[:space:]]*(#|$)' packages/dnf-unwanted.txt \
+                      | sed 's/[[:space:]]*#.*//' | tr -d ' ')"
+          [ -n "$unwanted" ] || { echo "::error::packages/dnf-unwanted.txt is empty"; exit 1; }
+          for p in $unwanted; do
+            if rpm -q "$p" >/dev/null 2>&1; then
+              echo "::error::$p was pulled in despite install_weak_deps=False"
+              exit 1
+            fi
+          done
+      # ⚠️ THE `|| echo` THAT USED TO BE HERE COULD NOT DO ANYTHING, and it was
+      # measured rather than reasoned about: qmllint-qt6 exits 0 even with
+      # warnings, so the fallback never ran — while masking the one case that
+      # matters, qmllint being absent or the -I paths being wrong. The step then
+      # passed having linted nothing.
+      #
+      # Warnings still do not fail the build, and that is a decision with a
+      # reason: several are false on this codebase. `Member "height" not found
+      # on type "qs::io::JsonObject"` is qmllint not knowing that a JsonObject's
+      # properties are declared at runtime — the key exists and works. Turning
+      # those into errors would mean an exemption list, and every exemption this
+      # project has had turned out to hide a real fault.
+      #
+      # What IS checked: that qmllint ran at all, and over the expected files.
+      - name: qmllint
+        run: |
+          command -v qmllint-qt6 >/dev/null || {
+            echo "::error::qmllint-qt6 is not installed — this step was linting nothing"
+            exit 1
+          }
+          # ⚠️ `find`, NOT `git ls-files`, AND THAT IS THE WHOLE BUG THIS STEP
+          # HAD. This job runs in a fedora:44 container with no git installed
+          # when actions/checkout runs, so checkout falls back to downloading a
+          # tarball — there is no .git here at all, and every `git ls-files` in
+          # this job answered with nothing. The old line passed that empty list
+          # to qmllint-qt6 and ended in `|| echo`, so the linter M1 asked for had
+          # never looked at a single file and the step was green every time.
+          #
+          # Adding git and a safe.directory line was the first fix and it was
+          # wrong for the same reason it looked right: the message said "not a
+          # git repository", which reads like a permissions problem and is
+          # actually an absence. `find` needs neither.
+          mapfile -t qml < <(find shell -name '*.qml' | sort)
+          (( ${#qml[@]} > 50 )) || {
+            echo "::error::only ${#qml[@]} qml files found — the glob is wrong"
+            exit 1
+          }
+          qmllint-qt6 -I /usr/lib64/qt6/qml -I shell/ "${qml[@]}" 2>&1 | tee /tmp/qmllint.txt
+          n=$(grep -c '^Warning:' /tmp/qmllint.txt || true)
+          echo "::notice::qmllint: ${n:-0} warnings over ${#qml[@]} files"
+
+      # ⚠️ THE CHECK A LINTER CANNOT DO, and the one the plan asked for in M1
+      # and never got. qmllint reads files; it does not build the object graph,
+      # so it cannot see a missing qmldir entry, a singleton shadowed by a Qt
+      # type, or a binding loop. Every one of those has broken this desktop.
+      # It found a real binding loop in its own first run.
+      - name: the shell actually builds, headless
+        run: bash tests/smoke.sh
+
+      # ⚠️ AND THE LOCK SCREEN, WHICH THE LINE ABOVE DOES NOT COVER. It is a
+      # separate process (BUCHHWIN_MODE=lock), so every suite could be green
+      # with a lock screen that does not come up — and twice it nearly was.
+      # ⚠️ FIVE SUITES ARE DELIBERATELY NOT HERE, and the reason is the same for
+      # all five: they ask about an INSTALLED machine, and a build container is
+      # not one. Written down so the next person does not have to rediscover it,
+      # and so "not in CI" never again means "nobody decided".
+      #
+      # ⚠️⚠️ AND THIS PARAGRAPH SAID "THREE" WHILE LISTING FIVE. The list grew
+      # twice and the number did not, which is the same fault as a stale count in
+      # a handover — the sentence that is supposed to make the decision auditable
+      # was itself out of date. Counted, not carried forward.
+      #
+      # ⚠️ FOUR OTHERS WERE IN NEITHER PLACE — not in a lane, not on this list,
+      # so "not in CI" DID mean "nobody decided" for them. Three read files only
+      # and are in the style job above now (no-foreign-bar, quick-drawers,
+      # nested-taps); `workspaces.sh` needs quickshell and is in this job below.
+      #   tests/unit-drift.sh     compares the installed systemd units against
+      #                           what the installer would write
+      #   tests/generated-read.sh asks whether kitty.conf on THIS system
+      #                           includes our theme — its own header says it
+      #                           runs against the machine, not the repository
+      #   tests/ipc-effect.sh     calls a verb and asks the running shell which
+      #                           page it landed on; it exits 2 without one
+      #   tests/surfaces.sh       opens and closes all fourteen surfaces and
+      #                           then counts instances and reads the journal
+      #   tests/settings-survive.sh  stops the shell, edits shell.json, starts
+      #                           it again — there is no shell to stop here
+      - name: the lock screen builds, and without complaints
+        run: bash tests/lock.sh
+
+      # ⚠️ AND EVERY SETTINGS PAGE, which smoke.sh does not reach either: it
+      # starts the shell, and the settings window is behind a LazyLoader that
+      # nothing opens. A page registered under a path that does not exist greps
+      # perfectly clean in setting-rows.sh and draws nothing on screen.
+      #
+      # It also cross-checks the two ways of counting rows — read out of the
+      # source, and built by the window. They have to be the same number.
+      # ⚠️ AND THE SURFACES, WHICH pages.sh DOES NOT REACH. A duplicate property
+      # made QML refuse to build QuickSettings; the refusal travelled up through
+      # QuickPage, NotchContent and ShellSurface, and the desktop came up with no
+      # notch, no bar, no launcher and no IPC. Nothing crashed, nothing exited
+      # non-zero, and all 57 suites were green — smoke.qml imports only ui/common,
+      # and surfaces.sh reads the journal of whatever shell is already running.
+      - name: every surface type can be built
+        run: bash tests/surface-build.sh
+      - name: every settings page builds, and the row counts agree
+        run: bash tests/pages.sh
+
+      # ⚠️ ADDED. It needs niri and nothing else, and the container installs
+      # niri already. It guards a silent class of fault: a keybinding naming an
+      # action niri does not have. The motivating case was Super+F, where the
+      # two fullscreen actions were the wrong way round for weeks.
+      - name: every keybinding names an action niri really has
+        run: bash tests/bind-actions.sh
+
+      # ⚠️ ALL of them. Eight suites existed and CI ran two, so six were only
+      # ever run by hand — which means they were green whenever somebody
+      # remembered, not whenever the code changed.
+      # ⚠️ The other half of the palette question: all-palettes.sh asks whether
+      # every token EXISTS, this asks whether any two of them are the same colour
+      # where one sits on the other. A sweep found eight such pairs once and
+      # survived only as a sentence in a comment — which eight, nobody could say.
+      - name: no element is drawn in its own background's colour
+        run: bash tests/contrast.sh
+      - name: every palette resolves to a full token set
+        run: bash tests/all-palettes.sh
+      # ⚠️ AXIS 8, AND IT NEEDED NOTHING BUT qs. It asks the question the two
+      # suites either side of it do not: all-palettes proves each palette
+      # resolves, reachable proves each generated file is pointed at — neither
+      # asks whether SWITCHING actually arrives. The control is a file that must
+      # NOT change (config.kdl: niri's colours live in the include), and the
+      # provenance header is masked so "it changed" cannot mean "it rewrote its
+      # own first line".
+      - name: switching the palette reaches every program
+        run: bash tests/palette-reach.sh
+      - name: the generated niri config parses, cleanly
+        run: bash tests/niri-config.sh
+      # ⚠️ EXITS 2 HERE AND SAYS SO. Neither Brave nor VS Code is installed on a
+      # CI runner, so there is nothing to override and this skips — the point of
+      # having it in the list anyway is that it runs on the test VM and on his
+      # laptop, where it does have something to look at. A suite that quietly
+      # passes on zero files is the failure this project keeps finding.
+      - name: the .desktop overrides describe the right program
+        run: bash tests/desktop-override.sh || [ $? -eq 2 ]
+      - name: every icon name exists in the real font
+        run: bash tests/icons.sh
+      - name: the generated themes are actually reachable
+        run: bash tests/reachable.sh
+      - name: iCalendar round-trips, recurrences included
+        run: bash tests/calendar.sh
+      - name: coordinates, and the migration that moved them
+        run: bash tests/location.sh
+      - name: the wallpaper's palette, and where it is cached
+        run: bash tests/wallpaper.sh
+      - name: which column a program lands in, and what never reaches the list
+        run: bash tests/launcher.sh
+      - name: the calculator's answers, and what it refuses to answer
+        run: bash tests/calculator.sh
+
+      # ⚠️⚠️ NINE MORE THAT ONLY EVER RAN BY HAND. All of them need quickshell
+      # and nothing else — which this job already installs — so they belong here
+      # and nowhere else. `switch-writes` is the sharpest of them: it drives all
+      # 191 settings rows through the write path, and it is the check that was
+      # green over B20 for weeks, which is precisely why it should not depend on
+      # somebody remembering.
+      - name: every settings row writes its key
+        run: bash tests/switch-writes.sh
+      - name: every row writes what it says it writes
+        run: bash tests/row-writes.sh
+      # ⚠️⚠️ THE OTHER HALF OF reset-page, AND IT HAD NEVER RUN IN CI. The
+      # suite is listed in the `style` lane, which has no quickshell — so
+      # only its structural half was ever exercised, while the half that
+      # actually drives Backup.resetPaths against a throwaway settings file
+      # exited 2 every time. That is the stronger half, and it is the one
+      # that caught the reset writing defaults instead of deleting keys.
+      - name: a page reset puts its own keys back and nothing else
+        run: bash tests/reset-page.sh
+      - name: the greeter builds and knows its users
+        run: bash tests/greeter.sh
+      - name: the backup names what it owns
+        run: bash tests/backup.sh
+      - name: what the shell generates parses back
+        run: bash tests/generated-parse.sh
+      - name: a rebind survives the generator
+        run: bash tests/rebind.sh
+      - name: the displays page does its arithmetic
+        run: bash tests/displays.sh
+      # ⚠️ It drives `layoutWindows` through quickshell with fixed window
+      # geometry, so it needs `qs` and belongs here rather than in the style job
+      # — but it was in neither, and it is the arithmetic B77 was about: three
+      # windows of 1232 px on a 1280 px screen come to 2.888 box widths.
+      - name: super+tab draws a workspace to scale
+        run: bash tests/workspaces.sh
+      # B33 · one column per MONITOR. Pure arithmetic over the output map, the
+      # workspace list and the windows, so it runs here even though the runner
+      # has no screens at all — which is the whole reason it was written as a
+      # function instead of as something to photograph.
+      - name: shift+alt+tab gives each monitor its own column
+        run: bash tests/monitors.sh
+      - name: the update group knows which tree it is in
+        run: bash tests/update.sh
+      - name: the calendar speaks CalDAV, not XMLHttpRequest
+        run: bash tests/caldav-transport.sh
+      # ⚠️ Vorgabe 12 in one line: an update may not touch his settings. It needs
+      # jq, which this job installs for all-palettes.
+      - name: an update keeps the settings
+        run: bash tests/update-keeps-settings.sh
+      # ⚠️ THESE TWO TOLERATE EXIT 2 ON PURPOSE, and it is not a loophole: both
+      # carry their own environment guard and say "cannot run here" rather than
+      # inventing an answer. `suggestions` wants a live Wayland socket for half
+      # its work, `xwayland` needs niri to say which windows are X11. Exit 2 is
+      # printed in the log, so a skip is visible rather than silent — the same
+      # arrangement desktop-override has had since it was added.
+      - name: the suggestion lists are real
+        run: bash tests/suggestions.sh || [ $? -eq 2 ]
+      - name: the XWayland allowlist stays at one entry
+        run: bash tests/xwayland.sh || [ $? -eq 2 ]
+
+  secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # ⚠️⚠️ THE FOUR PATTERNS THAT USED TO BE HERE HAD HOLES, AND THE HOLES
+      # WERE USED. A sweep on 10.08.2026 found, in this repository and in its
+      # public history:
+      #
+      #   * `/home/[a-z]+/` required a TRAILING SLASH, so the line
+      #     "…and /home/<user> is drwx------…" walked straight past it. The
+      #     commit that ADDED this guard names that exact string as a near-miss
+      #     and then shipped the file it was in.
+      #   * A home town and its coordinates, in a test fixture and two comments,
+      #     across 170 commits.
+      #   * A plain-text password for the lab VM, across 41 commits, because
+      #     "it is only the test VM" felt like a reason.
+      #   * Hostnames, a hypervisor name, VM numbers and an ssh wrapper's name,
+      #     which nothing looked for at all.
+      #
+      # So the check moved into the repository, where it can be read, reasoned
+      # about and RUN LOCALLY before a push — and where its exemptions each have
+      # to say what they are. This step is now one line.
+      - name: nothing private in the repository
+        run: bash tests/no-secrets.sh
+      - name: no GPL sources copied into the shell
+        # caelestia and end-4 are GPL. Their ideas are fair game; their code is
+        # not, and this repository is MIT. A name appearing under shell/ is the
+        # cheapest possible signal that a file was pasted rather than written.
+        run: |
+          if git grep -nIE 'caelestia|end-4|GNU General Public' -- shell/ ; then
+            echo "::error::a GPL project is referenced inside shell/"
+            exit 1
+          fi
+          echo "clean"

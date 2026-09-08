@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Teams web app launcher icon.
+
+  ⚠️ DELIBERATELY NOT MICROSOFT'S LOGO. The entry used to ask the icon theme for
+  a name called "teams", which does not exist on a stock Fedora — so the launcher
+  drew nothing and it was reported as "teams und Outlook haben kein Logo". The
+  obvious fix, shipping the real artwork, is the one thing that cannot be done:
+  it is a trademark and this repository is public.
+
+  So this says what the app IS rather than who makes it — two overlapping speech
+  bubbles for a chat client. Ours, no licence attached, safe to redistribute.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <rect width="64" height="64" rx="14" fill="#4b53bc"/>
+  <path d="M14 20a5 5 0 0 1 5-5h18a5 5 0 0 1 5 5v11a5 5 0 0 1-5 5H25l-7 6v-6h-1a3 3 0 0 1-3-3z"
+        fill="#ffffff" opacity="0.95"/>
+  <path d="M28 32a5 5 0 0 1 5-5h12a5 5 0 0 1 5 5v9a5 5 0 0 1-5 5h-1v6l-7-6h-4a5 5 0 0 1-5-5z"
+        fill="#ffffff" opacity="0.62"/>
+</svg>

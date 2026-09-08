@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+case "${1:-toggle}" in
+  toggle) exec qs -c buchhwin ipc call clipboard toggle ;;
+  list) exec cliphist list ;;
+  copy)
+    [[ $# -eq 2 ]] || exit 2
+    printf '%s' "$2" | cliphist decode | wl-copy
+    ;;
+  delete)
+    [[ $# -eq 2 ]] || exit 2
+    printf '%s' "$2" | cliphist delete
+    ;;
+  wipe) exec cliphist wipe ;;
+  *) echo "usage: buchhwin-clipboard [toggle|list|copy ENTRY|delete ENTRY|wipe]" >&2; exit 2 ;;
+esac

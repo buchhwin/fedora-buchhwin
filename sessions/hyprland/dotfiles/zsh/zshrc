@@ -1,0 +1,198 @@
+# zsh — the interactive shell.
+#
+# Installed by lib/80-shellenv.sh as ~/.zshrc. Your own settings go in
+# ~/.zshrc.local, which is sourced at the end and never touched by an update.
+#
+# ⚠️ THIS FILE, AND THE FACT THAT ZSH IS THE LOGIN SHELL AT ALL, WERE MISSING.
+# zsh has been in packages/dnf-core.txt since M1 — installed, with no
+# configuration, and never made anybody's login shell. So the account fell back
+# to bash with no history worth the name, no completion, no aliases and no
+# prompt, on a machine built for someone who lives in a terminal.
+#
+# zsh rather than fish: fish is nicer out of the box and is not POSIX, so every
+# snippet from a vendor document has to be translated before it runs. For this
+# job that trade is not worth it.
+#
+# starship rather than powerlevel10k: p10k has been in limited support since
+# 2024 and its configuration is a ~1700-line zsh script that cannot be
+# templated. starship is one toml file, so the prompt follows a palette change
+# instead of being the one thing left behind.
+
+# ---------------------------------------------------------------------------
+# History — generous, shared, deduplicated
+# ---------------------------------------------------------------------------
+HISTFILE="${XDG_STATE_HOME:-$HOME/.local/state}/zsh/history"
+HISTSIZE=100000
+SAVEHIST=100000
+mkdir -p "${HISTFILE:h}"
+
+setopt EXTENDED_HISTORY          # timestamps, so `atuin` and `fc` agree
+setopt INC_APPEND_HISTORY        # written as you go, not on exit
+setopt SHARE_HISTORY             # every terminal sees every command
+setopt HIST_IGNORE_ALL_DUPS
+setopt HIST_IGNORE_SPACE         # a leading space keeps it out of history
+setopt HIST_REDUCE_BLANKS
+setopt HIST_VERIFY               # expand !! before running it, not after
+
+# ---------------------------------------------------------------------------
+# Behaviour
+# ---------------------------------------------------------------------------
+setopt AUTO_CD
+setopt AUTO_PUSHD
+setopt PUSHD_IGNORE_DUPS
+setopt INTERACTIVE_COMMENTS
+setopt NO_BEEP
+setopt CORRECT
+
+# ---------------------------------------------------------------------------
+# Completion
+# ---------------------------------------------------------------------------
+autoload -Uz compinit
+# ⚠️ Once a day, not once a shell. `compinit` rebuilding its dump on every start
+# is the usual reason zsh feels slow to open, and on a laptop it is also the
+# reason a new terminal spins the disk.
+_zcompdump="${XDG_CACHE_HOME:-$HOME/.cache}/zsh/zcompdump"
+mkdir -p "${_zcompdump:h}"
+if [[ -n ${_zcompdump}(#qN.mh+24) ]]; then
+    compinit -d "$_zcompdump"
+else
+    compinit -C -d "$_zcompdump"
+fi
+
+zstyle ':completion:*' menu select
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' 'r:|=*' 'l:|=* r:|=*'
+zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
+zstyle ':completion:*' group-name ''
+zstyle ':completion:*:descriptions' format '%F{yellow}-- %d --%f'
+
+# ---------------------------------------------------------------------------
+# Plugins — Fedora packages, so they update with everything else
+# ---------------------------------------------------------------------------
+[[ -f /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh ]] \
+    && source /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+# ⚠️ SYNTAX HIGHLIGHTING IS SOURCED LAST OF THE TWO, and the order is not
+# cosmetic: it wraps the widgets the other plugin installs, so the other way
+# round it silently highlights nothing.
+[[ -f /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]] \
+    && source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+
+# ---------------------------------------------------------------------------
+# Key bindings
+# ---------------------------------------------------------------------------
+bindkey -e                                   # emacs keys; vi mode fights fzf
+bindkey '^[[A' history-search-backward       # up-arrow searches what you typed
+bindkey '^[[B' history-search-forward
+bindkey '^[[1;5C' forward-word               # Ctrl+Right
+bindkey '^[[1;5D' backward-word              # Ctrl+Left
+bindkey '^[[3~' delete-char
+bindkey '^[[H' beginning-of-line             # Home
+bindkey '^[[F' end-of-line                   # End
+
+# ---------------------------------------------------------------------------
+# Tools — each guarded, so a machine without one still has a working shell
+# ---------------------------------------------------------------------------
+command -v starship >/dev/null && eval "$(starship init zsh)"
+command -v zoxide   >/dev/null && eval "$(zoxide init zsh --cmd cd)"
+command -v direnv   >/dev/null && eval "$(direnv hook zsh)"
+# atuin replaces Ctrl+R with a searchable history. --disable-up-arrow keeps the
+# plain up-arrow doing what muscle memory expects, which is the line above.
+command -v atuin    >/dev/null && eval "$(atuin init zsh --disable-up-arrow)"
+
+if command -v fzf >/dev/null; then
+    source <(fzf --zsh) 2>/dev/null
+    command -v fd >/dev/null && export FZF_DEFAULT_COMMAND='fd --type f --hidden --exclude .git'
+fi
+
+# ⚠️ NO shell-colors.sh HERE. The predecessor sourced a generated file for fzf,
+# bat and eza colours; this project does not generate one, so a line sourcing it
+# would be a pointer at a file that never arrives. bat is themed through its own
+# config (~/.config/bat/config selects the generated theme), and fzf and eza
+# follow the terminal's ANSI palette, which kitty gets from theme.conf. If those
+# two ever need explicit colours, the file has to be written by
+# shell/tools/render.qml first and pointed at second — in that order.
+
+# ---------------------------------------------------------------------------
+# Aliases
+# ---------------------------------------------------------------------------
+if command -v eza >/dev/null; then
+    alias ls='eza --group-directories-first --icons'
+    alias ll='eza -l --group-directories-first --icons --git'
+    alias la='eza -la --group-directories-first --icons --git'
+    alias lt='eza --tree --level=2 --icons'
+else
+    alias ll='ls -lh --color=auto'
+    alias la='ls -lha --color=auto'
+fi
+
+command -v bat     >/dev/null && alias cat='bat --paging=never'
+command -v fd      >/dev/null && alias find='fd'
+command -v rg      >/dev/null && alias grep='rg'
+command -v duf     >/dev/null && alias df='duf'
+command -v lazygit >/dev/null && alias lg='lazygit'
+
+alias ..='cd ..'
+alias ...='cd ../..'
+alias mkdir='mkdir -p'
+alias ip='ip -color=auto'
+
+# systemd, which is most of the job
+alias sc='systemctl'
+alias scu='systemctl --user'
+alias jc='journalctl'
+alias jcf='journalctl -f'
+alias jce='journalctl -p err -b'   # what went wrong since this boot
+
+# containers
+alias pps='podman ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"'
+alias pim='podman images'
+
+# this desktop
+alias bh='bhctl'
+
+# ---------------------------------------------------------------------------
+# Environment
+# ---------------------------------------------------------------------------
+export EDITOR="${EDITOR:-nvim}"
+command -v nvim >/dev/null || export EDITOR=vim
+export VISUAL="$EDITOR"
+export PAGER=less
+export LESS='-R --mouse'
+export MANROFFOPT='-c'
+command -v bat >/dev/null && export MANPAGER="sh -c 'col -bx | bat -l man -p'"
+
+# ⚠️ ~/.local/bin ON THE PATH. Fedora's own /etc/profile.d adds it for login
+# shells only, so anything installed with `pip --user` or dropped in by hand was
+# invisible in a terminal opened from the desktop.
+[[ ":$PATH:" == *":$HOME/.local/bin:"* ]] || export PATH="$HOME/.local/bin:$PATH"
+
+# ---------------------------------------------------------------------------
+# The greeting
+# ---------------------------------------------------------------------------
+# fastfetch on a new terminal. `ff` is the manual way; `onNewTerminal` in
+# shell.json decides whether it also runs by itself.
+#
+# ⚠️ IT USED TO CALL buchhwin-fetch, A PLAYER THAT DREW A TURNING FEDORA LOGO.
+# He asked for the animation and then asked for it back out — "mach einfach ein  # english-ok: the request, quoted
+# normales schönes fastfetch" — so the player is gone and this calls fastfetch   # english-ok: the request, quoted
+# itself. The config it reads is still ours, written by the palette renderer.
+#
+# ⚠️ INTERACTIVE SHELLS ONLY. This file is sourced by every zsh that starts,
+# including the ones a script or an `ssh host command` opens — printing a
+# greeting into those is output nobody asked for, in the middle of somebody's
+# pipe.
+#
+# ⚠️ AND IT COSTS ONE `sed` ON A CACHED FILE when it is off. This project has
+# paid 43 seconds once already for a slow launch; a greeting is not worth a
+# second one.
+alias ff='fastfetch'
+if [[ -o interactive ]] && command -v fastfetch >/dev/null; then
+    if [[ "$(sed -n 's/.*"onNewTerminal"[[:space:]]*:[[:space:]]*\([a-z]*\).*/\1/p' \
+             "${XDG_CONFIG_HOME:-$HOME/.config}/buchhwin/shell.json" 2>/dev/null | head -1)" != false ]]; then
+        fastfetch
+    fi
+fi
+
+# ---------------------------------------------------------------------------
+# Local overrides — never tracked, never overwritten by an update
+# ---------------------------------------------------------------------------
+[[ -f ~/.zshrc.local ]] && source ~/.zshrc.local

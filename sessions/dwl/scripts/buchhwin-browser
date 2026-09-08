@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+set -euo pipefail
+settings="${XDG_CONFIG_HOME:-$HOME/.config}/buchhwin-dwl/settings.env"
+[[ -f "$settings" ]] && source "$settings"
+browser_command="${BROWSER:-brave}"
+if command -v "${browser_command%% *}" >/dev/null 2>&1; then
+  exec sh -lc "$browser_command"
+fi
+# BROWSER=brave must select the installed Brave Flatpak even when Plasma's
+# default browser is Firefox. Do not change the user's desktop-wide defaults.
+if [[ "$browser_command" == brave || "$browser_command" == brave-browser ]]; then
+  if command -v brave-browser >/dev/null 2>&1; then exec brave-browser "$@"; fi
+  if command -v flatpak >/dev/null 2>&1 && flatpak info com.brave.Browser >/dev/null 2>&1; then
+    exec flatpak run com.brave.Browser "$@"
+  fi
+fi
+desktop="$(xdg-settings get default-web-browser 2>/dev/null || true)"
+if [[ -n "$desktop" ]] && command -v gtk-launch >/dev/null 2>&1; then
+  exec gtk-launch "${desktop%.desktop}"
+fi
+for browser in brave brave-browser firefox chromium google-chrome-stable vivaldi; do
+  command -v "$browser" >/dev/null 2>&1 && exec "$browser"
+done
+notify-send "buchhwin" "No browser found. Set BROWSER in ~/.config/buchhwin-dwl/settings.env"
+exit 1

@@ -1,0 +1,21 @@
+# Pages the notch turns into. Each states its own implicitWidth; the notch
+# animates to it. None of them is a window.
+VolumePage 1.0 VolumePage.qml
+MediaPage 1.0 MediaPage.qml
+NotificationsPage 1.0 NotificationsPage.qml
+QuickPage 1.0 QuickPage.qml
+CalendarPage 1.0 CalendarPage.qml
+TrayPage 1.0 TrayPage.qml
+ThemePage 1.0 ThemePage.qml
+WallpaperPage 1.0 WallpaperPage.qml
+EventPage 1.0 EventPage.qml
+BrightnessPage 1.0 BrightnessPage.qml
+MicPage 1.0 MicPage.qml
+CalculatorPage 1.0 CalculatorPage.qml
+EmojiPage 1.0 EmojiPage.qml
+TasksPage 1.0 TasksPage.qml
+TimerPage 1.0 TimerPage.qml
+SessionPage 1.0 SessionPage.qml
+ClipboardPage 1.0 ClipboardPage.qml
+WorkspacesPage 1.0 WorkspacesPage.qml
+MonitorsPage 1.0 MonitorsPage.qml

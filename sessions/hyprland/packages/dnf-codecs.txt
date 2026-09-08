@@ -1,0 +1,40 @@
+# Multimedia codecs, from RPM Fusion.
+#
+# ⚠️ WHY THIS EXISTS. vlc is in packages/dnf-apps.txt and Fedora ships it
+# without the patent-encumbered decoders, so it plays about half of what it is
+# handed. RPM Fusion is already being enabled for the NVIDIA branch next door,
+# so this costs one more transaction rather than a new repository.
+#
+# The conditional steps are not here — `read_list` has no syntax for them and
+# each needs a condition, so they live in lib/10-gpu.sh:
+#   ffmpeg-free -> ffmpeg, or a plain install if neither is present
+#   mesa-va-drivers-freeworld on AMD, intel-media-driver on Intel
+#
+# ⚠️ BOTH OF THOSE WERE GUARDED ON THE WRONG THING UNTIL 10.08.2026, and the bug
+# was the same twice: the step fired only if the package it replaces was already
+# installed. Measured on a machine that had run the installer — neither
+# ffmpeg-free nor ffmpeg present, so nothing installed ffmpeg at all, and the
+# machine had no H.265 decoder outside whatever vlc carries privately. The
+# guards now hang on "what is this machine" instead of "what did it already
+# have": the GPU vendor from sysfs, and "is ffmpeg there".
+#
+# ⚠️ HEIC WAS NOT OPENABLE AT ALL, and this was a stated open question for three
+# handovers ("libheif is installed, but whether Fedora's build can open HEIC
+# depends on the decoder — nebenbei zu prüfen, nicht zu behaupten"). Measured on
+# 10.08.2026, with the control:
+#
+#   before  ls /usr/lib64/libheif/          0 plugins
+#           gdk-pixbuf-query-loaders | heif 0 loaders
+#   after   libheif-freeworld installed     4 plugins, incl. libheif-libde265
+#           heif-enc + heif-info round trip  "MIME type: image/heic"
+#
+# So Fedora ships the container and none of the codecs: every photo off a phone
+# was a file nothing on the machine could open. libheif-tools is deliberately
+# NOT added — heif-enc/heif-info are what MEASURED this, they are not needed to
+# look at a picture.
+
+libva-utils                 # vainfo — the instrument the HEVC claim is measured with
+gstreamer1-plugin-openh264  # H.264 for anything on GStreamer
+gstreamer1-libav            # H.265/HEVC and the rest, for anything on GStreamer
+libavcodec-freeworld        # the encumbered decoders Fedora's build leaves out
+libheif-freeworld           # HEIC images — the phone photo format; measured below

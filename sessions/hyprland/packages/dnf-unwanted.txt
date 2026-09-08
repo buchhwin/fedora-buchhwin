@@ -1,0 +1,24 @@
+# Foreign programs this desktop REPLACES, and which Fedora's niri package pulls
+# in as weak dependencies. One list, read by three callers: lib/common.sh
+# (removes them), .github/workflows/ci.yml (proves they never arrive in a clean
+# container) and tests/no-foreign-bar.sh (proves the installer acts on all of
+# them). A second copy of this list is how one of them quietly stops being
+# handled.
+#
+# ⚠️⚠️ WARNING ABOUT THEM WAS NOT ENOUGH, AND THIS FILE EXISTS BECAUSE OF A
+# MEASUREMENT. The installer printed "waybar is installed … sudo dnf remove
+# waybar" and moved on. On the lab VM waybar was still installed AND running,
+# with its own bar across the top of every screenshot, printing the machine's
+# IP address next to the clock. He saw it and asked what it was. A sentence in a
+# log nobody re-reads is not a fix.
+#
+# ⚠️ THEY ARE ONLY REMOVED WHEN THE PACKAGE MANAGER SAYS THEY WERE NOT ASKED
+# FOR. `dnf repoquery --installed --qf '%{reason}'` answers "Weak Dependency"
+# for something that arrived as a recommendation and "User" for something
+# somebody installed on purpose. Measured on the lab VM: waybar, fuzzel and
+# swaylock all said "Weak Dependency"; niri and kitty said "User". A desktop
+# that removes a program its owner chose is worse than one that leaves a second
+# bar on screen.
+waybar          # a second bar across the top — the island is our surface
+fuzzel          # a launcher; ours is Mod+Space
+swaylock        # a lock screen; ours is the one with the two-stage face

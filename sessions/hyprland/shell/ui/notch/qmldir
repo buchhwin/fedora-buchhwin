@@ -1,0 +1,6 @@
+# See ../../common/qmldir.
+NotchContent 1.0 NotchContent.qml
+NotchWide 1.0 NotchWide.qml
+# The week around today, for the left of the hovered island — see the file for
+# why it rolls instead of showing a Monday-to-Sunday week.
+WeekStrip 1.0 WeekStrip.qml

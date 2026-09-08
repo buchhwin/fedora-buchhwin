@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+set -euo pipefail
+config_home="${XDG_CONFIG_HOME:-$HOME/.config}/buchhwin-dwl"
+export ZDOTDIR="$config_home/zsh"
+export STARSHIP_CONFIG="$config_home/starship.toml"
+# Terminal emulators otherwise select the account's login shell (often Bash).
+# Explicit commands supplied by callers still take precedence.
+if (( $# == 0 )); then
+  set -- zsh -i
+fi
+if command -v kitty >/dev/null 2>&1; then
+  exec kitty --config "$config_home/kitty.conf" "$@"
+fi
+if (( $# )); then
+  exec alacritty --config-file "$config_home/alacritty.toml" -e "$@"
+fi
+exec alacritty --config-file "$config_home/alacritty.toml"

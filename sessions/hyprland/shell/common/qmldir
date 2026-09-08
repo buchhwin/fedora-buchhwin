@@ -1,0 +1,17 @@
+# Shared building blocks, registered by name.
+#
+# Not optional: Quickshell loads files through a virtual filesystem
+# (qs:@/qs/tools/...), so QML's implicit "types in my own folder" rule does not
+# apply and a component without an entry here fails with "X is not a type".
+# The singletons in theme/ and config/ carry the same warning for the same
+# reason — this is the third time the project has paid for it.
+WaitFor 1.0 WaitFor.qml
+# ⚠️ A SINGLETON, and the `singleton` word is not optional — without it QML
+# hands out a new instance per import and every reader gets its own idea of what
+# the clock format is. theme/qmldir and config/qmldir carry the same line for the
+# same reason.
+singleton Clock 1.0 Clock.qml
+# Shared by BOTH window maps — Mod+Tab (one column per workspace of this
+# monitor) and Shift+Alt+Tab (one column per monitor). A second copy would drift
+# away from the niri measurements the arithmetic is built on.
+singleton WorkspaceGeometry 1.0 WorkspaceGeometry.qml

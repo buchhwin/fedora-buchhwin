@@ -1,0 +1,91 @@
+#!/usr/bin/env python3
+"""Persist and apply single wallpapers or a timed dwl-only slideshow."""
+from __future__ import annotations
+import fcntl, os, shlex, shutil, subprocess, sys, tempfile, time
+from pathlib import Path
+
+config_home = Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config"))
+settings = config_home / "buchhwin-dwl" / "settings.env"
+default_image = config_home / "buchhwin-dwl/wallpapers/buchhwin-default.png"
+extensions = {".png", ".jpg", ".jpeg", ".webp", ".bmp"}
+
+def values() -> dict[str, str]:
+    result = {"WALLPAPER": str(default_image), "WALLPAPER_MODE": "image",
+              "WALLPAPER_FOLDER": "", "WALLPAPER_INTERVAL": "300"}
+    if not settings.exists(): return result
+    for line in settings.read_text(encoding="utf-8").splitlines():
+        if "=" not in line or line.lstrip().startswith("#"): continue
+        key, raw = line.split("=", 1)
+        if key not in result: continue
+        try: parsed = shlex.split(raw.strip())
+        except ValueError: continue
+        if parsed: result[key] = os.path.expandvars(os.path.expanduser(parsed[0]))
+    return result
+
+def update(changes: dict[str, str]) -> None:
+    settings.parent.mkdir(parents=True, exist_ok=True)
+    lines = settings.read_text(encoding="utf-8").splitlines() if settings.exists() else []
+    pending = dict(changes)
+    for index, line in enumerate(lines):
+        key = line.split("=", 1)[0] if "=" in line else ""
+        if key in pending: lines[index] = f"{key}={shlex.quote(pending.pop(key))}"
+    lines.extend(f"{key}={shlex.quote(value)}" for key, value in pending.items())
+    fd, name = tempfile.mkstemp(prefix=".settings-", dir=settings.parent, text=True)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as handle:
+            handle.write("\n".join(lines) + "\n"); handle.flush(); os.fsync(handle.fileno())
+        os.replace(name, settings)
+    finally: Path(name).unlink(missing_ok=True)
+
+def images(folder: Path) -> list[Path]:
+    if not folder.is_dir(): return []
+    return sorted(p for p in folder.iterdir() if p.is_file() and p.suffix.lower() in extensions)
+
+def apply(path: Path) -> None:
+    if not shutil.which("swaybg"): raise SystemExit("swaybg is not installed")
+    subprocess.run(["pkill", "-TERM", "-x", "swaybg"], check=False,
+                   stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    subprocess.Popen(["swaybg", "-i", str(path), "-m", "fill"],
+                     stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                     stderr=subprocess.DEVNULL, start_new_session=True)
+
+def watch() -> None:
+    runtime = Path(os.environ.get("XDG_RUNTIME_DIR", "/tmp"))
+    lock = (runtime / "buchhwin-wallpaper.lock").open("w")
+    try: fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except BlockingIOError: return
+    signature = None; index = 0; next_change = 0.0
+    while True:
+        cfg = values()
+        current = (cfg["WALLPAPER_MODE"], cfg["WALLPAPER_FOLDER"], cfg["WALLPAPER_INTERVAL"])
+        now = time.monotonic()
+        if current != signature: signature, index, next_change = current, 0, 0.0
+        if now >= next_change:
+            try: interval = max(10, int(cfg["WALLPAPER_INTERVAL"]))
+            except ValueError: interval = 300
+            candidates = images(Path(cfg["WALLPAPER_FOLDER"])) if cfg["WALLPAPER_MODE"] == "slideshow" else []
+            path = candidates[index % len(candidates)] if candidates else Path(cfg["WALLPAPER"])
+            if path.is_file(): apply(path)
+            index += 1; next_change = now + interval
+        time.sleep(1)
+
+def main() -> None:
+    command = sys.argv[1] if len(sys.argv) > 1 else "get"; cfg = values()
+    if command == "get": print(cfg["WALLPAPER"]); return
+    if command == "get-folder": print(cfg["WALLPAPER_FOLDER"]); return
+    if command == "get-interval": print(cfg["WALLPAPER_INTERVAL"]); return
+    if command == "get-mode": print(cfg["WALLPAPER_MODE"]); return
+    if command == "watch": watch(); return
+    if command == "set" and len(sys.argv) == 3:
+        path = Path(sys.argv[2]).expanduser().resolve()
+        if not path.is_file(): raise SystemExit(f"file not found: {path}")
+        update({"WALLPAPER": str(path), "WALLPAPER_MODE": "image"}); apply(path); print(path); return
+    if command == "set-folder" and len(sys.argv) == 3:
+        folder = Path(sys.argv[2]).expanduser().resolve(); found = images(folder)
+        if not found: raise SystemExit(f"no supported images in: {folder}")
+        update({"WALLPAPER_FOLDER": str(folder), "WALLPAPER_MODE": "slideshow"}); apply(found[0]); print(folder); return
+    if command == "set-interval" and len(sys.argv) == 3:
+        seconds = max(10, int(sys.argv[2])); update({"WALLPAPER_INTERVAL": str(seconds)}); print(seconds); return
+    raise SystemExit("invalid wallpaper command")
+
+if __name__ == "__main__": main()

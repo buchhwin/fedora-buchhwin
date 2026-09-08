@@ -1,0 +1,3 @@
+# See ../../common/qmldir.
+LauncherSurface 1.0 LauncherSurface.qml
+LauncherContent 1.0 LauncherContent.qml

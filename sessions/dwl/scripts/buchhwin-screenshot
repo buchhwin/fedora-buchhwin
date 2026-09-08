@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+set -euo pipefail
+mode="${1:-region}"
+settings="${XDG_CONFIG_HOME:-$HOME/.config}/buchhwin-dwl/settings.env"
+[[ -f "$settings" ]] && source "$settings"
+dir="${SCREENSHOT_DIR:-$HOME/Pictures/Screenshots}"
+mkdir -p "$dir"
+file="$dir/$(date +'%Y-%m-%d_%H-%M-%S').png"
+case "$mode" in
+  region)
+    geometry="$(slurp)" || exit 0
+    grim -g "$geometry" "$file"
+    ;;
+  full) grim "$file" ;;
+  edit)
+    geometry="$(slurp)" || exit 0
+    grim -g "$geometry" - | swappy -f -
+    exit 0
+    ;;
+  *) echo "usage: buchhwin-screenshot [region|full|edit]" >&2; exit 2 ;;
+esac
+wl-copy < "$file"
+notify-send "Screenshot saved" "$file"

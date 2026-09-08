@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+exec python3 "${XDG_CONFIG_HOME:-$HOME/.config}/buchhwin-dwl/weather.py" "$@"

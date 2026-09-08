@@ -1,0 +1,68 @@
+# Buchhwin is an additional session on Fedora KDE Plasma. Plasma and SDDM are
+# prerequisites (checked by lib/00-preflight.sh), not replaced.
+
+# Compositor and shell.
+hyprland
+xdg-desktop-portal-hyprland
+quickshell
+qt6-qtdeclarative
+qt6-qtdeclarative-devel
+kitty
+
+# Fonts and small Wayland helpers used only by the Buchhwin session.
+rsms-inter-vf-fonts
+material-icons-fonts
+google-noto-color-emoji-fonts
+google-noto-sans-cjk-fonts
+jetbrains-mono-fonts
+breeze-cursor-theme
+brightnessctl
+ddcutil
+cliphist
+wl-clipboard
+wtype
+gammastep
+pipewire-utils
+sound-theme-freedesktop
+wf-recorder
+grim
+slurp
+
+# KDE is the only desktop integration layer. Do not add GNOME portals,
+# keyrings, file managers, network applets or Bluetooth frontends here.
+xdg-desktop-portal
+xdg-desktop-portal-kde
+polkit-kde
+kwalletmanager
+signon-kwallet-extension
+kio-fuse
+kio-gdrive
+udisks2
+dolphin
+okular
+gwenview
+kate
+kcalc
+vlc
+merkuro
+akonadi
+akonadi-server
+kdepim-runtime
+akonadi-calendar-tools
+kaccounts-integration-qt6
+kaccounts-providers
+plasma-systemsettings
+
+# Fedora KDE owns these facilities. The Buchhwin session opens KDE's tools
+# instead of implementing a second Wi-Fi/Bluetooth UI.
+NetworkManager
+bluez
+plasma-nm
+bluedevil
+plasma-pa
+powerdevil
+
+# Foreign application theming; generated config remains session-scoped.
+breeze-gtk
+papirus-icon-theme
+qt6ct

@@ -1,0 +1,76 @@
+#!/usr/bin/env bash
+# Machine-readable Bluetooth control for the Quickshell UI, replacing blueman.
+# Output is one record per line, fields separated by "|".
+set -euo pipefail
+
+usage() {
+  cat >&2 <<'EOF'
+usage: buchhwin-btctl <command> [args]
+
+  status                 -> powered|discovering
+  list                   -> mac|name|paired|connected
+  scan [seconds]         discover nearby devices (default 12)
+  power on|off
+  pair MAC               pair, trust and connect in one step
+  connect MAC
+  disconnect MAC
+  remove MAC             forget the device
+EOF
+  exit 2
+}
+
+command -v bluetoothctl >/dev/null 2>&1 || {
+  echo "buchhwin-btctl: bluetoothctl not found (install bluez)" >&2
+  exit 1
+}
+
+command="${1:-}"
+shift || true
+
+case "$command" in
+  status)
+    info="$(bluetoothctl show 2>/dev/null || true)"
+    powered=no; discovering=no
+    case "$info" in *"Powered: yes"*) powered=yes ;; esac
+    case "$info" in *"Discovering: yes"*) discovering=yes ;; esac
+    printf '%s|%s\n' "$powered" "$discovering"
+    ;;
+
+  list)
+    # One `bluetoothctl info` call per device; the list is short enough that
+    # this stays well under the UI's refresh interval.
+    bluetoothctl devices 2>/dev/null | sed 's/^Device //' | while read -r mac name; do
+      [[ -n "$mac" ]] || continue
+      [[ -n "$name" ]] || name="$mac"
+      info="$(bluetoothctl info "$mac" 2>/dev/null || true)"
+      paired=no; connected=no
+      case "$info" in *"Paired: yes"*) paired=yes ;; esac
+      case "$info" in *"Connected: yes"*) connected=yes ;; esac
+      printf '%s|%s|%s|%s\n' "$mac" "$name" "$paired" "$connected"
+    done
+    ;;
+
+  scan)
+    seconds="${1:-12}"
+    # --timeout makes bluetoothctl exit on its own, so no stray scan process
+    # is left behind when the panel closes.
+    bluetoothctl --timeout "$seconds" scan on >/dev/null 2>&1 || true
+    ;;
+
+  power)
+    [[ $# -eq 1 ]] || usage
+    bluetoothctl power "$1" >/dev/null
+    ;;
+
+  pair)
+    [[ $# -eq 1 ]] || usage
+    bluetoothctl pair "$1" >/dev/null 2>&1 || true
+    bluetoothctl trust "$1" >/dev/null 2>&1 || true
+    bluetoothctl connect "$1" >/dev/null
+    ;;
+
+  connect)    [[ $# -eq 1 ]] || usage; bluetoothctl connect "$1" >/dev/null ;;
+  disconnect) [[ $# -eq 1 ]] || usage; bluetoothctl disconnect "$1" >/dev/null ;;
+  remove)     [[ $# -eq 1 ]] || usage; bluetoothctl remove "$1" >/dev/null ;;
+  *) usage ;;
+esac

@@ -1,0 +1,4 @@
+# The notification toasts. See ../../common/qmldir for why this file must exist.
+Toast 1.0 Toast.qml
+ToastWindow 1.0 ToastWindow.qml
+ToastSurface 1.0 ToastSurface.qml

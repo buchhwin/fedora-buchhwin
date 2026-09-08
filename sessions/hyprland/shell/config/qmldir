@@ -1,0 +1,11 @@
+# See theme/qmldir — a singleton without a qmldir entry is invisible to any
+# file outside its own directory.
+singleton Config 1.0 Config.qml
+singleton Migrations 1.0 Migrations.qml
+# Export, import and reset. Separate from Config because they act on the FILE
+# rather than on a setting — see the note at the top of Backup.qml.
+singleton Backup 1.0 Backup.qml
+# Writing to `outputs`, the one setting that is a list of objects and therefore
+# cannot be reached by a dotted path. Separate from Config for the same reason
+# Backup is: it is a way of writing, not a thing that is written.
+singleton Outputs 1.0 Outputs.qml

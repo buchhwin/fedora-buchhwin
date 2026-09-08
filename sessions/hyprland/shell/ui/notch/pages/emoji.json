@@ -1,0 +1,7150 @@
+{
+"note": "Generated once from Python's unicodedata; see EmojiPage.qml.",
+"emoji": [
+{
+"c": "😀",
+"n": "grinning face",
+"g": "Smileys"
+},
+{
+"c": "😁",
+"n": "grinning face with smiling eyes",
+"g": "Smileys"
+},
+{
+"c": "😂",
+"n": "face with tears of joy",
+"g": "Smileys"
+},
+{
+"c": "😃",
+"n": "smiling face with open mouth",
+"g": "Smileys"
+},
+{
+"c": "😄",
+"n": "smiling face with open mouth and smiling eyes",
+"g": "Smileys"
+},
+{
+"c": "😅",
+"n": "smiling face with open mouth and cold sweat",
+"g": "Smileys"
+},
+{
+"c": "😆",
+"n": "smiling face with open mouth and tightly-closed eyes",
+"g": "Smileys"
+},
+{
+"c": "😇",
+"n": "smiling face with halo",
+"g": "Smileys"
+},
+{
+"c": "😈",
+"n": "smiling face with horns",
+"g": "Smileys"
+},
+{
+"c": "😉",
+"n": "winking face",
+"g": "Smileys"
+},
+{
+"c": "😊",
+"n": "smiling face with smiling eyes",
+"g": "Smileys"
+},
+{
+"c": "😋",
+"n": "face savouring delicious food",
+"g": "Smileys"
+},
+{
+"c": "😌",
+"n": "relieved face",
+"g": "Smileys"
+},
+{
+"c": "😍",
+"n": "smiling face with heart-shaped eyes",
+"g": "Smileys"
+},
+{
+"c": "😎",
+"n": "smiling face with sunglasses",
+"g": "Smileys"
+},
+{
+"c": "😏",
+"n": "smirking face",
+"g": "Smileys"
+},
+{
+"c": "😐",
+"n": "neutral face",
+"g": "Smileys"
+},
+{
+"c": "😑",
+"n": "expressionless face",
+"g": "Smileys"
+},
+{
+"c": "😒",
+"n": "unamused face",
+"g": "Smileys"
+},
+{
+"c": "😓",
+"n": "face with cold sweat",
+"g": "Smileys"
+},
+{
+"c": "😔",
+"n": "pensive face",
+"g": "Smileys"
+},
+{
+"c": "😕",
+"n": "confused face",
+"g": "Smileys"
+},
+{
+"c": "😖",
+"n": "confounded face",
+"g": "Smileys"
+},
+{
+"c": "😗",
+"n": "kissing face",
+"g": "Smileys"
+},
+{
+"c": "😘",
+"n": "face throwing a kiss",
+"g": "Smileys"
+},
+{
+"c": "😙",
+"n": "kissing face with smiling eyes",
+"g": "Smileys"
+},
+{
+"c": "😚",
+"n": "kissing face with closed eyes",
+"g": "Smileys"
+},
+{
+"c": "😛",
+"n": "face with stuck-out tongue",
+"g": "Smileys"
+},
+{
+"c": "😜",
+"n": "face with stuck-out tongue and winking eye",
+"g": "Smileys"
+},
+{
+"c": "😝",
+"n": "face with stuck-out tongue and tightly-closed eyes",
+"g": "Smileys"
+},
+{
+"c": "😞",
+"n": "disappointed face",
+"g": "Smileys"
+},
+{
+"c": "😟",
+"n": "worried face",
+"g": "Smileys"
+},
+{
+"c": "😠",
+"n": "angry face",
+"g": "Smileys"
+},
+{
+"c": "😡",
+"n": "pouting face",
+"g": "Smileys"
+},
+{
+"c": "😢",
+"n": "crying face",
+"g": "Smileys"
+},
+{
+"c": "😣",
+"n": "persevering face",
+"g": "Smileys"
+},
+{
+"c": "😤",
+"n": "face with look of triumph",
+"g": "Smileys"
+},
+{
+"c": "😥",
+"n": "disappointed but relieved face",
+"g": "Smileys"
+},
+{
+"c": "😦",
+"n": "frowning face with open mouth",
+"g": "Smileys"
+},
+{
+"c": "😧",
+"n": "anguished face",
+"g": "Smileys"
+},
+{
+"c": "😨",
+"n": "fearful face",
+"g": "Smileys"
+},
+{
+"c": "😩",
+"n": "weary face",
+"g": "Smileys"
+},
+{
+"c": "😪",
+"n": "sleepy face",
+"g": "Smileys"
+},
+{
+"c": "😫",
+"n": "tired face",
+"g": "Smileys"
+},
+{
+"c": "😬",
+"n": "grimacing face",
+"g": "Smileys"
+},
+{
+"c": "😭",
+"n": "loudly crying face",
+"g": "Smileys"
+},
+{
+"c": "😮",
+"n": "face with open mouth",
+"g": "Smileys"
+},
+{
+"c": "😯",
+"n": "hushed face",
+"g": "Smileys"
+},
+{
+"c": "😰",
+"n": "face with open mouth and cold sweat",
+"g": "Smileys"
+},
+{
+"c": "😱",
+"n": "face screaming in fear",
+"g": "Smileys"
+},
+{
+"c": "😲",
+"n": "astonished face",
+"g": "Smileys"
+},
+{
+"c": "😳",
+"n": "flushed face",
+"g": "Smileys"
+},
+{
+"c": "😴",
+"n": "sleeping face",
+"g": "Smileys"
+},
+{
+"c": "😵",
+"n": "dizzy face",
+"g": "Smileys"
+},
+{
+"c": "😶",
+"n": "face without mouth",
+"g": "Smileys"
+},
+{
+"c": "😷",
+"n": "face with medical mask",
+"g": "Smileys"
+},
+{
+"c": "😸",
+"n": "grinning cat face with smiling eyes",
+"g": "Smileys"
+},
+{
+"c": "😹",
+"n": "cat face with tears of joy",
+"g": "Smileys"
+},
+{
+"c": "😺",
+"n": "smiling cat face with open mouth",
+"g": "Smileys"
+},
+{
+"c": "😻",
+"n": "smiling cat face with heart-shaped eyes",
+"g": "Smileys"
+},
+{
+"c": "😼",
+"n": "cat face with wry smile",
+"g": "Smileys"
+},
+{
+"c": "😽",
+"n": "kissing cat face with closed eyes",
+"g": "Smileys"
+},
+{
+"c": "😾",
+"n": "pouting cat face",
+"g": "Smileys"
+},
+{
+"c": "😿",
+"n": "crying cat face",
+"g": "Smileys"
+},
+{
+"c": "🙀",
+"n": "weary cat face",
+"g": "Smileys"
+},
+{
+"c": "🙁",
+"n": "slightly frowning face",
+"g": "Smileys"
+},
+{
+"c": "🙂",
+"n": "slightly smiling face",
+"g": "Smileys"
+},
+{
+"c": "🙃",
+"n": "upside-down face",
+"g": "Smileys"
+},
+{
+"c": "🙄",
+"n": "face with rolling eyes",
+"g": "Smileys"
+},
+{
+"c": "🙅",
+"n": "face with no good gesture",
+"g": "Smileys"
+},
+{
+"c": "🙆",
+"n": "face with ok gesture",
+"g": "Smileys"
+},
+{
+"c": "🙇",
+"n": "person bowing deeply",
+"g": "Smileys"
+},
+{
+"c": "🙈",
+"n": "see-no-evil monkey",
+"g": "Smileys"
+},
+{
+"c": "🙉",
+"n": "hear-no-evil monkey",
+"g": "Smileys"
+},
+{
+"c": "🙊",
+"n": "speak-no-evil monkey",
+"g": "Smileys"
+},
+{
+"c": "🙋",
+"n": "happy person raising one hand",
+"g": "Smileys"
+},
+{
+"c": "🙌",
+"n": "person raising both hands in celebration",
+"g": "Smileys"
+},
+{
+"c": "🙍",
+"n": "person frowning",
+"g": "Smileys"
+},
+{
+"c": "🙎",
+"n": "person with pouting face",
+"g": "Smileys"
+},
+{
+"c": "🙏",
+"n": "person with folded hands",
+"g": "Smileys"
+},
+{
+"c": "🤐",
+"n": "zipper-mouth face",
+"g": "Smileys"
+},
+{
+"c": "🤑",
+"n": "money-mouth face",
+"g": "Smileys"
+},
+{
+"c": "🤒",
+"n": "face with thermometer",
+"g": "Smileys"
+},
+{
+"c": "🤓",
+"n": "nerd face",
+"g": "Smileys"
+},
+{
+"c": "🤔",
+"n": "thinking face",
+"g": "Smileys"
+},
+{
+"c": "🤕",
+"n": "face with head-bandage",
+"g": "Smileys"
+},
+{
+"c": "🤖",
+"n": "robot face",
+"g": "Smileys"
+},
+{
+"c": "🤗",
+"n": "hugging face",
+"g": "Smileys"
+},
+{
+"c": "🤘",
+"n": "sign of the horns",
+"g": "Smileys"
+},
+{
+"c": "🤙",
+"n": "call me hand",
+"g": "Smileys"
+},
+{
+"c": "🤚",
+"n": "raised back of hand",
+"g": "Smileys"
+},
+{
+"c": "🤛",
+"n": "left-facing fist",
+"g": "Smileys"
+},
+{
+"c": "🤜",
+"n": "right-facing fist",
+"g": "Smileys"
+},
+{
+"c": "🤝",
+"n": "handshake",
+"g": "Smileys"
+},
+{
+"c": "🤞",
+"n": "hand with index and middle fingers crossed",
+"g": "Smileys"
+},
+{
+"c": "🤟",
+"n": "i love you hand sign",
+"g": "Smileys"
+},
+{
+"c": "🤠",
+"n": "face with cowboy hat",
+"g": "Smileys"
+},
+{
+"c": "🤡",
+"n": "clown face",
+"g": "Smileys"
+},
+{
+"c": "🤢",
+"n": "nauseated face",
+"g": "Smileys"
+},
+{
+"c": "🤣",
+"n": "rolling on the floor laughing",
+"g": "Smileys"
+},
+{
+"c": "🤤",
+"n": "drooling face",
+"g": "Smileys"
+},
+{
+"c": "🤥",
+"n": "lying face",
+"g": "Smileys"
+},
+{
+"c": "🤦",
+"n": "face palm",
+"g": "Smileys"
+},
+{
+"c": "🤧",
+"n": "sneezing face",
+"g": "Smileys"
+},
+{
+"c": "🤨",
+"n": "face with one eyebrow raised",
+"g": "Smileys"
+},
+{
+"c": "🤩",
+"n": "grinning face with star eyes",
+"g": "Smileys"
+},
+{
+"c": "🤪",
+"n": "grinning face with one large and one small eye",
+"g": "Smileys"
+},
+{
+"c": "🤫",
+"n": "face with finger covering closed lips",
+"g": "Smileys"
+},
+{
+"c": "🤬",
+"n": "serious face with symbols covering mouth",
+"g": "Smileys"
+},
+{
+"c": "🤭",
+"n": "smiling face with smiling eyes and hand covering mouth",
+"g": "Smileys"
+},
+{
+"c": "🤮",
+"n": "face with open mouth vomiting",
+"g": "Smileys"
+},
+{
+"c": "🤯",
+"n": "shocked face with exploding head",
+"g": "Smileys"
+},
+{
+"c": "🥰",
+"n": "smiling face with smiling eyes and three hearts",
+"g": "Smileys"
+},
+{
+"c": "🥱",
+"n": "yawning face",
+"g": "Smileys"
+},
+{
+"c": "🥲",
+"n": "smiling face with tear",
+"g": "Smileys"
+},
+{
+"c": "🥳",
+"n": "face with party horn and party hat",
+"g": "Smileys"
+},
+{
+"c": "🥴",
+"n": "face with uneven eyes and wavy mouth",
+"g": "Smileys"
+},
+{
+"c": "🥵",
+"n": "overheated face",
+"g": "Smileys"
+},
+{
+"c": "🥶",
+"n": "freezing face",
+"g": "Smileys"
+},
+{
+"c": "🥷",
+"n": "ninja",
+"g": "Smileys"
+},
+{
+"c": "🥸",
+"n": "disguised face",
+"g": "Smileys"
+},
+{
+"c": "🥹",
+"n": "face holding back tears",
+"g": "Smileys"
+},
+{
+"c": "🥺",
+"n": "face with pleading eyes",
+"g": "Smileys"
+},
+{
+"c": "👤",
+"n": "bust in silhouette",
+"g": "People"
+},
+{
+"c": "👥",
+"n": "busts in silhouette",
+"g": "People"
+},
+{
+"c": "👦",
+"n": "boy",
+"g": "People"
+},
+{
+"c": "👧",
+"n": "girl",
+"g": "People"
+},
+{
+"c": "👨",
+"n": "man",
+"g": "People"
+},
+{
+"c": "👩",
+"n": "woman",
+"g": "People"
+},
+{
+"c": "👪",
+"n": "family",
+"g": "People"
+},
+{
+"c": "👫",
+"n": "man and woman holding hands",
+"g": "People"
+},
+{
+"c": "👬",
+"n": "two men holding hands",
+"g": "People"
+},
+{
+"c": "👭",
+"n": "two women holding hands",
+"g": "People"
+},
+{
+"c": "👮",
+"n": "police officer",
+"g": "People"
+},
+{
+"c": "👯",
+"n": "woman with bunny ears",
+"g": "People"
+},
+{
+"c": "👰",
+"n": "bride with veil",
+"g": "People"
+},
+{
+"c": "👱",
+"n": "person with blond hair",
+"g": "People"
+},
+{
+"c": "👲",
+"n": "man with gua pi mao",
+"g": "People"
+},
+{
+"c": "👳",
+"n": "man with turban",
+"g": "People"
+},
+{
+"c": "👴",
+"n": "older man",
+"g": "People"
+},
+{
+"c": "👵",
+"n": "older woman",
+"g": "People"
+},
+{
+"c": "👶",
+"n": "baby",
+"g": "People"
+},
+{
+"c": "👷",
+"n": "construction worker",
+"g": "People"
+},
+{
+"c": "👸",
+"n": "princess",
+"g": "People"
+},
+{
+"c": "👹",
+"n": "japanese ogre",
+"g": "People"
+},
+{
+"c": "👺",
+"n": "japanese goblin",
+"g": "People"
+},
+{
+"c": "👻",
+"n": "ghost",
+"g": "People"
+},
+{
+"c": "👼",
+"n": "baby angel",
+"g": "People"
+},
+{
+"c": "👽",
+"n": "extraterrestrial alien",
+"g": "People"
+},
+{
+"c": "👾",
+"n": "alien monster",
+"g": "People"
+},
+{
+"c": "👿",
+"n": "imp",
+"g": "People"
+},
+{
+"c": "💀",
+"n": "skull",
+"g": "People"
+},
+{
+"c": "💁",
+"n": "information desk person",
+"g": "People"
+},
+{
+"c": "💂",
+"n": "guardsman",
+"g": "People"
+},
+{
+"c": "💃",
+"n": "dancer",
+"g": "People"
+},
+{
+"c": "💄",
+"n": "lipstick",
+"g": "People"
+},
+{
+"c": "💅",
+"n": "nail polish",
+"g": "People"
+},
+{
+"c": "💆",
+"n": "face massage",
+"g": "People"
+},
+{
+"c": "💇",
+"n": "haircut",
+"g": "People"
+},
+{
+"c": "🤰",
+"n": "pregnant woman",
+"g": "People"
+},
+{
+"c": "🤱",
+"n": "breast-feeding",
+"g": "People"
+},
+{
+"c": "🤲",
+"n": "palms up together",
+"g": "People"
+},
+{
+"c": "🤳",
+"n": "selfie",
+"g": "People"
+},
+{
+"c": "🤴",
+"n": "prince",
+"g": "People"
+},
+{
+"c": "🤵",
+"n": "man in tuxedo",
+"g": "People"
+},
+{
+"c": "🤶",
+"n": "mother christmas",
+"g": "People"
+},
+{
+"c": "🤷",
+"n": "shrug",
+"g": "People"
+},
+{
+"c": "🤸",
+"n": "person doing cartwheel",
+"g": "People"
+},
+{
+"c": "🤹",
+"n": "juggling",
+"g": "People"
+},
+{
+"c": "🤺",
+"n": "fencer",
+"g": "People"
+},
+{
+"c": "🤻",
+"n": "modern pentathlon",
+"g": "People"
+},
+{
+"c": "🤼",
+"n": "wrestlers",
+"g": "People"
+},
+{
+"c": "🤽",
+"n": "water polo",
+"g": "People"
+},
+{
+"c": "🤾",
+"n": "handball",
+"g": "People"
+},
+{
+"c": "🦰",
+"n": "emoji component red hair",
+"g": "People"
+},
+{
+"c": "🦱",
+"n": "emoji component curly hair",
+"g": "People"
+},
+{
+"c": "🦲",
+"n": "emoji component bald",
+"g": "People"
+},
+{
+"c": "🦳",
+"n": "emoji component white hair",
+"g": "People"
+},
+{
+"c": "🦴",
+"n": "bone",
+"g": "People"
+},
+{
+"c": "🦵",
+"n": "leg",
+"g": "People"
+},
+{
+"c": "🦶",
+"n": "foot",
+"g": "People"
+},
+{
+"c": "🦷",
+"n": "tooth",
+"g": "People"
+},
+{
+"c": "🦸",
+"n": "superhero",
+"g": "People"
+},
+{
+"c": "🦹",
+"n": "supervillain",
+"g": "People"
+},
+{
+"c": "🦺",
+"n": "safety vest",
+"g": "People"
+},
+{
+"c": "🦻",
+"n": "ear with hearing aid",
+"g": "People"
+},
+{
+"c": "🦼",
+"n": "motorized wheelchair",
+"g": "People"
+},
+{
+"c": "🦽",
+"n": "manual wheelchair",
+"g": "People"
+},
+{
+"c": "🦾",
+"n": "mechanical arm",
+"g": "People"
+},
+{
+"c": "🦿",
+"n": "mechanical leg",
+"g": "People"
+},
+{
+"c": "🧀",
+"n": "cheese wedge",
+"g": "People"
+},
+{
+"c": "🧁",
+"n": "cupcake",
+"g": "People"
+},
+{
+"c": "🧂",
+"n": "salt shaker",
+"g": "People"
+},
+{
+"c": "🧃",
+"n": "beverage box",
+"g": "People"
+},
+{
+"c": "🧄",
+"n": "garlic",
+"g": "People"
+},
+{
+"c": "🧅",
+"n": "onion",
+"g": "People"
+},
+{
+"c": "🧆",
+"n": "falafel",
+"g": "People"
+},
+{
+"c": "🧇",
+"n": "waffle",
+"g": "People"
+},
+{
+"c": "🧈",
+"n": "butter",
+"g": "People"
+},
+{
+"c": "🧉",
+"n": "mate drink",
+"g": "People"
+},
+{
+"c": "🧊",
+"n": "ice cube",
+"g": "People"
+},
+{
+"c": "🧋",
+"n": "bubble tea",
+"g": "People"
+},
+{
+"c": "🧌",
+"n": "troll",
+"g": "People"
+},
+{
+"c": "🧍",
+"n": "standing person",
+"g": "People"
+},
+{
+"c": "🧎",
+"n": "kneeling person",
+"g": "People"
+},
+{
+"c": "🧏",
+"n": "deaf person",
+"g": "People"
+},
+{
+"c": "🧐",
+"n": "face with monocle",
+"g": "People"
+},
+{
+"c": "🧑",
+"n": "adult",
+"g": "People"
+},
+{
+"c": "🧒",
+"n": "child",
+"g": "People"
+},
+{
+"c": "🧓",
+"n": "older adult",
+"g": "People"
+},
+{
+"c": "🧔",
+"n": "bearded person",
+"g": "People"
+},
+{
+"c": "🧕",
+"n": "person with headscarf",
+"g": "People"
+},
+{
+"c": "🧖",
+"n": "person in steamy room",
+"g": "People"
+},
+{
+"c": "🧗",
+"n": "person climbing",
+"g": "People"
+},
+{
+"c": "🧘",
+"n": "person in lotus position",
+"g": "People"
+},
+{
+"c": "🧙",
+"n": "mage",
+"g": "People"
+},
+{
+"c": "🧚",
+"n": "fairy",
+"g": "People"
+},
+{
+"c": "🧛",
+"n": "vampire",
+"g": "People"
+},
+{
+"c": "🧜",
+"n": "merperson",
+"g": "People"
+},
+{
+"c": "🧝",
+"n": "elf",
+"g": "People"
+},
+{
+"c": "🧞",
+"n": "genie",
+"g": "People"
+},
+{
+"c": "🧟",
+"n": "zombie",
+"g": "People"
+},
+{
+"c": "👊",
+"n": "fisted hand sign",
+"g": "People"
+},
+{
+"c": "👋",
+"n": "waving hand sign",
+"g": "People"
+},
+{
+"c": "👌",
+"n": "ok hand sign",
+"g": "People"
+},
+{
+"c": "👍",
+"n": "thumbs up sign",
+"g": "People"
+},
+{
+"c": "👎",
+"n": "thumbs down sign",
+"g": "People"
+},
+{
+"c": "👏",
+"n": "clapping hands sign",
+"g": "People"
+},
+{
+"c": "👐",
+"n": "open hands sign",
+"g": "People"
+},
+{
+"c": "🐀",
+"n": "rat",
+"g": "Nature"
+},
+{
+"c": "🐁",
+"n": "mouse",
+"g": "Nature"
+},
+{
+"c": "🐂",
+"n": "ox",
+"g": "Nature"
+},
+{
+"c": "🐃",
+"n": "water buffalo",
+"g": "Nature"
+},
+{
+"c": "🐄",
+"n": "cow",
+"g": "Nature"
+},
+{
+"c": "🐅",
+"n": "tiger",
+"g": "Nature"
+},
+{
+"c": "🐆",
+"n": "leopard",
+"g": "Nature"
+},
+{
+"c": "🐇",
+"n": "rabbit",
+"g": "Nature"
+},
+{
+"c": "🐈",
+"n": "cat",
+"g": "Nature"
+},
+{
+"c": "🐉",
+"n": "dragon",
+"g": "Nature"
+},
+{
+"c": "🐊",
+"n": "crocodile",
+"g": "Nature"
+},
+{
+"c": "🐋",
+"n": "whale",
+"g": "Nature"
+},
+{
+"c": "🐌",
+"n": "snail",
+"g": "Nature"
+},
+{
+"c": "🐍",
+"n": "snake",
+"g": "Nature"
+},
+{
+"c": "🐎",
+"n": "horse",
+"g": "Nature"
+},
+{
+"c": "🐏",
+"n": "ram",
+"g": "Nature"
+},
+{
+"c": "🐐",
+"n": "goat",
+"g": "Nature"
+},
+{
+"c": "🐑",
+"n": "sheep",
+"g": "Nature"
+},
+{
+"c": "🐒",
+"n": "monkey",
+"g": "Nature"
+},
+{
+"c": "🐓",
+"n": "rooster",
+"g": "Nature"
+},
+{
+"c": "🐔",
+"n": "chicken",
+"g": "Nature"
+},
+{
+"c": "🐕",
+"n": "dog",
+"g": "Nature"
+},
+{
+"c": "🐖",
+"n": "pig",
+"g": "Nature"
+},
+{
+"c": "🐗",
+"n": "boar",
+"g": "Nature"
+},
+{
+"c": "🐘",
+"n": "elephant",
+"g": "Nature"
+},
+{
+"c": "🐙",
+"n": "octopus",
+"g": "Nature"
+},
+{
+"c": "🐚",
+"n": "spiral shell",
+"g": "Nature"
+},
+{
+"c": "🐛",
+"n": "bug",
+"g": "Nature"
+},
+{
+"c": "🐜",
+"n": "ant",
+"g": "Nature"
+},
+{
+"c": "🐝",
+"n": "honeybee",
+"g": "Nature"
+},
+{
+"c": "🐞",
+"n": "lady beetle",
+"g": "Nature"
+},
+{
+"c": "🐟",
+"n": "fish",
+"g": "Nature"
+},
+{
+"c": "🐠",
+"n": "tropical fish",
+"g": "Nature"
+},
+{
+"c": "🐡",
+"n": "blowfish",
+"g": "Nature"
+},
+{
+"c": "🐢",
+"n": "turtle",
+"g": "Nature"
+},
+{
+"c": "🐣",
+"n": "hatching chick",
+"g": "Nature"
+},
+{
+"c": "🐤",
+"n": "baby chick",
+"g": "Nature"
+},
+{
+"c": "🐥",
+"n": "front-facing baby chick",
+"g": "Nature"
+},
+{
+"c": "🐦",
+"n": "bird",
+"g": "Nature"
+},
+{
+"c": "🐧",
+"n": "penguin",
+"g": "Nature"
+},
+{
+"c": "🐨",
+"n": "koala",
+"g": "Nature"
+},
+{
+"c": "🐩",
+"n": "poodle",
+"g": "Nature"
+},
+{
+"c": "🐪",
+"n": "dromedary camel",
+"g": "Nature"
+},
+{
+"c": "🐫",
+"n": "bactrian camel",
+"g": "Nature"
+},
+{
+"c": "🐬",
+"n": "dolphin",
+"g": "Nature"
+},
+{
+"c": "🐭",
+"n": "mouse face",
+"g": "Nature"
+},
+{
+"c": "🐮",
+"n": "cow face",
+"g": "Nature"
+},
+{
+"c": "🐯",
+"n": "tiger face",
+"g": "Nature"
+},
+{
+"c": "🐰",
+"n": "rabbit face",
+"g": "Nature"
+},
+{
+"c": "🐱",
+"n": "cat face",
+"g": "Nature"
+},
+{
+"c": "🐲",
+"n": "dragon face",
+"g": "Nature"
+},
+{
+"c": "🐳",
+"n": "spouting whale",
+"g": "Nature"
+},
+{
+"c": "🐴",
+"n": "horse face",
+"g": "Nature"
+},
+{
+"c": "🐵",
+"n": "monkey face",
+"g": "Nature"
+},
+{
+"c": "🐶",
+"n": "dog face",
+"g": "Nature"
+},
+{
+"c": "🐷",
+"n": "pig face",
+"g": "Nature"
+},
+{
+"c": "🐸",
+"n": "frog face",
+"g": "Nature"
+},
+{
+"c": "🐹",
+"n": "hamster face",
+"g": "Nature"
+},
+{
+"c": "🐺",
+"n": "wolf face",
+"g": "Nature"
+},
+{
+"c": "🐻",
+"n": "bear face",
+"g": "Nature"
+},
+{
+"c": "🐼",
+"n": "panda face",
+"g": "Nature"
+},
+{
+"c": "🐽",
+"n": "pig nose",
+"g": "Nature"
+},
+{
+"c": "🐾",
+"n": "paw prints",
+"g": "Nature"
+},
+{
+"c": "🐿",
+"n": "chipmunk",
+"g": "Nature"
+},
+{
+"c": "🦀",
+"n": "crab",
+"g": "Nature"
+},
+{
+"c": "🦁",
+"n": "lion face",
+"g": "Nature"
+},
+{
+"c": "🦂",
+"n": "scorpion",
+"g": "Nature"
+},
+{
+"c": "🦃",
+"n": "turkey",
+"g": "Nature"
+},
+{
+"c": "🦄",
+"n": "unicorn face",
+"g": "Nature"
+},
+{
+"c": "🦅",
+"n": "eagle",
+"g": "Nature"
+},
+{
+"c": "🦆",
+"n": "duck",
+"g": "Nature"
+},
+{
+"c": "🦇",
+"n": "bat",
+"g": "Nature"
+},
+{
+"c": "🦈",
+"n": "shark",
+"g": "Nature"
+},
+{
+"c": "🦉",
+"n": "owl",
+"g": "Nature"
+},
+{
+"c": "🦊",
+"n": "fox face",
+"g": "Nature"
+},
+{
+"c": "🦋",
+"n": "butterfly",
+"g": "Nature"
+},
+{
+"c": "🦌",
+"n": "deer",
+"g": "Nature"
+},
+{
+"c": "🦍",
+"n": "gorilla",
+"g": "Nature"
+},
+{
+"c": "🦎",
+"n": "lizard",
+"g": "Nature"
+},
+{
+"c": "🦏",
+"n": "rhinoceros",
+"g": "Nature"
+},
+{
+"c": "🦐",
+"n": "shrimp",
+"g": "Nature"
+},
+{
+"c": "🦑",
+"n": "squid",
+"g": "Nature"
+},
+{
+"c": "🦒",
+"n": "giraffe face",
+"g": "Nature"
+},
+{
+"c": "🦓",
+"n": "zebra face",
+"g": "Nature"
+},
+{
+"c": "🦔",
+"n": "hedgehog",
+"g": "Nature"
+},
+{
+"c": "🦕",
+"n": "sauropod",
+"g": "Nature"
+},
+{
+"c": "🦖",
+"n": "t-rex",
+"g": "Nature"
+},
+{
+"c": "🦗",
+"n": "cricket",
+"g": "Nature"
+},
+{
+"c": "🦘",
+"n": "kangaroo",
+"g": "Nature"
+},
+{
+"c": "🦙",
+"n": "llama",
+"g": "Nature"
+},
+{
+"c": "🦚",
+"n": "peacock",
+"g": "Nature"
+},
+{
+"c": "🦛",
+"n": "hippopotamus",
+"g": "Nature"
+},
+{
+"c": "🦜",
+"n": "parrot",
+"g": "Nature"
+},
+{
+"c": "🦝",
+"n": "raccoon",
+"g": "Nature"
+},
+{
+"c": "🦞",
+"n": "lobster",
+"g": "Nature"
+},
+{
+"c": "🦟",
+"n": "mosquito",
+"g": "Nature"
+},
+{
+"c": "🦠",
+"n": "microbe",
+"g": "Nature"
+},
+{
+"c": "🦡",
+"n": "badger",
+"g": "Nature"
+},
+{
+"c": "🦢",
+"n": "swan",
+"g": "Nature"
+},
+{
+"c": "🦣",
+"n": "mammoth",
+"g": "Nature"
+},
+{
+"c": "🦤",
+"n": "dodo",
+"g": "Nature"
+},
+{
+"c": "🦥",
+"n": "sloth",
+"g": "Nature"
+},
+{
+"c": "🦦",
+"n": "otter",
+"g": "Nature"
+},
+{
+"c": "🦧",
+"n": "orangutan",
+"g": "Nature"
+},
+{
+"c": "🦨",
+"n": "skunk",
+"g": "Nature"
+},
+{
+"c": "🦩",
+"n": "flamingo",
+"g": "Nature"
+},
+{
+"c": "🦪",
+"n": "oyster",
+"g": "Nature"
+},
+{
+"c": "🦫",
+"n": "beaver",
+"g": "Nature"
+},
+{
+"c": "🦬",
+"n": "bison",
+"g": "Nature"
+},
+{
+"c": "🦭",
+"n": "seal",
+"g": "Nature"
+},
+{
+"c": "🦮",
+"n": "guide dog",
+"g": "Nature"
+},
+{
+"c": "🌰",
+"n": "chestnut",
+"g": "Nature"
+},
+{
+"c": "🌱",
+"n": "seedling",
+"g": "Nature"
+},
+{
+"c": "🌲",
+"n": "evergreen tree",
+"g": "Nature"
+},
+{
+"c": "🌳",
+"n": "deciduous tree",
+"g": "Nature"
+},
+{
+"c": "🌴",
+"n": "palm tree",
+"g": "Nature"
+},
+{
+"c": "🌵",
+"n": "cactus",
+"g": "Nature"
+},
+{
+"c": "🌶",
+"n": "hot pepper",
+"g": "Nature"
+},
+{
+"c": "🌷",
+"n": "tulip",
+"g": "Nature"
+},
+{
+"c": "🌸",
+"n": "cherry blossom",
+"g": "Nature"
+},
+{
+"c": "🌹",
+"n": "rose",
+"g": "Nature"
+},
+{
+"c": "🌺",
+"n": "hibiscus",
+"g": "Nature"
+},
+{
+"c": "🌻",
+"n": "sunflower",
+"g": "Nature"
+},
+{
+"c": "🌼",
+"n": "blossom",
+"g": "Nature"
+},
+{
+"c": "🌽",
+"n": "ear of maize",
+"g": "Nature"
+},
+{
+"c": "🌾",
+"n": "ear of rice",
+"g": "Nature"
+},
+{
+"c": "🌿",
+"n": "herb",
+"g": "Nature"
+},
+{
+"c": "🍀",
+"n": "four leaf clover",
+"g": "Nature"
+},
+{
+"c": "🍁",
+"n": "maple leaf",
+"g": "Nature"
+},
+{
+"c": "🍂",
+"n": "fallen leaf",
+"g": "Nature"
+},
+{
+"c": "🍃",
+"n": "leaf fluttering in wind",
+"g": "Nature"
+},
+{
+"c": "🍄",
+"n": "mushroom",
+"g": "Nature"
+},
+{
+"c": "🍅",
+"n": "tomato",
+"g": "Nature"
+},
+{
+"c": "🍆",
+"n": "aubergine",
+"g": "Nature"
+},
+{
+"c": "🍇",
+"n": "grapes",
+"g": "Nature"
+},
+{
+"c": "🍈",
+"n": "melon",
+"g": "Nature"
+},
+{
+"c": "🍉",
+"n": "watermelon",
+"g": "Nature"
+},
+{
+"c": "🍊",
+"n": "tangerine",
+"g": "Nature"
+},
+{
+"c": "🍋",
+"n": "lemon",
+"g": "Nature"
+},
+{
+"c": "🍌",
+"n": "banana",
+"g": "Nature"
+},
+{
+"c": "🍍",
+"n": "pineapple",
+"g": "Nature"
+},
+{
+"c": "🍎",
+"n": "red apple",
+"g": "Nature"
+},
+{
+"c": "🍏",
+"n": "green apple",
+"g": "Nature"
+},
+{
+"c": "🍐",
+"n": "pear",
+"g": "Nature"
+},
+{
+"c": "🍑",
+"n": "peach",
+"g": "Nature"
+},
+{
+"c": "🍒",
+"n": "cherries",
+"g": "Nature"
+},
+{
+"c": "🍓",
+"n": "strawberry",
+"g": "Nature"
+},
+{
+"c": "🍔",
+"n": "hamburger",
+"g": "Nature"
+},
+{
+"c": "🍕",
+"n": "slice of pizza",
+"g": "Nature"
+},
+{
+"c": "🍖",
+"n": "meat on bone",
+"g": "Nature"
+},
+{
+"c": "🍗",
+"n": "poultry leg",
+"g": "Nature"
+},
+{
+"c": "🍘",
+"n": "rice cracker",
+"g": "Nature"
+},
+{
+"c": "🍙",
+"n": "rice ball",
+"g": "Nature"
+},
+{
+"c": "🍚",
+"n": "cooked rice",
+"g": "Nature"
+},
+{
+"c": "🍛",
+"n": "curry and rice",
+"g": "Nature"
+},
+{
+"c": "🍜",
+"n": "steaming bowl",
+"g": "Nature"
+},
+{
+"c": "🍝",
+"n": "spaghetti",
+"g": "Nature"
+},
+{
+"c": "🍞",
+"n": "bread",
+"g": "Nature"
+},
+{
+"c": "🍟",
+"n": "french fries",
+"g": "Nature"
+},
+{
+"c": "🍠",
+"n": "roasted sweet potato",
+"g": "Nature"
+},
+{
+"c": "🍡",
+"n": "dango",
+"g": "Nature"
+},
+{
+"c": "🍢",
+"n": "oden",
+"g": "Nature"
+},
+{
+"c": "🍣",
+"n": "sushi",
+"g": "Nature"
+},
+{
+"c": "🍤",
+"n": "fried shrimp",
+"g": "Nature"
+},
+{
+"c": "🍥",
+"n": "fish cake with swirl design",
+"g": "Nature"
+},
+{
+"c": "🍦",
+"n": "soft ice cream",
+"g": "Nature"
+},
+{
+"c": "🍧",
+"n": "shaved ice",
+"g": "Nature"
+},
+{
+"c": "🍨",
+"n": "ice cream",
+"g": "Nature"
+},
+{
+"c": "🍩",
+"n": "doughnut",
+"g": "Nature"
+},
+{
+"c": "🍪",
+"n": "cookie",
+"g": "Nature"
+},
+{
+"c": "🍫",
+"n": "chocolate bar",
+"g": "Nature"
+},
+{
+"c": "🍬",
+"n": "candy",
+"g": "Nature"
+},
+{
+"c": "🍭",
+"n": "lollipop",
+"g": "Nature"
+},
+{
+"c": "🍮",
+"n": "custard",
+"g": "Nature"
+},
+{
+"c": "🍯",
+"n": "honey pot",
+"g": "Nature"
+},
+{
+"c": "🍰",
+"n": "shortcake",
+"g": "Nature"
+},
+{
+"c": "🍱",
+"n": "bento box",
+"g": "Nature"
+},
+{
+"c": "🍲",
+"n": "pot of food",
+"g": "Nature"
+},
+{
+"c": "🍳",
+"n": "cooking",
+"g": "Nature"
+},
+{
+"c": "🍴",
+"n": "fork and knife",
+"g": "Nature"
+},
+{
+"c": "🍵",
+"n": "teacup without handle",
+"g": "Nature"
+},
+{
+"c": "🍶",
+"n": "sake bottle and cup",
+"g": "Nature"
+},
+{
+"c": "🍷",
+"n": "wine glass",
+"g": "Nature"
+},
+{
+"c": "🍸",
+"n": "cocktail glass",
+"g": "Nature"
+},
+{
+"c": "🍹",
+"n": "tropical drink",
+"g": "Nature"
+},
+{
+"c": "🍺",
+"n": "beer mug",
+"g": "Nature"
+},
+{
+"c": "🍻",
+"n": "clinking beer mugs",
+"g": "Nature"
+},
+{
+"c": "🍼",
+"n": "baby bottle",
+"g": "Nature"
+},
+{
+"c": "🍽",
+"n": "fork and knife with plate",
+"g": "Nature"
+},
+{
+"c": "🍾",
+"n": "bottle with popping cork",
+"g": "Nature"
+},
+{
+"c": "🍿",
+"n": "popcorn",
+"g": "Nature"
+},
+{
+"c": "💠",
+"n": "diamond shape with a dot inside",
+"g": "Objects"
+},
+{
+"c": "💡",
+"n": "electric light bulb",
+"g": "Objects"
+},
+{
+"c": "💢",
+"n": "anger symbol",
+"g": "Objects"
+},
+{
+"c": "💣",
+"n": "bomb",
+"g": "Objects"
+},
+{
+"c": "💤",
+"n": "sleeping symbol",
+"g": "Objects"
+},
+{
+"c": "💥",
+"n": "collision symbol",
+"g": "Objects"
+},
+{
+"c": "💦",
+"n": "splashing sweat symbol",
+"g": "Objects"
+},
+{
+"c": "💧",
+"n": "droplet",
+"g": "Objects"
+},
+{
+"c": "💨",
+"n": "dash symbol",
+"g": "Objects"
+},
+{
+"c": "💩",
+"n": "pile of poo",
+"g": "Objects"
+},
+{
+"c": "💪",
+"n": "flexed biceps",
+"g": "Objects"
+},
+{
+"c": "💫",
+"n": "dizzy symbol",
+"g": "Objects"
+},
+{
+"c": "💬",
+"n": "speech balloon",
+"g": "Objects"
+},
+{
+"c": "💭",
+"n": "thought balloon",
+"g": "Objects"
+},
+{
+"c": "💮",
+"n": "white flower",
+"g": "Objects"
+},
+{
+"c": "💯",
+"n": "hundred points symbol",
+"g": "Objects"
+},
+{
+"c": "💰",
+"n": "money bag",
+"g": "Objects"
+},
+{
+"c": "💱",
+"n": "currency exchange",
+"g": "Objects"
+},
+{
+"c": "💲",
+"n": "heavy dollar sign",
+"g": "Objects"
+},
+{
+"c": "💳",
+"n": "credit card",
+"g": "Objects"
+},
+{
+"c": "💴",
+"n": "banknote with yen sign",
+"g": "Objects"
+},
+{
+"c": "💵",
+"n": "banknote with dollar sign",
+"g": "Objects"
+},
+{
+"c": "💶",
+"n": "banknote with euro sign",
+"g": "Objects"
+},
+{
+"c": "💷",
+"n": "banknote with pound sign",
+"g": "Objects"
+},
+{
+"c": "💸",
+"n": "money with wings",
+"g": "Objects"
+},
+{
+"c": "💹",
+"n": "chart with upwards trend and yen sign",
+"g": "Objects"
+},
+{
+"c": "💺",
+"n": "seat",
+"g": "Objects"
+},
+{
+"c": "💻",
+"n": "personal computer",
+"g": "Objects"
+},
+{
+"c": "💼",
+"n": "briefcase",
+"g": "Objects"
+},
+{
+"c": "💽",
+"n": "minidisc",
+"g": "Objects"
+},
+{
+"c": "💾",
+"n": "floppy disk",
+"g": "Objects"
+},
+{
+"c": "💿",
+"n": "optical disc",
+"g": "Objects"
+},
+{
+"c": "📀",
+"n": "dvd",
+"g": "Objects"
+},
+{
+"c": "📁",
+"n": "file folder",
+"g": "Objects"
+},
+{
+"c": "📂",
+"n": "open file folder",
+"g": "Objects"
+},
+{
+"c": "📃",
+"n": "page with curl",
+"g": "Objects"
+},
+{
+"c": "📄",
+"n": "page facing up",
+"g": "Objects"
+},
+{
+"c": "📅",
+"n": "calendar",
+"g": "Objects"
+},
+{
+"c": "📆",
+"n": "tear-off calendar",
+"g": "Objects"
+},
+{
+"c": "📇",
+"n": "card index",
+"g": "Objects"
+},
+{
+"c": "📈",
+"n": "chart with upwards trend",
+"g": "Objects"
+},
+{
+"c": "📉",
+"n": "chart with downwards trend",
+"g": "Objects"
+},
+{
+"c": "📊",
+"n": "bar chart",
+"g": "Objects"
+},
+{
+"c": "📋",
+"n": "clipboard",
+"g": "Objects"
+},
+{
+"c": "📌",
+"n": "pushpin",
+"g": "Objects"
+},
+{
+"c": "📍",
+"n": "round pushpin",
+"g": "Objects"
+},
+{
+"c": "📎",
+"n": "paperclip",
+"g": "Objects"
+},
+{
+"c": "📏",
+"n": "straight ruler",
+"g": "Objects"
+},
+{
+"c": "📐",
+"n": "triangular ruler",
+"g": "Objects"
+},
+{
+"c": "📑",
+"n": "bookmark tabs",
+"g": "Objects"
+},
+{
+"c": "📒",
+"n": "ledger",
+"g": "Objects"
+},
+{
+"c": "📓",
+"n": "notebook",
+"g": "Objects"
+},
+{
+"c": "📔",
+"n": "notebook with decorative cover",
+"g": "Objects"
+},
+{
+"c": "📕",
+"n": "closed book",
+"g": "Objects"
+},
+{
+"c": "📖",
+"n": "open book",
+"g": "Objects"
+},
+{
+"c": "📗",
+"n": "green book",
+"g": "Objects"
+},
+{
+"c": "📘",
+"n": "blue book",
+"g": "Objects"
+},
+{
+"c": "📙",
+"n": "orange book",
+"g": "Objects"
+},
+{
+"c": "📚",
+"n": "books",
+"g": "Objects"
+},
+{
+"c": "📛",
+"n": "name badge",
+"g": "Objects"
+},
+{
+"c": "📜",
+"n": "scroll",
+"g": "Objects"
+},
+{
+"c": "📝",
+"n": "memo",
+"g": "Objects"
+},
+{
+"c": "📞",
+"n": "telephone receiver",
+"g": "Objects"
+},
+{
+"c": "📟",
+"n": "pager",
+"g": "Objects"
+},
+{
+"c": "📠",
+"n": "fax machine",
+"g": "Objects"
+},
+{
+"c": "📡",
+"n": "satellite antenna",
+"g": "Objects"
+},
+{
+"c": "📢",
+"n": "public address loudspeaker",
+"g": "Objects"
+},
+{
+"c": "📣",
+"n": "cheering megaphone",
+"g": "Objects"
+},
+{
+"c": "📤",
+"n": "outbox tray",
+"g": "Objects"
+},
+{
+"c": "📥",
+"n": "inbox tray",
+"g": "Objects"
+},
+{
+"c": "📦",
+"n": "package",
+"g": "Objects"
+},
+{
+"c": "📧",
+"n": "e-mail symbol",
+"g": "Objects"
+},
+{
+"c": "📨",
+"n": "incoming envelope",
+"g": "Objects"
+},
+{
+"c": "📩",
+"n": "envelope with downwards arrow above",
+"g": "Objects"
+},
+{
+"c": "📪",
+"n": "closed mailbox with lowered flag",
+"g": "Objects"
+},
+{
+"c": "📫",
+"n": "closed mailbox with raised flag",
+"g": "Objects"
+},
+{
+"c": "📬",
+"n": "open mailbox with raised flag",
+"g": "Objects"
+},
+{
+"c": "📭",
+"n": "open mailbox with lowered flag",
+"g": "Objects"
+},
+{
+"c": "📮",
+"n": "postbox",
+"g": "Objects"
+},
+{
+"c": "📯",
+"n": "postal horn",
+"g": "Objects"
+},
+{
+"c": "📰",
+"n": "newspaper",
+"g": "Objects"
+},
+{
+"c": "📱",
+"n": "mobile phone",
+"g": "Objects"
+},
+{
+"c": "📲",
+"n": "mobile phone with rightwards arrow at left",
+"g": "Objects"
+},
+{
+"c": "📳",
+"n": "vibration mode",
+"g": "Objects"
+},
+{
+"c": "📴",
+"n": "mobile phone off",
+"g": "Objects"
+},
+{
+"c": "📵",
+"n": "no mobile phones",
+"g": "Objects"
+},
+{
+"c": "📶",
+"n": "antenna with bars",
+"g": "Objects"
+},
+{
+"c": "📷",
+"n": "camera",
+"g": "Objects"
+},
+{
+"c": "📸",
+"n": "camera with flash",
+"g": "Objects"
+},
+{
+"c": "📹",
+"n": "video camera",
+"g": "Objects"
+},
+{
+"c": "📺",
+"n": "television",
+"g": "Objects"
+},
+{
+"c": "📻",
+"n": "radio",
+"g": "Objects"
+},
+{
+"c": "📼",
+"n": "videocassette",
+"g": "Objects"
+},
+{
+"c": "📽",
+"n": "film projector",
+"g": "Objects"
+},
+{
+"c": "📾",
+"n": "portable stereo",
+"g": "Objects"
+},
+{
+"c": "📿",
+"n": "prayer beads",
+"g": "Objects"
+},
+{
+"c": "🔀",
+"n": "twisted rightwards arrows",
+"g": "Objects"
+},
+{
+"c": "🔁",
+"n": "clockwise rightwards and leftwards open circle arrows",
+"g": "Objects"
+},
+{
+"c": "🔂",
+"n": "clockwise rightwards and leftwards open circle arrows with circled one overlay",
+"g": "Objects"
+},
+{
+"c": "🔃",
+"n": "clockwise downwards and upwards open circle arrows",
+"g": "Objects"
+},
+{
+"c": "🔄",
+"n": "anticlockwise downwards and upwards open circle arrows",
+"g": "Objects"
+},
+{
+"c": "🔅",
+"n": "low brightness symbol",
+"g": "Objects"
+},
+{
+"c": "🔆",
+"n": "high brightness symbol",
+"g": "Objects"
+},
+{
+"c": "🔇",
+"n": "speaker with cancellation stroke",
+"g": "Objects"
+},
+{
+"c": "🔈",
+"n": "speaker",
+"g": "Objects"
+},
+{
+"c": "🔉",
+"n": "speaker with one sound wave",
+"g": "Objects"
+},
+{
+"c": "🔊",
+"n": "speaker with three sound waves",
+"g": "Objects"
+},
+{
+"c": "🔋",
+"n": "battery",
+"g": "Objects"
+},
+{
+"c": "🔌",
+"n": "electric plug",
+"g": "Objects"
+},
+{
+"c": "🔍",
+"n": "left-pointing magnifying glass",
+"g": "Objects"
+},
+{
+"c": "🔎",
+"n": "right-pointing magnifying glass",
+"g": "Objects"
+},
+{
+"c": "🔏",
+"n": "lock with ink pen",
+"g": "Objects"
+},
+{
+"c": "🔐",
+"n": "closed lock with key",
+"g": "Objects"
+},
+{
+"c": "🔑",
+"n": "key",
+"g": "Objects"
+},
+{
+"c": "🔒",
+"n": "lock",
+"g": "Objects"
+},
+{
+"c": "🔓",
+"n": "open lock",
+"g": "Objects"
+},
+{
+"c": "🔔",
+"n": "bell",
+"g": "Objects"
+},
+{
+"c": "🔕",
+"n": "bell with cancellation stroke",
+"g": "Objects"
+},
+{
+"c": "🔖",
+"n": "bookmark",
+"g": "Objects"
+},
+{
+"c": "🔗",
+"n": "link symbol",
+"g": "Objects"
+},
+{
+"c": "🔘",
+"n": "radio button",
+"g": "Objects"
+},
+{
+"c": "🔙",
+"n": "back with leftwards arrow above",
+"g": "Objects"
+},
+{
+"c": "🔚",
+"n": "end with leftwards arrow above",
+"g": "Objects"
+},
+{
+"c": "🔛",
+"n": "on with exclamation mark with left right arrow above",
+"g": "Objects"
+},
+{
+"c": "🔜",
+"n": "soon with rightwards arrow above",
+"g": "Objects"
+},
+{
+"c": "🔝",
+"n": "top with upwards arrow above",
+"g": "Objects"
+},
+{
+"c": "🔞",
+"n": "no one under eighteen symbol",
+"g": "Objects"
+},
+{
+"c": "🔟",
+"n": "keycap ten",
+"g": "Objects"
+},
+{
+"c": "🔠",
+"n": "input symbol for latin capital letters",
+"g": "Objects"
+},
+{
+"c": "🔡",
+"n": "input symbol for latin small letters",
+"g": "Objects"
+},
+{
+"c": "🔢",
+"n": "input symbol for numbers",
+"g": "Objects"
+},
+{
+"c": "🔣",
+"n": "input symbol for symbols",
+"g": "Objects"
+},
+{
+"c": "🔤",
+"n": "input symbol for latin letters",
+"g": "Objects"
+},
+{
+"c": "🔥",
+"n": "fire",
+"g": "Objects"
+},
+{
+"c": "🔦",
+"n": "electric torch",
+"g": "Objects"
+},
+{
+"c": "🔧",
+"n": "wrench",
+"g": "Objects"
+},
+{
+"c": "🔨",
+"n": "hammer",
+"g": "Objects"
+},
+{
+"c": "🔩",
+"n": "nut and bolt",
+"g": "Objects"
+},
+{
+"c": "🔪",
+"n": "hocho",
+"g": "Objects"
+},
+{
+"c": "🔫",
+"n": "pistol",
+"g": "Objects"
+},
+{
+"c": "🔬",
+"n": "microscope",
+"g": "Objects"
+},
+{
+"c": "🔭",
+"n": "telescope",
+"g": "Objects"
+},
+{
+"c": "🔮",
+"n": "crystal ball",
+"g": "Objects"
+},
+{
+"c": "🔯",
+"n": "six pointed star with middle dot",
+"g": "Objects"
+},
+{
+"c": "🔰",
+"n": "japanese symbol for beginner",
+"g": "Objects"
+},
+{
+"c": "🔱",
+"n": "trident emblem",
+"g": "Objects"
+},
+{
+"c": "🔲",
+"n": "black square button",
+"g": "Objects"
+},
+{
+"c": "🔳",
+"n": "white square button",
+"g": "Objects"
+},
+{
+"c": "🔴",
+"n": "large red circle",
+"g": "Objects"
+},
+{
+"c": "🔵",
+"n": "large blue circle",
+"g": "Objects"
+},
+{
+"c": "🔶",
+"n": "large orange diamond",
+"g": "Objects"
+},
+{
+"c": "🔷",
+"n": "large blue diamond",
+"g": "Objects"
+},
+{
+"c": "🔸",
+"n": "small orange diamond",
+"g": "Objects"
+},
+{
+"c": "🔹",
+"n": "small blue diamond",
+"g": "Objects"
+},
+{
+"c": "🔺",
+"n": "up-pointing red triangle",
+"g": "Objects"
+},
+{
+"c": "🔻",
+"n": "down-pointing red triangle",
+"g": "Objects"
+},
+{
+"c": "🔼",
+"n": "up-pointing small red triangle",
+"g": "Objects"
+},
+{
+"c": "🔽",
+"n": "down-pointing small red triangle",
+"g": "Objects"
+},
+{
+"c": "🔾",
+"n": "lower right shadowed white circle",
+"g": "Objects"
+},
+{
+"c": "🔿",
+"n": "upper right shadowed white circle",
+"g": "Objects"
+},
+{
+"c": "🛠",
+"n": "hammer and wrench",
+"g": "Objects"
+},
+{
+"c": "🛡",
+"n": "shield",
+"g": "Objects"
+},
+{
+"c": "🛢",
+"n": "oil drum",
+"g": "Objects"
+},
+{
+"c": "🛣",
+"n": "motorway",
+"g": "Objects"
+},
+{
+"c": "🛤",
+"n": "railway track",
+"g": "Objects"
+},
+{
+"c": "🛥",
+"n": "motor boat",
+"g": "Objects"
+},
+{
+"c": "🛦",
+"n": "up-pointing military airplane",
+"g": "Objects"
+},
+{
+"c": "🛧",
+"n": "up-pointing airplane",
+"g": "Objects"
+},
+{
+"c": "🛨",
+"n": "up-pointing small airplane",
+"g": "Objects"
+},
+{
+"c": "🛩",
+"n": "small airplane",
+"g": "Objects"
+},
+{
+"c": "🛪",
+"n": "northeast-pointing airplane",
+"g": "Objects"
+},
+{
+"c": "🛫",
+"n": "airplane departure",
+"g": "Objects"
+},
+{
+"c": "🛬",
+"n": "airplane arriving",
+"g": "Objects"
+},
+{
+"c": "🛰",
+"n": "satellite",
+"g": "Objects"
+},
+{
+"c": "🛱",
+"n": "oncoming fire engine",
+"g": "Objects"
+},
+{
+"c": "🛲",
+"n": "diesel locomotive",
+"g": "Objects"
+},
+{
+"c": "🛳",
+"n": "passenger ship",
+"g": "Objects"
+},
+{
+"c": "🛴",
+"n": "scooter",
+"g": "Objects"
+},
+{
+"c": "🛵",
+"n": "motor scooter",
+"g": "Objects"
+},
+{
+"c": "🛶",
+"n": "canoe",
+"g": "Objects"
+},
+{
+"c": "🛷",
+"n": "sled",
+"g": "Objects"
+},
+{
+"c": "🛸",
+"n": "flying saucer",
+"g": "Objects"
+},
+{
+"c": "🛹",
+"n": "skateboard",
+"g": "Objects"
+},
+{
+"c": "🛺",
+"n": "auto rickshaw",
+"g": "Objects"
+},
+{
+"c": "🛻",
+"n": "pickup truck",
+"g": "Objects"
+},
+{
+"c": "🛼",
+"n": "roller skate",
+"g": "Objects"
+},
+{
+"c": "🧰",
+"n": "toolbox",
+"g": "Objects"
+},
+{
+"c": "🧱",
+"n": "brick",
+"g": "Objects"
+},
+{
+"c": "🧲",
+"n": "magnet",
+"g": "Objects"
+},
+{
+"c": "🧳",
+"n": "luggage",
+"g": "Objects"
+},
+{
+"c": "🧴",
+"n": "lotion bottle",
+"g": "Objects"
+},
+{
+"c": "🧵",
+"n": "spool of thread",
+"g": "Objects"
+},
+{
+"c": "🧶",
+"n": "ball of yarn",
+"g": "Objects"
+},
+{
+"c": "🧷",
+"n": "safety pin",
+"g": "Objects"
+},
+{
+"c": "🧸",
+"n": "teddy bear",
+"g": "Objects"
+},
+{
+"c": "🧹",
+"n": "broom",
+"g": "Objects"
+},
+{
+"c": "🧺",
+"n": "basket",
+"g": "Objects"
+},
+{
+"c": "🧻",
+"n": "roll of paper",
+"g": "Objects"
+},
+{
+"c": "🧼",
+"n": "bar of soap",
+"g": "Objects"
+},
+{
+"c": "🧽",
+"n": "sponge",
+"g": "Objects"
+},
+{
+"c": "🧾",
+"n": "receipt",
+"g": "Objects"
+},
+{
+"c": "🧿",
+"n": "nazar amulet",
+"g": "Objects"
+},
+{
+"c": "☀",
+"n": "black sun with rays",
+"g": "Symbols"
+},
+{
+"c": "☁",
+"n": "cloud",
+"g": "Symbols"
+},
+{
+"c": "☂",
+"n": "umbrella",
+"g": "Symbols"
+},
+{
+"c": "☃",
+"n": "snowman",
+"g": "Symbols"
+},
+{
+"c": "☄",
+"n": "comet",
+"g": "Symbols"
+},
+{
+"c": "★",
+"n": "black star",
+"g": "Symbols"
+},
+{
+"c": "☆",
+"n": "white star",
+"g": "Symbols"
+},
+{
+"c": "☇",
+"n": "lightning",
+"g": "Symbols"
+},
+{
+"c": "☈",
+"n": "thunderstorm",
+"g": "Symbols"
+},
+{
+"c": "☉",
+"n": "sun",
+"g": "Symbols"
+},
+{
+"c": "☊",
+"n": "ascending node",
+"g": "Symbols"
+},
+{
+"c": "☋",
+"n": "descending node",
+"g": "Symbols"
+},
+{
+"c": "☌",
+"n": "conjunction",
+"g": "Symbols"
+},
+{
+"c": "☍",
+"n": "opposition",
+"g": "Symbols"
+},
+{
+"c": "☎",
+"n": "black telephone",
+"g": "Symbols"
+},
+{
+"c": "☏",
+"n": "white telephone",
+"g": "Symbols"
+},
+{
+"c": "☐",
+"n": "ballot box",
+"g": "Symbols"
+},
+{
+"c": "☑",
+"n": "ballot box with check",
+"g": "Symbols"
+},
+{
+"c": "☒",
+"n": "ballot box with x",
+"g": "Symbols"
+},
+{
+"c": "☓",
+"n": "saltire",
+"g": "Symbols"
+},
+{
+"c": "☔",
+"n": "umbrella with rain drops",
+"g": "Symbols"
+},
+{
+"c": "☕",
+"n": "hot beverage",
+"g": "Symbols"
+},
+{
+"c": "☖",
+"n": "white shogi piece",
+"g": "Symbols"
+},
+{
+"c": "☗",
+"n": "black shogi piece",
+"g": "Symbols"
+},
+{
+"c": "☘",
+"n": "shamrock",
+"g": "Symbols"
+},
+{
+"c": "☙",
+"n": "reversed rotated floral heart bullet",
+"g": "Symbols"
+},
+{
+"c": "☚",
+"n": "black left pointing index",
+"g": "Symbols"
+},
+{
+"c": "☛",
+"n": "black right pointing index",
+"g": "Symbols"
+},
+{
+"c": "☜",
+"n": "white left pointing index",
+"g": "Symbols"
+},
+{
+"c": "☝",
+"n": "white up pointing index",
+"g": "Symbols"
+},
+{
+"c": "☞",
+"n": "white right pointing index",
+"g": "Symbols"
+},
+{
+"c": "☟",
+"n": "white down pointing index",
+"g": "Symbols"
+},
+{
+"c": "☠",
+"n": "skull and crossbones",
+"g": "Symbols"
+},
+{
+"c": "☡",
+"n": "caution sign",
+"g": "Symbols"
+},
+{
+"c": "☢",
+"n": "radioactive sign",
+"g": "Symbols"
+},
+{
+"c": "☣",
+"n": "biohazard sign",
+"g": "Symbols"
+},
+{
+"c": "☤",
+"n": "caduceus",
+"g": "Symbols"
+},
+{
+"c": "☥",
+"n": "ankh",
+"g": "Symbols"
+},
+{
+"c": "☦",
+"n": "orthodox cross",
+"g": "Symbols"
+},
+{
+"c": "☧",
+"n": "chi rho",
+"g": "Symbols"
+},
+{
+"c": "☨",
+"n": "cross of lorraine",
+"g": "Symbols"
+},
+{
+"c": "☩",
+"n": "cross of jerusalem",
+"g": "Symbols"
+},
+{
+"c": "☪",
+"n": "star and crescent",
+"g": "Symbols"
+},
+{
+"c": "☫",
+"n": "farsi symbol",
+"g": "Symbols"
+},
+{
+"c": "☬",
+"n": "adi shakti",
+"g": "Symbols"
+},
+{
+"c": "☭",
+"n": "hammer and sickle",
+"g": "Symbols"
+},
+{
+"c": "☮",
+"n": "peace symbol",
+"g": "Symbols"
+},
+{
+"c": "☯",
+"n": "yin yang",
+"g": "Symbols"
+},
+{
+"c": "☰",
+"n": "trigram for heaven",
+"g": "Symbols"
+},
+{
+"c": "☱",
+"n": "trigram for lake",
+"g": "Symbols"
+},
+{
+"c": "☲",
+"n": "trigram for fire",
+"g": "Symbols"
+},
+{
+"c": "☳",
+"n": "trigram for thunder",
+"g": "Symbols"
+},
+{
+"c": "☴",
+"n": "trigram for wind",
+"g": "Symbols"
+},
+{
+"c": "☵",
+"n": "trigram for water",
+"g": "Symbols"
+},
+{
+"c": "☶",
+"n": "trigram for mountain",
+"g": "Symbols"
+},
+{
+"c": "☷",
+"n": "trigram for earth",
+"g": "Symbols"
+},
+{
+"c": "☸",
+"n": "wheel of dharma",
+"g": "Symbols"
+},
+{
+"c": "☹",
+"n": "white frowning face",
+"g": "Symbols"
+},
+{
+"c": "☺",
+"n": "white smiling face",
+"g": "Symbols"
+},
+{
+"c": "☻",
+"n": "black smiling face",
+"g": "Symbols"
+},
+{
+"c": "☼",
+"n": "white sun with rays",
+"g": "Symbols"
+},
+{
+"c": "☽",
+"n": "first quarter moon",
+"g": "Symbols"
+},
+{
+"c": "☾",
+"n": "last quarter moon",
+"g": "Symbols"
+},
+{
+"c": "☿",
+"n": "mercury",
+"g": "Symbols"
+},
+{
+"c": "♀",
+"n": "female sign",
+"g": "Symbols"
+},
+{
+"c": "♁",
+"n": "earth",
+"g": "Symbols"
+},
+{
+"c": "♂",
+"n": "male sign",
+"g": "Symbols"
+},
+{
+"c": "♃",
+"n": "jupiter",
+"g": "Symbols"
+},
+{
+"c": "♄",
+"n": "saturn",
+"g": "Symbols"
+},
+{
+"c": "♅",
+"n": "uranus",
+"g": "Symbols"
+},
+{
+"c": "♆",
+"n": "neptune",
+"g": "Symbols"
+},
+{
+"c": "♇",
+"n": "pluto",
+"g": "Symbols"
+},
+{
+"c": "♈",
+"n": "aries",
+"g": "Symbols"
+},
+{
+"c": "♉",
+"n": "taurus",
+"g": "Symbols"
+},
+{
+"c": "♊",
+"n": "gemini",
+"g": "Symbols"
+},
+{
+"c": "♋",
+"n": "cancer",
+"g": "Symbols"
+},
+{
+"c": "♌",
+"n": "leo",
+"g": "Symbols"
+},
+{
+"c": "♍",
+"n": "virgo",
+"g": "Symbols"
+},
+{
+"c": "♎",
+"n": "libra",
+"g": "Symbols"
+},
+{
+"c": "♏",
+"n": "scorpius",
+"g": "Symbols"
+},
+{
+"c": "♐",
+"n": "sagittarius",
+"g": "Symbols"
+},
+{
+"c": "♑",
+"n": "capricorn",
+"g": "Symbols"
+},
+{
+"c": "♒",
+"n": "aquarius",
+"g": "Symbols"
+},
+{
+"c": "♓",
+"n": "pisces",
+"g": "Symbols"
+},
+{
+"c": "♔",
+"n": "white chess king",
+"g": "Symbols"
+},
+{
+"c": "♕",
+"n": "white chess queen",
+"g": "Symbols"
+},
+{
+"c": "♖",
+"n": "white chess rook",
+"g": "Symbols"
+},
+{
+"c": "♗",
+"n": "white chess bishop",
+"g": "Symbols"
+},
+{
+"c": "♘",
+"n": "white chess knight",
+"g": "Symbols"
+},
+{
+"c": "♙",
+"n": "white chess pawn",
+"g": "Symbols"
+},
+{
+"c": "♚",
+"n": "black chess king",
+"g": "Symbols"
+},
+{
+"c": "♛",
+"n": "black chess queen",
+"g": "Symbols"
+},
+{
+"c": "♜",
+"n": "black chess rook",
+"g": "Symbols"
+},
+{
+"c": "♝",
+"n": "black chess bishop",
+"g": "Symbols"
+},
+{
+"c": "♞",
+"n": "black chess knight",
+"g": "Symbols"
+},
+{
+"c": "♟",
+"n": "black chess pawn",
+"g": "Symbols"
+},
+{
+"c": "♠",
+"n": "black spade suit",
+"g": "Symbols"
+},
+{
+"c": "♡",
+"n": "white heart suit",
+"g": "Symbols"
+},
+{
+"c": "♢",
+"n": "white diamond suit",
+"g": "Symbols"
+},
+{
+"c": "♣",
+"n": "black club suit",
+"g": "Symbols"
+},
+{
+"c": "♤",
+"n": "white spade suit",
+"g": "Symbols"
+},
+{
+"c": "♥",
+"n": "black heart suit",
+"g": "Symbols"
+},
+{
+"c": "♦",
+"n": "black diamond suit",
+"g": "Symbols"
+},
+{
+"c": "♧",
+"n": "white club suit",
+"g": "Symbols"
+},
+{
+"c": "♨",
+"n": "hot springs",
+"g": "Symbols"
+},
+{
+"c": "♩",
+"n": "quarter note",
+"g": "Symbols"
+},
+{
+"c": "♪",
+"n": "eighth note",
+"g": "Symbols"
+},
+{
+"c": "♫",
+"n": "beamed eighth notes",
+"g": "Symbols"
+},
+{
+"c": "♬",
+"n": "beamed sixteenth notes",
+"g": "Symbols"
+},
+{
+"c": "♭",
+"n": "music flat sign",
+"g": "Symbols"
+},
+{
+"c": "♮",
+"n": "music natural sign",
+"g": "Symbols"
+},
+{
+"c": "♯",
+"n": "music sharp sign",
+"g": "Symbols"
+},
+{
+"c": "♰",
+"n": "west syriac cross",
+"g": "Symbols"
+},
+{
+"c": "♱",
+"n": "east syriac cross",
+"g": "Symbols"
+},
+{
+"c": "♲",
+"n": "universal recycling symbol",
+"g": "Symbols"
+},
+{
+"c": "♳",
+"n": "recycling symbol for type-1 plastics",
+"g": "Symbols"
+},
+{
+"c": "♴",
+"n": "recycling symbol for type-2 plastics",
+"g": "Symbols"
+},
+{
+"c": "♵",
+"n": "recycling symbol for type-3 plastics",
+"g": "Symbols"
+},
+{
+"c": "♶",
+"n": "recycling symbol for type-4 plastics",
+"g": "Symbols"
+},
+{
+"c": "♷",
+"n": "recycling symbol for type-5 plastics",
+"g": "Symbols"
+},
+{
+"c": "♸",
+"n": "recycling symbol for type-6 plastics",
+"g": "Symbols"
+},
+{
+"c": "♹",
+"n": "recycling symbol for type-7 plastics",
+"g": "Symbols"
+},
+{
+"c": "♺",
+"n": "recycling symbol for generic materials",
+"g": "Symbols"
+},
+{
+"c": "♻",
+"n": "black universal recycling symbol",
+"g": "Symbols"
+},
+{
+"c": "♼",
+"n": "recycled paper symbol",
+"g": "Symbols"
+},
+{
+"c": "♽",
+"n": "partially-recycled paper symbol",
+"g": "Symbols"
+},
+{
+"c": "♾",
+"n": "permanent paper sign",
+"g": "Symbols"
+},
+{
+"c": "♿",
+"n": "wheelchair symbol",
+"g": "Symbols"
+},
+{
+"c": "⚀",
+"n": "die face-1",
+"g": "Symbols"
+},
+{
+"c": "⚁",
+"n": "die face-2",
+"g": "Symbols"
+},
+{
+"c": "⚂",
+"n": "die face-3",
+"g": "Symbols"
+},
+{
+"c": "⚃",
+"n": "die face-4",
+"g": "Symbols"
+},
+{
+"c": "⚄",
+"n": "die face-5",
+"g": "Symbols"
+},
+{
+"c": "⚅",
+"n": "die face-6",
+"g": "Symbols"
+},
+{
+"c": "⚆",
+"n": "white circle with dot right",
+"g": "Symbols"
+},
+{
+"c": "⚇",
+"n": "white circle with two dots",
+"g": "Symbols"
+},
+{
+"c": "⚈",
+"n": "black circle with white dot right",
+"g": "Symbols"
+},
+{
+"c": "⚉",
+"n": "black circle with two white dots",
+"g": "Symbols"
+},
+{
+"c": "⚊",
+"n": "monogram for yang",
+"g": "Symbols"
+},
+{
+"c": "⚋",
+"n": "monogram for yin",
+"g": "Symbols"
+},
+{
+"c": "⚌",
+"n": "digram for greater yang",
+"g": "Symbols"
+},
+{
+"c": "⚍",
+"n": "digram for lesser yin",
+"g": "Symbols"
+},
+{
+"c": "⚎",
+"n": "digram for lesser yang",
+"g": "Symbols"
+},
+{
+"c": "⚏",
+"n": "digram for greater yin",
+"g": "Symbols"
+},
+{
+"c": "⚐",
+"n": "white flag",
+"g": "Symbols"
+},
+{
+"c": "⚑",
+"n": "black flag",
+"g": "Symbols"
+},
+{
+"c": "⚒",
+"n": "hammer and pick",
+"g": "Symbols"
+},
+{
+"c": "⚓",
+"n": "anchor",
+"g": "Symbols"
+},
+{
+"c": "⚔",
+"n": "crossed swords",
+"g": "Symbols"
+},
+{
+"c": "⚕",
+"n": "staff of aesculapius",
+"g": "Symbols"
+},
+{
+"c": "⚖",
+"n": "scales",
+"g": "Symbols"
+},
+{
+"c": "⚗",
+"n": "alembic",
+"g": "Symbols"
+},
+{
+"c": "⚘",
+"n": "flower",
+"g": "Symbols"
+},
+{
+"c": "⚙",
+"n": "gear",
+"g": "Symbols"
+},
+{
+"c": "⚚",
+"n": "staff of hermes",
+"g": "Symbols"
+},
+{
+"c": "⚛",
+"n": "atom symbol",
+"g": "Symbols"
+},
+{
+"c": "⚜",
+"n": "fleur-de-lis",
+"g": "Symbols"
+},
+{
+"c": "⚝",
+"n": "outlined white star",
+"g": "Symbols"
+},
+{
+"c": "⚞",
+"n": "three lines converging right",
+"g": "Symbols"
+},
+{
+"c": "⚟",
+"n": "three lines converging left",
+"g": "Symbols"
+},
+{
+"c": "⚠",
+"n": "warning sign",
+"g": "Symbols"
+},
+{
+"c": "⚡",
+"n": "high voltage sign",
+"g": "Symbols"
+},
+{
+"c": "⚢",
+"n": "doubled female sign",
+"g": "Symbols"
+},
+{
+"c": "⚣",
+"n": "doubled male sign",
+"g": "Symbols"
+},
+{
+"c": "⚤",
+"n": "interlocked female and male sign",
+"g": "Symbols"
+},
+{
+"c": "⚥",
+"n": "male and female sign",
+"g": "Symbols"
+},
+{
+"c": "⚦",
+"n": "male with stroke sign",
+"g": "Symbols"
+},
+{
+"c": "⚧",
+"n": "male with stroke and male and female sign",
+"g": "Symbols"
+},
+{
+"c": "⚨",
+"n": "vertical male with stroke sign",
+"g": "Symbols"
+},
+{
+"c": "⚩",
+"n": "horizontal male with stroke sign",
+"g": "Symbols"
+},
+{
+"c": "⚪",
+"n": "medium white circle",
+"g": "Symbols"
+},
+{
+"c": "⚫",
+"n": "medium black circle",
+"g": "Symbols"
+},
+{
+"c": "⚬",
+"n": "medium small white circle",
+"g": "Symbols"
+},
+{
+"c": "⚭",
+"n": "marriage symbol",
+"g": "Symbols"
+},
+{
+"c": "⚮",
+"n": "divorce symbol",
+"g": "Symbols"
+},
+{
+"c": "⚯",
+"n": "unmarried partnership symbol",
+"g": "Symbols"
+},
+{
+"c": "⚰",
+"n": "coffin",
+"g": "Symbols"
+},
+{
+"c": "⚱",
+"n": "funeral urn",
+"g": "Symbols"
+},
+{
+"c": "⚲",
+"n": "neuter",
+"g": "Symbols"
+},
+{
+"c": "⚳",
+"n": "ceres",
+"g": "Symbols"
+},
+{
+"c": "⚴",
+"n": "pallas",
+"g": "Symbols"
+},
+{
+"c": "⚵",
+"n": "juno",
+"g": "Symbols"
+},
+{
+"c": "⚶",
+"n": "vesta",
+"g": "Symbols"
+},
+{
+"c": "⚷",
+"n": "chiron",
+"g": "Symbols"
+},
+{
+"c": "⚸",
+"n": "black moon lilith",
+"g": "Symbols"
+},
+{
+"c": "⚹",
+"n": "sextile",
+"g": "Symbols"
+},
+{
+"c": "⚺",
+"n": "semisextile",
+"g": "Symbols"
+},
+{
+"c": "⚻",
+"n": "quincunx",
+"g": "Symbols"
+},
+{
+"c": "⚼",
+"n": "sesquiquadrate",
+"g": "Symbols"
+},
+{
+"c": "⚽",
+"n": "soccer ball",
+"g": "Symbols"
+},
+{
+"c": "⚾",
+"n": "baseball",
+"g": "Symbols"
+},
+{
+"c": "⚿",
+"n": "squared key",
+"g": "Symbols"
+},
+{
+"c": "⛀",
+"n": "white draughts man",
+"g": "Symbols"
+},
+{
+"c": "⛁",
+"n": "white draughts king",
+"g": "Symbols"
+},
+{
+"c": "⛂",
+"n": "black draughts man",
+"g": "Symbols"
+},
+{
+"c": "⛃",
+"n": "black draughts king",
+"g": "Symbols"
+},
+{
+"c": "⛄",
+"n": "snowman without snow",
+"g": "Symbols"
+},
+{
+"c": "⛅",
+"n": "sun behind cloud",
+"g": "Symbols"
+},
+{
+"c": "⛆",
+"n": "rain",
+"g": "Symbols"
+},
+{
+"c": "⛇",
+"n": "black snowman",
+"g": "Symbols"
+},
+{
+"c": "⛈",
+"n": "thunder cloud and rain",
+"g": "Symbols"
+},
+{
+"c": "⛉",
+"n": "turned white shogi piece",
+"g": "Symbols"
+},
+{
+"c": "⛊",
+"n": "turned black shogi piece",
+"g": "Symbols"
+},
+{
+"c": "⛋",
+"n": "white diamond in square",
+"g": "Symbols"
+},
+{
+"c": "⛌",
+"n": "crossing lanes",
+"g": "Symbols"
+},
+{
+"c": "⛍",
+"n": "disabled car",
+"g": "Symbols"
+},
+{
+"c": "⛎",
+"n": "ophiuchus",
+"g": "Symbols"
+},
+{
+"c": "⛏",
+"n": "pick",
+"g": "Symbols"
+},
+{
+"c": "⛐",
+"n": "car sliding",
+"g": "Symbols"
+},
+{
+"c": "⛑",
+"n": "helmet with white cross",
+"g": "Symbols"
+},
+{
+"c": "⛒",
+"n": "circled crossing lanes",
+"g": "Symbols"
+},
+{
+"c": "⛓",
+"n": "chains",
+"g": "Symbols"
+},
+{
+"c": "⛔",
+"n": "no entry",
+"g": "Symbols"
+},
+{
+"c": "⛕",
+"n": "alternate one-way left way traffic",
+"g": "Symbols"
+},
+{
+"c": "⛖",
+"n": "black two-way left way traffic",
+"g": "Symbols"
+},
+{
+"c": "⛗",
+"n": "white two-way left way traffic",
+"g": "Symbols"
+},
+{
+"c": "⛘",
+"n": "black left lane merge",
+"g": "Symbols"
+},
+{
+"c": "⛙",
+"n": "white left lane merge",
+"g": "Symbols"
+},
+{
+"c": "⛚",
+"n": "drive slow sign",
+"g": "Symbols"
+},
+{
+"c": "⛛",
+"n": "heavy white down-pointing triangle",
+"g": "Symbols"
+},
+{
+"c": "⛜",
+"n": "left closed entry",
+"g": "Symbols"
+},
+{
+"c": "⛝",
+"n": "squared saltire",
+"g": "Symbols"
+},
+{
+"c": "⛞",
+"n": "falling diagonal in white circle in black square",
+"g": "Symbols"
+},
+{
+"c": "⛟",
+"n": "black truck",
+"g": "Symbols"
+},
+{
+"c": "⛠",
+"n": "restricted left entry-1",
+"g": "Symbols"
+},
+{
+"c": "⛡",
+"n": "restricted left entry-2",
+"g": "Symbols"
+},
+{
+"c": "⛢",
+"n": "astronomical symbol for uranus",
+"g": "Symbols"
+},
+{
+"c": "⛣",
+"n": "heavy circle with stroke and two dots above",
+"g": "Symbols"
+},
+{
+"c": "⛤",
+"n": "pentagram",
+"g": "Symbols"
+},
+{
+"c": "⛥",
+"n": "right-handed interlaced pentagram",
+"g": "Symbols"
+},
+{
+"c": "⛦",
+"n": "left-handed interlaced pentagram",
+"g": "Symbols"
+},
+{
+"c": "⛧",
+"n": "inverted pentagram",
+"g": "Symbols"
+},
+{
+"c": "⛨",
+"n": "black cross on shield",
+"g": "Symbols"
+},
+{
+"c": "⛩",
+"n": "shinto shrine",
+"g": "Symbols"
+},
+{
+"c": "⛪",
+"n": "church",
+"g": "Symbols"
+},
+{
+"c": "⛫",
+"n": "castle",
+"g": "Symbols"
+},
+{
+"c": "⛬",
+"n": "historic site",
+"g": "Symbols"
+},
+{
+"c": "⛭",
+"n": "gear without hub",
+"g": "Symbols"
+},
+{
+"c": "⛮",
+"n": "gear with handles",
+"g": "Symbols"
+},
+{
+"c": "⛯",
+"n": "map symbol for lighthouse",
+"g": "Symbols"
+},
+{
+"c": "⛰",
+"n": "mountain",
+"g": "Symbols"
+},
+{
+"c": "⛱",
+"n": "umbrella on ground",
+"g": "Symbols"
+},
+{
+"c": "⛲",
+"n": "fountain",
+"g": "Symbols"
+},
+{
+"c": "⛳",
+"n": "flag in hole",
+"g": "Symbols"
+},
+{
+"c": "⛴",
+"n": "ferry",
+"g": "Symbols"
+},
+{
+"c": "⛵",
+"n": "sailboat",
+"g": "Symbols"
+},
+{
+"c": "⛶",
+"n": "square four corners",
+"g": "Symbols"
+},
+{
+"c": "⛷",
+"n": "skier",
+"g": "Symbols"
+},
+{
+"c": "⛸",
+"n": "ice skate",
+"g": "Symbols"
+},
+{
+"c": "⛹",
+"n": "person with ball",
+"g": "Symbols"
+},
+{
+"c": "⛺",
+"n": "tent",
+"g": "Symbols"
+},
+{
+"c": "⛻",
+"n": "japanese bank symbol",
+"g": "Symbols"
+},
+{
+"c": "⛼",
+"n": "headstone graveyard symbol",
+"g": "Symbols"
+},
+{
+"c": "⛽",
+"n": "fuel pump",
+"g": "Symbols"
+},
+{
+"c": "⛾",
+"n": "cup on black square",
+"g": "Symbols"
+},
+{
+"c": "⛿",
+"n": "white flag with horizontal middle black stripe",
+"g": "Symbols"
+},
+{
+"c": "✀",
+"n": "black safety scissors",
+"g": "Symbols"
+},
+{
+"c": "✁",
+"n": "upper blade scissors",
+"g": "Symbols"
+},
+{
+"c": "✂",
+"n": "black scissors",
+"g": "Symbols"
+},
+{
+"c": "✃",
+"n": "lower blade scissors",
+"g": "Symbols"
+},
+{
+"c": "✄",
+"n": "white scissors",
+"g": "Symbols"
+},
+{
+"c": "✅",
+"n": "white heavy check mark",
+"g": "Symbols"
+},
+{
+"c": "✆",
+"n": "telephone location sign",
+"g": "Symbols"
+},
+{
+"c": "✇",
+"n": "tape drive",
+"g": "Symbols"
+},
+{
+"c": "✈",
+"n": "airplane",
+"g": "Symbols"
+},
+{
+"c": "✉",
+"n": "envelope",
+"g": "Symbols"
+},
+{
+"c": "✊",
+"n": "raised fist",
+"g": "Symbols"
+},
+{
+"c": "✋",
+"n": "raised hand",
+"g": "Symbols"
+},
+{
+"c": "✌",
+"n": "victory hand",
+"g": "Symbols"
+},
+{
+"c": "✍",
+"n": "writing hand",
+"g": "Symbols"
+},
+{
+"c": "✎",
+"n": "lower right pencil",
+"g": "Symbols"
+},
+{
+"c": "✏",
+"n": "pencil",
+"g": "Symbols"
+},
+{
+"c": "✐",
+"n": "upper right pencil",
+"g": "Symbols"
+},
+{
+"c": "✑",
+"n": "white nib",
+"g": "Symbols"
+},
+{
+"c": "✒",
+"n": "black nib",
+"g": "Symbols"
+},
+{
+"c": "✓",
+"n": "check mark",
+"g": "Symbols"
+},
+{
+"c": "✔",
+"n": "heavy check mark",
+"g": "Symbols"
+},
+{
+"c": "✕",
+"n": "multiplication x",
+"g": "Symbols"
+},
+{
+"c": "✖",
+"n": "heavy multiplication x",
+"g": "Symbols"
+},
+{
+"c": "✗",
+"n": "ballot x",
+"g": "Symbols"
+},
+{
+"c": "✘",
+"n": "heavy ballot x",
+"g": "Symbols"
+},
+{
+"c": "✙",
+"n": "outlined greek cross",
+"g": "Symbols"
+},
+{
+"c": "✚",
+"n": "heavy greek cross",
+"g": "Symbols"
+},
+{
+"c": "✛",
+"n": "open centre cross",
+"g": "Symbols"
+},
+{
+"c": "✜",
+"n": "heavy open centre cross",
+"g": "Symbols"
+},
+{
+"c": "✝",
+"n": "latin cross",
+"g": "Symbols"
+},
+{
+"c": "✞",
+"n": "shadowed white latin cross",
+"g": "Symbols"
+},
+{
+"c": "✟",
+"n": "outlined latin cross",
+"g": "Symbols"
+},
+{
+"c": "✠",
+"n": "maltese cross",
+"g": "Symbols"
+},
+{
+"c": "✡",
+"n": "star of david",
+"g": "Symbols"
+},
+{
+"c": "✢",
+"n": "four teardrop-spoked asterisk",
+"g": "Symbols"
+},
+{
+"c": "✣",
+"n": "four balloon-spoked asterisk",
+"g": "Symbols"
+},
+{
+"c": "✤",
+"n": "heavy four balloon-spoked asterisk",
+"g": "Symbols"
+},
+{
+"c": "✥",
+"n": "four club-spoked asterisk",
+"g": "Symbols"
+},
+{
+"c": "✦",
+"n": "black four pointed star",
+"g": "Symbols"
+},
+{
+"c": "✧",
+"n": "white four pointed star",
+"g": "Symbols"
+},
+{
+"c": "✨",
+"n": "sparkles",
+"g": "Symbols"
+},
+{
+"c": "✩",
+"n": "stress outlined white star",
+"g": "Symbols"
+},
+{
+"c": "✪",
+"n": "circled white star",
+"g": "Symbols"
+},
+{
+"c": "✫",
+"n": "open centre black star",
+"g": "Symbols"
+},
+{
+"c": "✬",
+"n": "black centre white star",
+"g": "Symbols"
+},
+{
+"c": "✭",
+"n": "outlined black star",
+"g": "Symbols"
+},
+{
+"c": "✮",
+"n": "heavy outlined black star",
+"g": "Symbols"
+},
+{
+"c": "✯",
+"n": "pinwheel star",
+"g": "Symbols"
+},
+{
+"c": "✰",
+"n": "shadowed white star",
+"g": "Symbols"
+},
+{
+"c": "✱",
+"n": "heavy asterisk",
+"g": "Symbols"
+},
+{
+"c": "✲",
+"n": "open centre asterisk",
+"g": "Symbols"
+},
+{
+"c": "✳",
+"n": "eight spoked asterisk",
+"g": "Symbols"
+},
+{
+"c": "✴",
+"n": "eight pointed black star",
+"g": "Symbols"
+},
+{
+"c": "✵",
+"n": "eight pointed pinwheel star",
+"g": "Symbols"
+},
+{
+"c": "✶",
+"n": "six pointed black star",
+"g": "Symbols"
+},
+{
+"c": "✷",
+"n": "eight pointed rectilinear black star",
+"g": "Symbols"
+},
+{
+"c": "✸",
+"n": "heavy eight pointed rectilinear black star",
+"g": "Symbols"
+},
+{
+"c": "✹",
+"n": "twelve pointed black star",
+"g": "Symbols"
+},
+{
+"c": "✺",
+"n": "sixteen pointed asterisk",
+"g": "Symbols"
+},
+{
+"c": "✻",
+"n": "teardrop-spoked asterisk",
+"g": "Symbols"
+},
+{
+"c": "✼",
+"n": "open centre teardrop-spoked asterisk",
+"g": "Symbols"
+},
+{
+"c": "✽",
+"n": "heavy teardrop-spoked asterisk",
+"g": "Symbols"
+},
+{
+"c": "✾",
+"n": "six petalled black and white florette",
+"g": "Symbols"
+},
+{
+"c": "✿",
+"n": "black florette",
+"g": "Symbols"
+},
+{
+"c": "❀",
+"n": "white florette",
+"g": "Symbols"
+},
+{
+"c": "❁",
+"n": "eight petalled outlined black florette",
+"g": "Symbols"
+},
+{
+"c": "❂",
+"n": "circled open centre eight pointed star",
+"g": "Symbols"
+},
+{
+"c": "❃",
+"n": "heavy teardrop-spoked pinwheel asterisk",
+"g": "Symbols"
+},
+{
+"c": "❄",
+"n": "snowflake",
+"g": "Symbols"
+},
+{
+"c": "❅",
+"n": "tight trifoliate snowflake",
+"g": "Symbols"
+},
+{
+"c": "❆",
+"n": "heavy chevron snowflake",
+"g": "Symbols"
+},
+{
+"c": "❇",
+"n": "sparkle",
+"g": "Symbols"
+},
+{
+"c": "❈",
+"n": "heavy sparkle",
+"g": "Symbols"
+},
+{
+"c": "❉",
+"n": "balloon-spoked asterisk",
+"g": "Symbols"
+},
+{
+"c": "❊",
+"n": "eight teardrop-spoked propeller asterisk",
+"g": "Symbols"
+},
+{
+"c": "❋",
+"n": "heavy eight teardrop-spoked propeller asterisk",
+"g": "Symbols"
+},
+{
+"c": "❌",
+"n": "cross mark",
+"g": "Symbols"
+},
+{
+"c": "❍",
+"n": "shadowed white circle",
+"g": "Symbols"
+},
+{
+"c": "❎",
+"n": "negative squared cross mark",
+"g": "Symbols"
+},
+{
+"c": "❏",
+"n": "lower right drop-shadowed white square",
+"g": "Symbols"
+},
+{
+"c": "❐",
+"n": "upper right drop-shadowed white square",
+"g": "Symbols"
+},
+{
+"c": "❑",
+"n": "lower right shadowed white square",
+"g": "Symbols"
+},
+{
+"c": "❒",
+"n": "upper right shadowed white square",
+"g": "Symbols"
+},
+{
+"c": "❓",
+"n": "black question mark ornament",
+"g": "Symbols"
+},
+{
+"c": "❔",
+"n": "white question mark ornament",
+"g": "Symbols"
+},
+{
+"c": "❕",
+"n": "white exclamation mark ornament",
+"g": "Symbols"
+},
+{
+"c": "❖",
+"n": "black diamond minus white x",
+"g": "Symbols"
+},
+{
+"c": "❗",
+"n": "heavy exclamation mark symbol",
+"g": "Symbols"
+},
+{
+"c": "❘",
+"n": "light vertical bar",
+"g": "Symbols"
+},
+{
+"c": "❙",
+"n": "medium vertical bar",
+"g": "Symbols"
+},
+{
+"c": "❚",
+"n": "heavy vertical bar",
+"g": "Symbols"
+},
+{
+"c": "❛",
+"n": "heavy single turned comma quotation mark ornament",
+"g": "Symbols"
+},
+{
+"c": "❜",
+"n": "heavy single comma quotation mark ornament",
+"g": "Symbols"
+},
+{
+"c": "❝",
+"n": "heavy double turned comma quotation mark ornament",
+"g": "Symbols"
+},
+{
+"c": "❞",
+"n": "heavy double comma quotation mark ornament",
+"g": "Symbols"
+},
+{
+"c": "❟",
+"n": "heavy low single comma quotation mark ornament",
+"g": "Symbols"
+},
+{
+"c": "❠",
+"n": "heavy low double comma quotation mark ornament",
+"g": "Symbols"
+},
+{
+"c": "❡",
+"n": "curved stem paragraph sign ornament",
+"g": "Symbols"
+},
+{
+"c": "❢",
+"n": "heavy exclamation mark ornament",
+"g": "Symbols"
+},
+{
+"c": "❣",
+"n": "heavy heart exclamation mark ornament",
+"g": "Symbols"
+},
+{
+"c": "❤",
+"n": "heavy black heart",
+"g": "Symbols"
+},
+{
+"c": "❥",
+"n": "rotated heavy black heart bullet",
+"g": "Symbols"
+},
+{
+"c": "❦",
+"n": "floral heart",
+"g": "Symbols"
+},
+{
+"c": "❧",
+"n": "rotated floral heart bullet",
+"g": "Symbols"
+},
+{
+"c": "➔",
+"n": "heavy wide-headed rightwards arrow",
+"g": "Symbols"
+},
+{
+"c": "➕",
+"n": "heavy plus sign",
+"g": "Symbols"
+},
+{
+"c": "➖",
+"n": "heavy minus sign",
+"g": "Symbols"
+},
+{
+"c": "➗",
+"n": "heavy division sign",
+"g": "Symbols"
+},
+{
+"c": "➘",
+"n": "heavy south east arrow",
+"g": "Symbols"
+},
+{
+"c": "➙",
+"n": "heavy rightwards arrow",
+"g": "Symbols"
+},
+{
+"c": "➚",
+"n": "heavy north east arrow",
+"g": "Symbols"
+},
+{
+"c": "➛",
+"n": "drafting point rightwards arrow",
+"g": "Symbols"
+},
+{
+"c": "➜",
+"n": "heavy round-tipped rightwards arrow",
+"g": "Symbols"
+},
+{
+"c": "➝",
+"n": "triangle-headed rightwards arrow",
+"g": "Symbols"
+},
+{
+"c": "➞",
+"n": "heavy triangle-headed rightwards arrow",
+"g": "Symbols"
+},
+{
+"c": "➟",
+"n": "dashed triangle-headed rightwards arrow",
+"g": "Symbols"
+},
+{
+"c": "➠",
+"n": "heavy dashed triangle-headed rightwards arrow",
+"g": "Symbols"
+},
+{
+"c": "➡",
+"n": "black rightwards arrow",
+"g": "Symbols"
+},
+{
+"c": "➢",
+"n": "three-d top-lighted rightwards arrowhead",
+"g": "Symbols"
+},
+{
+"c": "➣",
+"n": "three-d bottom-lighted rightwards arrowhead",
+"g": "Symbols"
+},
+{
+"c": "➤",
+"n": "black rightwards arrowhead",
+"g": "Symbols"
+},
+{
+"c": "➥",
+"n": "heavy black curved downwards and rightwards arrow",
+"g": "Symbols"
+},
+{
+"c": "➦",
+"n": "heavy black curved upwards and rightwards arrow",
+"g": "Symbols"
+},
+{
+"c": "➧",
+"n": "squat black rightwards arrow",
+"g": "Symbols"
+},
+{
+"c": "➨",
+"n": "heavy concave-pointed black rightwards arrow",
+"g": "Symbols"
+},
+{
+"c": "➩",
+"n": "right-shaded white rightwards arrow",
+"g": "Symbols"
+},
+{
+"c": "➪",
+"n": "left-shaded white rightwards arrow",
+"g": "Symbols"
+},
+{
+"c": "➫",
+"n": "back-tilted shadowed white rightwards arrow",
+"g": "Symbols"
+},
+{
+"c": "➬",
+"n": "front-tilted shadowed white rightwards arrow",
+"g": "Symbols"
+},
+{
+"c": "➭",
+"n": "heavy lower right-shadowed white rightwards arrow",
+"g": "Symbols"
+},
+{
+"c": "➮",
+"n": "heavy upper right-shadowed white rightwards arrow",
+"g": "Symbols"
+},
+{
+"c": "➯",
+"n": "notched lower right-shadowed white rightwards arrow",
+"g": "Symbols"
+},
+{
+"c": "➰",
+"n": "curly loop",
+"g": "Symbols"
+},
+{
+"c": "➱",
+"n": "notched upper right-shadowed white rightwards arrow",
+"g": "Symbols"
+},
+{
+"c": "➲",
+"n": "circled heavy white rightwards arrow",
+"g": "Symbols"
+},
+{
+"c": "➳",
+"n": "white-feathered rightwards arrow",
+"g": "Symbols"
+},
+{
+"c": "➴",
+"n": "black-feathered south east arrow",
+"g": "Symbols"
+},
+{
+"c": "➵",
+"n": "black-feathered rightwards arrow",
+"g": "Symbols"
+},
+{
+"c": "➶",
+"n": "black-feathered north east arrow",
+"g": "Symbols"
+},
+{
+"c": "➷",
+"n": "heavy black-feathered south east arrow",
+"g": "Symbols"
+},
+{
+"c": "➸",
+"n": "heavy black-feathered rightwards arrow",
+"g": "Symbols"
+},
+{
+"c": "➹",
+"n": "heavy black-feathered north east arrow",
+"g": "Symbols"
+},
+{
+"c": "➺",
+"n": "teardrop-barbed rightwards arrow",
+"g": "Symbols"
+},
+{
+"c": "➻",
+"n": "heavy teardrop-shanked rightwards arrow",
+"g": "Symbols"
+},
+{
+"c": "➼",
+"n": "wedge-tailed rightwards arrow",
+"g": "Symbols"
+},
+{
+"c": "➽",
+"n": "heavy wedge-tailed rightwards arrow",
+"g": "Symbols"
+},
+{
+"c": "➾",
+"n": "open-outlined rightwards arrow",
+"g": "Symbols"
+},
+{
+"c": "➿",
+"n": "double curly loop",
+"g": "Symbols"
+},
+{
+"c": "⬀",
+"n": "north east white arrow",
+"g": "Symbols"
+},
+{
+"c": "⬁",
+"n": "north west white arrow",
+"g": "Symbols"
+},
+{
+"c": "⬂",
+"n": "south east white arrow",
+"g": "Symbols"
+},
+{
+"c": "⬃",
+"n": "south west white arrow",
+"g": "Symbols"
+},
+{
+"c": "⬄",
+"n": "left right white arrow",
+"g": "Symbols"
+},
+{
+"c": "⬅",
+"n": "leftwards black arrow",
+"g": "Symbols"
+},
+{
+"c": "⬆",
+"n": "upwards black arrow",
+"g": "Symbols"
+},
+{
+"c": "⬇",
+"n": "downwards black arrow",
+"g": "Symbols"
+},
+{
+"c": "⬈",
+"n": "north east black arrow",
+"g": "Symbols"
+},
+{
+"c": "⬉",
+"n": "north west black arrow",
+"g": "Symbols"
+},
+{
+"c": "⬊",
+"n": "south east black arrow",
+"g": "Symbols"
+},
+{
+"c": "⬋",
+"n": "south west black arrow",
+"g": "Symbols"
+},
+{
+"c": "⬌",
+"n": "left right black arrow",
+"g": "Symbols"
+},
+{
+"c": "⬍",
+"n": "up down black arrow",
+"g": "Symbols"
+},
+{
+"c": "⬎",
+"n": "rightwards arrow with tip downwards",
+"g": "Symbols"
+},
+{
+"c": "⬏",
+"n": "rightwards arrow with tip upwards",
+"g": "Symbols"
+},
+{
+"c": "⬐",
+"n": "leftwards arrow with tip downwards",
+"g": "Symbols"
+},
+{
+"c": "⬑",
+"n": "leftwards arrow with tip upwards",
+"g": "Symbols"
+},
+{
+"c": "⬒",
+"n": "square with top half black",
+"g": "Symbols"
+},
+{
+"c": "⬓",
+"n": "square with bottom half black",
+"g": "Symbols"
+},
+{
+"c": "⬔",
+"n": "square with upper right diagonal half black",
+"g": "Symbols"
+},
+{
+"c": "⬕",
+"n": "square with lower left diagonal half black",
+"g": "Symbols"
+},
+{
+"c": "⬖",
+"n": "diamond with left half black",
+"g": "Symbols"
+},
+{
+"c": "⬗",
+"n": "diamond with right half black",
+"g": "Symbols"
+},
+{
+"c": "⬘",
+"n": "diamond with top half black",
+"g": "Symbols"
+},
+{
+"c": "⬙",
+"n": "diamond with bottom half black",
+"g": "Symbols"
+},
+{
+"c": "⬚",
+"n": "dotted square",
+"g": "Symbols"
+},
+{
+"c": "⬛",
+"n": "black large square",
+"g": "Symbols"
+},
+{
+"c": "⬜",
+"n": "white large square",
+"g": "Symbols"
+},
+{
+"c": "⬝",
+"n": "black very small square",
+"g": "Symbols"
+},
+{
+"c": "⬞",
+"n": "white very small square",
+"g": "Symbols"
+},
+{
+"c": "⬟",
+"n": "black pentagon",
+"g": "Symbols"
+},
+{
+"c": "⬠",
+"n": "white pentagon",
+"g": "Symbols"
+},
+{
+"c": "⬡",
+"n": "white hexagon",
+"g": "Symbols"
+},
+{
+"c": "⬢",
+"n": "black hexagon",
+"g": "Symbols"
+},
+{
+"c": "⬣",
+"n": "horizontal black hexagon",
+"g": "Symbols"
+},
+{
+"c": "⬤",
+"n": "black large circle",
+"g": "Symbols"
+},
+{
+"c": "⬥",
+"n": "black medium diamond",
+"g": "Symbols"
+},
+{
+"c": "⬦",
+"n": "white medium diamond",
+"g": "Symbols"
+},
+{
+"c": "⬧",
+"n": "black medium lozenge",
+"g": "Symbols"
+},
+{
+"c": "⬨",
+"n": "white medium lozenge",
+"g": "Symbols"
+},
+{
+"c": "⬩",
+"n": "black small diamond",
+"g": "Symbols"
+},
+{
+"c": "⬪",
+"n": "black small lozenge",
+"g": "Symbols"
+},
+{
+"c": "⬫",
+"n": "white small lozenge",
+"g": "Symbols"
+},
+{
+"c": "⬬",
+"n": "black horizontal ellipse",
+"g": "Symbols"
+},
+{
+"c": "⬭",
+"n": "white horizontal ellipse",
+"g": "Symbols"
+},
+{
+"c": "⬮",
+"n": "black vertical ellipse",
+"g": "Symbols"
+},
+{
+"c": "⬯",
+"n": "white vertical ellipse",
+"g": "Symbols"
+},
+{
+"c": "⬰",
+"n": "left arrow with small circle",
+"g": "Symbols"
+},
+{
+"c": "⬱",
+"n": "three leftwards arrows",
+"g": "Symbols"
+},
+{
+"c": "⬲",
+"n": "left arrow with circled plus",
+"g": "Symbols"
+},
+{
+"c": "⬳",
+"n": "long leftwards squiggle arrow",
+"g": "Symbols"
+},
+{
+"c": "⬴",
+"n": "leftwards two-headed arrow with vertical stroke",
+"g": "Symbols"
+},
+{
+"c": "⬵",
+"n": "leftwards two-headed arrow with double vertical stroke",
+"g": "Symbols"
+},
+{
+"c": "⬶",
+"n": "leftwards two-headed arrow from bar",
+"g": "Symbols"
+},
+{
+"c": "⬷",
+"n": "leftwards two-headed triple dash arrow",
+"g": "Symbols"
+},
+{
+"c": "⬸",
+"n": "leftwards arrow with dotted stem",
+"g": "Symbols"
+},
+{
+"c": "⬹",
+"n": "leftwards arrow with tail with vertical stroke",
+"g": "Symbols"
+},
+{
+"c": "⬺",
+"n": "leftwards arrow with tail with double vertical stroke",
+"g": "Symbols"
+},
+{
+"c": "⬻",
+"n": "leftwards two-headed arrow with tail",
+"g": "Symbols"
+},
+{
+"c": "⬼",
+"n": "leftwards two-headed arrow with tail with vertical stroke",
+"g": "Symbols"
+},
+{
+"c": "⬽",
+"n": "leftwards two-headed arrow with tail with double vertical stroke",
+"g": "Symbols"
+},
+{
+"c": "⬾",
+"n": "leftwards arrow through x",
+"g": "Symbols"
+},
+{
+"c": "⬿",
+"n": "wave arrow pointing directly left",
+"g": "Symbols"
+},
+{
+"c": "⭀",
+"n": "equals sign above leftwards arrow",
+"g": "Symbols"
+},
+{
+"c": "⭁",
+"n": "reverse tilde operator above leftwards arrow",
+"g": "Symbols"
+},
+{
+"c": "⭂",
+"n": "leftwards arrow above reverse almost equal to",
+"g": "Symbols"
+},
+{
+"c": "⭃",
+"n": "rightwards arrow through greater-than",
+"g": "Symbols"
+},
+{
+"c": "⭄",
+"n": "rightwards arrow through superset",
+"g": "Symbols"
+},
+{
+"c": "⭅",
+"n": "leftwards quadruple arrow",
+"g": "Symbols"
+},
+{
+"c": "⭆",
+"n": "rightwards quadruple arrow",
+"g": "Symbols"
+},
+{
+"c": "⭇",
+"n": "reverse tilde operator above rightwards arrow",
+"g": "Symbols"
+},
+{
+"c": "⭈",
+"n": "rightwards arrow above reverse almost equal to",
+"g": "Symbols"
+},
+{
+"c": "⭉",
+"n": "tilde operator above leftwards arrow",
+"g": "Symbols"
+},
+{
+"c": "⭊",
+"n": "leftwards arrow above almost equal to",
+"g": "Symbols"
+},
+{
+"c": "⭋",
+"n": "leftwards arrow above reverse tilde operator",
+"g": "Symbols"
+},
+{
+"c": "⭌",
+"n": "rightwards arrow above reverse tilde operator",
+"g": "Symbols"
+},
+{
+"c": "⭍",
+"n": "downwards triangle-headed zigzag arrow",
+"g": "Symbols"
+},
+{
+"c": "⭎",
+"n": "short slanted north arrow",
+"g": "Symbols"
+},
+{
+"c": "⭏",
+"n": "short backslanted south arrow",
+"g": "Symbols"
+},
+{
+"c": "⭐",
+"n": "white medium star",
+"g": "Symbols"
+},
+{
+"c": "⭑",
+"n": "black small star",
+"g": "Symbols"
+},
+{
+"c": "⭒",
+"n": "white small star",
+"g": "Symbols"
+},
+{
+"c": "⭓",
+"n": "black right-pointing pentagon",
+"g": "Symbols"
+},
+{
+"c": "⭔",
+"n": "white right-pointing pentagon",
+"g": "Symbols"
+},
+{
+"c": "⭕",
+"n": "heavy large circle",
+"g": "Symbols"
+},
+{
+"c": "⭖",
+"n": "heavy oval with oval inside",
+"g": "Symbols"
+},
+{
+"c": "⭗",
+"n": "heavy circle with circle inside",
+"g": "Symbols"
+},
+{
+"c": "⭘",
+"n": "heavy circle",
+"g": "Symbols"
+},
+{
+"c": "⭙",
+"n": "heavy circled saltire",
+"g": "Symbols"
+},
+{
+"c": "⭚",
+"n": "slanted north arrow with hooked head",
+"g": "Symbols"
+},
+{
+"c": "⭛",
+"n": "backslanted south arrow with hooked tail",
+"g": "Symbols"
+},
+{
+"c": "⭜",
+"n": "slanted north arrow with horizontal tail",
+"g": "Symbols"
+},
+{
+"c": "⭝",
+"n": "backslanted south arrow with horizontal tail",
+"g": "Symbols"
+},
+{
+"c": "⭞",
+"n": "bent arrow pointing downwards then north east",
+"g": "Symbols"
+},
+{
+"c": "⭟",
+"n": "short bent arrow pointing downwards then north east",
+"g": "Symbols"
+},
+{
+"c": "⭠",
+"n": "leftwards triangle-headed arrow",
+"g": "Symbols"
+},
+{
+"c": "⭡",
+"n": "upwards triangle-headed arrow",
+"g": "Symbols"
+},
+{
+"c": "⭢",
+"n": "rightwards triangle-headed arrow",
+"g": "Symbols"
+},
+{
+"c": "⭣",
+"n": "downwards triangle-headed arrow",
+"g": "Symbols"
+},
+{
+"c": "⭤",
+"n": "left right triangle-headed arrow",
+"g": "Symbols"
+},
+{
+"c": "⭥",
+"n": "up down triangle-headed arrow",
+"g": "Symbols"
+},
+{
+"c": "⭦",
+"n": "north west triangle-headed arrow",
+"g": "Symbols"
+},
+{
+"c": "⭧",
+"n": "north east triangle-headed arrow",
+"g": "Symbols"
+},
+{
+"c": "⭨",
+"n": "south east triangle-headed arrow",
+"g": "Symbols"
+},
+{
+"c": "⭩",
+"n": "south west triangle-headed arrow",
+"g": "Symbols"
+},
+{
+"c": "⭪",
+"n": "leftwards triangle-headed dashed arrow",
+"g": "Symbols"
+},
+{
+"c": "⭫",
+"n": "upwards triangle-headed dashed arrow",
+"g": "Symbols"
+},
+{
+"c": "⭬",
+"n": "rightwards triangle-headed dashed arrow",
+"g": "Symbols"
+},
+{
+"c": "⭭",
+"n": "downwards triangle-headed dashed arrow",
+"g": "Symbols"
+},
+{
+"c": "⭮",
+"n": "clockwise triangle-headed open circle arrow",
+"g": "Symbols"
+},
+{
+"c": "⭯",
+"n": "anticlockwise triangle-headed open circle arrow",
+"g": "Symbols"
+},
+{
+"c": "⭰",
+"n": "leftwards triangle-headed arrow to bar",
+"g": "Symbols"
+},
+{
+"c": "⭱",
+"n": "upwards triangle-headed arrow to bar",
+"g": "Symbols"
+},
+{
+"c": "⭲",
+"n": "rightwards triangle-headed arrow to bar",
+"g": "Symbols"
+},
+{
+"c": "⭳",
+"n": "downwards triangle-headed arrow to bar",
+"g": "Symbols"
+},
+{
+"c": "⭶",
+"n": "north west triangle-headed arrow to bar",
+"g": "Symbols"
+},
+{
+"c": "⭷",
+"n": "north east triangle-headed arrow to bar",
+"g": "Symbols"
+},
+{
+"c": "⭸",
+"n": "south east triangle-headed arrow to bar",
+"g": "Symbols"
+},
+{
+"c": "⭹",
+"n": "south west triangle-headed arrow to bar",
+"g": "Symbols"
+},
+{
+"c": "⭺",
+"n": "leftwards triangle-headed arrow with double horizontal stroke",
+"g": "Symbols"
+},
+{
+"c": "⭻",
+"n": "upwards triangle-headed arrow with double horizontal stroke",
+"g": "Symbols"
+},
+{
+"c": "⭼",
+"n": "rightwards triangle-headed arrow with double horizontal stroke",
+"g": "Symbols"
+},
+{
+"c": "⭽",
+"n": "downwards triangle-headed arrow with double horizontal stroke",
+"g": "Symbols"
+},
+{
+"c": "⭾",
+"n": "horizontal tab key",
+"g": "Symbols"
+},
+{
+"c": "⭿",
+"n": "vertical tab key",
+"g": "Symbols"
+},
+{
+"c": "⮀",
+"n": "leftwards triangle-headed arrow over rightwards triangle-headed arrow",
+"g": "Symbols"
+},
+{
+"c": "⮁",
+"n": "upwards triangle-headed arrow leftwards of downwards triangle-headed arrow",
+"g": "Symbols"
+},
+{
+"c": "⮂",
+"n": "rightwards triangle-headed arrow over leftwards triangle-headed arrow",
+"g": "Symbols"
+},
+{
+"c": "⮃",
+"n": "downwards triangle-headed arrow leftwards of upwards triangle-headed arrow",
+"g": "Symbols"
+},
+{
+"c": "⮄",
+"n": "leftwards triangle-headed paired arrows",
+"g": "Symbols"
+},
+{
+"c": "⮅",
+"n": "upwards triangle-headed paired arrows",
+"g": "Symbols"
+},
+{
+"c": "⮆",
+"n": "rightwards triangle-headed paired arrows",
+"g": "Symbols"
+},
+{
+"c": "⮇",
+"n": "downwards triangle-headed paired arrows",
+"g": "Symbols"
+},
+{
+"c": "⮈",
+"n": "leftwards black circled white arrow",
+"g": "Symbols"
+},
+{
+"c": "⮉",
+"n": "upwards black circled white arrow",
+"g": "Symbols"
+},
+{
+"c": "⮊",
+"n": "rightwards black circled white arrow",
+"g": "Symbols"
+},
+{
+"c": "⮋",
+"n": "downwards black circled white arrow",
+"g": "Symbols"
+},
+{
+"c": "⮌",
+"n": "anticlockwise triangle-headed right u-shaped arrow",
+"g": "Symbols"
+},
+{
+"c": "⮍",
+"n": "anticlockwise triangle-headed bottom u-shaped arrow",
+"g": "Symbols"
+},
+{
+"c": "⮎",
+"n": "anticlockwise triangle-headed left u-shaped arrow",
+"g": "Symbols"
+},
+{
+"c": "⮏",
+"n": "anticlockwise triangle-headed top u-shaped arrow",
+"g": "Symbols"
+},
+{
+"c": "⮐",
+"n": "return left",
+"g": "Symbols"
+},
+{
+"c": "⮑",
+"n": "return right",
+"g": "Symbols"
+},
+{
+"c": "⮒",
+"n": "newline left",
+"g": "Symbols"
+},
+{
+"c": "⮓",
+"n": "newline right",
+"g": "Symbols"
+},
+{
+"c": "⮔",
+"n": "four corner arrows circling anticlockwise",
+"g": "Symbols"
+},
+{
+"c": "⮕",
+"n": "rightwards black arrow",
+"g": "Symbols"
+},
+{
+"c": "⮗",
+"n": "symbol for type a electronics",
+"g": "Symbols"
+},
+{
+"c": "⮘",
+"n": "three-d top-lighted leftwards equilateral arrowhead",
+"g": "Symbols"
+},
+{
+"c": "⮙",
+"n": "three-d right-lighted upwards equilateral arrowhead",
+"g": "Symbols"
+},
+{
+"c": "⮚",
+"n": "three-d top-lighted rightwards equilateral arrowhead",
+"g": "Symbols"
+},
+{
+"c": "⮛",
+"n": "three-d left-lighted downwards equilateral arrowhead",
+"g": "Symbols"
+},
+{
+"c": "⮜",
+"n": "black leftwards equilateral arrowhead",
+"g": "Symbols"
+},
+{
+"c": "⮝",
+"n": "black upwards equilateral arrowhead",
+"g": "Symbols"
+},
+{
+"c": "⮞",
+"n": "black rightwards equilateral arrowhead",
+"g": "Symbols"
+},
+{
+"c": "⮟",
+"n": "black downwards equilateral arrowhead",
+"g": "Symbols"
+},
+{
+"c": "⮠",
+"n": "downwards triangle-headed arrow with long tip leftwards",
+"g": "Symbols"
+},
+{
+"c": "⮡",
+"n": "downwards triangle-headed arrow with long tip rightwards",
+"g": "Symbols"
+},
+{
+"c": "⮢",
+"n": "upwards triangle-headed arrow with long tip leftwards",
+"g": "Symbols"
+},
+{
+"c": "⮣",
+"n": "upwards triangle-headed arrow with long tip rightwards",
+"g": "Symbols"
+},
+{
+"c": "⮤",
+"n": "leftwards triangle-headed arrow with long tip upwards",
+"g": "Symbols"
+},
+{
+"c": "⮥",
+"n": "rightwards triangle-headed arrow with long tip upwards",
+"g": "Symbols"
+},
+{
+"c": "⮦",
+"n": "leftwards triangle-headed arrow with long tip downwards",
+"g": "Symbols"
+},
+{
+"c": "⮧",
+"n": "rightwards triangle-headed arrow with long tip downwards",
+"g": "Symbols"
+},
+{
+"c": "⮨",
+"n": "black curved downwards and leftwards arrow",
+"g": "Symbols"
+},
+{
+"c": "⮩",
+"n": "black curved downwards and rightwards arrow",
+"g": "Symbols"
+},
+{
+"c": "⮪",
+"n": "black curved upwards and leftwards arrow",
+"g": "Symbols"
+},
+{
+"c": "⮫",
+"n": "black curved upwards and rightwards arrow",
+"g": "Symbols"
+},
+{
+"c": "⮬",
+"n": "black curved leftwards and upwards arrow",
+"g": "Symbols"
+},
+{
+"c": "⮭",
+"n": "black curved rightwards and upwards arrow",
+"g": "Symbols"
+},
+{
+"c": "⮮",
+"n": "black curved leftwards and downwards arrow",
+"g": "Symbols"
+},
+{
+"c": "⮯",
+"n": "black curved rightwards and downwards arrow",
+"g": "Symbols"
+},
+{
+"c": "⮰",
+"n": "ribbon arrow down left",
+"g": "Symbols"
+},
+{
+"c": "⮱",
+"n": "ribbon arrow down right",
+"g": "Symbols"
+},
+{
+"c": "⮲",
+"n": "ribbon arrow up left",
+"g": "Symbols"
+},
+{
+"c": "⮳",
+"n": "ribbon arrow up right",
+"g": "Symbols"
+},
+{
+"c": "⮴",
+"n": "ribbon arrow left up",
+"g": "Symbols"
+},
+{
+"c": "⮵",
+"n": "ribbon arrow right up",
+"g": "Symbols"
+},
+{
+"c": "⮶",
+"n": "ribbon arrow left down",
+"g": "Symbols"
+},
+{
+"c": "⮷",
+"n": "ribbon arrow right down",
+"g": "Symbols"
+},
+{
+"c": "⮸",
+"n": "upwards white arrow from bar with horizontal bar",
+"g": "Symbols"
+},
+{
+"c": "⮹",
+"n": "up arrowhead in a rectangle box",
+"g": "Symbols"
+},
+{
+"c": "⮺",
+"n": "overlapping white squares",
+"g": "Symbols"
+},
+{
+"c": "⮻",
+"n": "overlapping white and black squares",
+"g": "Symbols"
+},
+{
+"c": "⮼",
+"n": "overlapping black squares",
+"g": "Symbols"
+},
+{
+"c": "⮽",
+"n": "ballot box with light x",
+"g": "Symbols"
+},
+{
+"c": "⮾",
+"n": "circled x",
+"g": "Symbols"
+},
+{
+"c": "⮿",
+"n": "circled bold x",
+"g": "Symbols"
+},
+{
+"c": "⯀",
+"n": "black square centred",
+"g": "Symbols"
+},
+{
+"c": "⯁",
+"n": "black diamond centred",
+"g": "Symbols"
+},
+{
+"c": "⯂",
+"n": "turned black pentagon",
+"g": "Symbols"
+},
+{
+"c": "⯃",
+"n": "horizontal black octagon",
+"g": "Symbols"
+},
+{
+"c": "⯄",
+"n": "black octagon",
+"g": "Symbols"
+},
+{
+"c": "⯅",
+"n": "black medium up-pointing triangle centred",
+"g": "Symbols"
+},
+{
+"c": "⯆",
+"n": "black medium down-pointing triangle centred",
+"g": "Symbols"
+},
+{
+"c": "⯇",
+"n": "black medium left-pointing triangle centred",
+"g": "Symbols"
+},
+{
+"c": "⯈",
+"n": "black medium right-pointing triangle centred",
+"g": "Symbols"
+},
+{
+"c": "⯉",
+"n": "neptune form two",
+"g": "Symbols"
+},
+{
+"c": "⯊",
+"n": "top half black circle",
+"g": "Symbols"
+},
+{
+"c": "⯋",
+"n": "bottom half black circle",
+"g": "Symbols"
+},
+{
+"c": "⯌",
+"n": "light four pointed black cusp",
+"g": "Symbols"
+},
+{
+"c": "⯍",
+"n": "rotated light four pointed black cusp",
+"g": "Symbols"
+},
+{
+"c": "⯎",
+"n": "white four pointed cusp",
+"g": "Symbols"
+},
+{
+"c": "⯏",
+"n": "rotated white four pointed cusp",
+"g": "Symbols"
+},
+{
+"c": "⯐",
+"n": "square position indicator",
+"g": "Symbols"
+},
+{
+"c": "⯑",
+"n": "uncertainty sign",
+"g": "Symbols"
+},
+{
+"c": "⯒",
+"n": "group mark",
+"g": "Symbols"
+},
+{
+"c": "⯓",
+"n": "pluto form two",
+"g": "Symbols"
+},
+{
+"c": "⯔",
+"n": "pluto form three",
+"g": "Symbols"
+},
+{
+"c": "⯕",
+"n": "pluto form four",
+"g": "Symbols"
+},
+{
+"c": "⯖",
+"n": "pluto form five",
+"g": "Symbols"
+},
+{
+"c": "⯗",
+"n": "transpluto",
+"g": "Symbols"
+},
+{
+"c": "⯘",
+"n": "proserpina",
+"g": "Symbols"
+},
+{
+"c": "⯙",
+"n": "astraea",
+"g": "Symbols"
+},
+{
+"c": "⯚",
+"n": "hygiea",
+"g": "Symbols"
+},
+{
+"c": "⯛",
+"n": "pholus",
+"g": "Symbols"
+},
+{
+"c": "⯜",
+"n": "nessus",
+"g": "Symbols"
+},
+{
+"c": "⯝",
+"n": "white moon selena",
+"g": "Symbols"
+},
+{
+"c": "⯞",
+"n": "black diamond on cross",
+"g": "Symbols"
+},
+{
+"c": "⯟",
+"n": "true light moon arta",
+"g": "Symbols"
+},
+{
+"c": "⯠",
+"n": "cupido",
+"g": "Symbols"
+},
+{
+"c": "⯡",
+"n": "hades",
+"g": "Symbols"
+},
+{
+"c": "⯢",
+"n": "zeus",
+"g": "Symbols"
+},
+{
+"c": "⯣",
+"n": "kronos",
+"g": "Symbols"
+},
+{
+"c": "⯤",
+"n": "apollon",
+"g": "Symbols"
+},
+{
+"c": "⯥",
+"n": "admetos",
+"g": "Symbols"
+},
+{
+"c": "⯦",
+"n": "vulcanus",
+"g": "Symbols"
+},
+{
+"c": "⯧",
+"n": "poseidon",
+"g": "Symbols"
+},
+{
+"c": "⯨",
+"n": "left half black star",
+"g": "Symbols"
+},
+{
+"c": "⯩",
+"n": "right half black star",
+"g": "Symbols"
+},
+{
+"c": "⯪",
+"n": "star with left half black",
+"g": "Symbols"
+},
+{
+"c": "⯫",
+"n": "star with right half black",
+"g": "Symbols"
+},
+{
+"c": "⯬",
+"n": "leftwards two-headed arrow with triangle arrowheads",
+"g": "Symbols"
+},
+{
+"c": "⯭",
+"n": "upwards two-headed arrow with triangle arrowheads",
+"g": "Symbols"
+},
+{
+"c": "⯮",
+"n": "rightwards two-headed arrow with triangle arrowheads",
+"g": "Symbols"
+},
+{
+"c": "⯯",
+"n": "downwards two-headed arrow with triangle arrowheads",
+"g": "Symbols"
+},
+{
+"c": "⯰",
+"n": "eris form one",
+"g": "Symbols"
+},
+{
+"c": "⯱",
+"n": "eris form two",
+"g": "Symbols"
+},
+{
+"c": "⯲",
+"n": "sedna",
+"g": "Symbols"
+},
+{
+"c": "⯳",
+"n": "russian astrological symbol vigintile",
+"g": "Symbols"
+},
+{
+"c": "⯴",
+"n": "russian astrological symbol novile",
+"g": "Symbols"
+},
+{
+"c": "⯵",
+"n": "russian astrological symbol quintile",
+"g": "Symbols"
+},
+{
+"c": "⯶",
+"n": "russian astrological symbol binovile",
+"g": "Symbols"
+},
+{
+"c": "⯷",
+"n": "russian astrological symbol sentagon",
+"g": "Symbols"
+},
+{
+"c": "⯸",
+"n": "russian astrological symbol tredecile",
+"g": "Symbols"
+},
+{
+"c": "⯹",
+"n": "equals sign with infinity below",
+"g": "Symbols"
+},
+{
+"c": "⯺",
+"n": "united symbol",
+"g": "Symbols"
+},
+{
+"c": "⯻",
+"n": "separated symbol",
+"g": "Symbols"
+},
+{
+"c": "⯼",
+"n": "doubled symbol",
+"g": "Symbols"
+},
+{
+"c": "⯽",
+"n": "passed symbol",
+"g": "Symbols"
+},
+{
+"c": "⯾",
+"n": "reversed right angle",
+"g": "Symbols"
+},
+{
+"c": "⯿",
+"n": "hellschreiber pause symbol",
+"g": "Symbols"
+},
+{
+"c": "🌀",
+"n": "cyclone",
+"g": "Symbols"
+},
+{
+"c": "🌁",
+"n": "foggy",
+"g": "Symbols"
+},
+{
+"c": "🌂",
+"n": "closed umbrella",
+"g": "Symbols"
+},
+{
+"c": "🌃",
+"n": "night with stars",
+"g": "Symbols"
+},
+{
+"c": "🌄",
+"n": "sunrise over mountains",
+"g": "Symbols"
+},
+{
+"c": "🌅",
+"n": "sunrise",
+"g": "Symbols"
+},
+{
+"c": "🌆",
+"n": "cityscape at dusk",
+"g": "Symbols"
+},
+{
+"c": "🌇",
+"n": "sunset over buildings",
+"g": "Symbols"
+},
+{
+"c": "🌈",
+"n": "rainbow",
+"g": "Symbols"
+},
+{
+"c": "🌉",
+"n": "bridge at night",
+"g": "Symbols"
+},
+{
+"c": "🌊",
+"n": "water wave",
+"g": "Symbols"
+},
+{
+"c": "🌋",
+"n": "volcano",
+"g": "Symbols"
+},
+{
+"c": "🌌",
+"n": "milky way",
+"g": "Symbols"
+},
+{
+"c": "🌍",
+"n": "earth globe europe-africa",
+"g": "Symbols"
+},
+{
+"c": "🌎",
+"n": "earth globe americas",
+"g": "Symbols"
+},
+{
+"c": "🌏",
+"n": "earth globe asia-australia",
+"g": "Symbols"
+},
+{
+"c": "🌐",
+"n": "globe with meridians",
+"g": "Symbols"
+},
+{
+"c": "🌑",
+"n": "new moon symbol",
+"g": "Symbols"
+},
+{
+"c": "🌒",
+"n": "waxing crescent moon symbol",
+"g": "Symbols"
+},
+{
+"c": "🌓",
+"n": "first quarter moon symbol",
+"g": "Symbols"
+},
+{
+"c": "🌔",
+"n": "waxing gibbous moon symbol",
+"g": "Symbols"
+},
+{
+"c": "🌕",
+"n": "full moon symbol",
+"g": "Symbols"
+},
+{
+"c": "🌖",
+"n": "waning gibbous moon symbol",
+"g": "Symbols"
+},
+{
+"c": "🌗",
+"n": "last quarter moon symbol",
+"g": "Symbols"
+},
+{
+"c": "🌘",
+"n": "waning crescent moon symbol",
+"g": "Symbols"
+},
+{
+"c": "🌙",
+"n": "crescent moon",
+"g": "Symbols"
+},
+{
+"c": "🌚",
+"n": "new moon with face",
+"g": "Symbols"
+},
+{
+"c": "🌛",
+"n": "first quarter moon with face",
+"g": "Symbols"
+},
+{
+"c": "🌜",
+"n": "last quarter moon with face",
+"g": "Symbols"
+},
+{
+"c": "🌝",
+"n": "full moon with face",
+"g": "Symbols"
+},
+{
+"c": "🌞",
+"n": "sun with face",
+"g": "Symbols"
+},
+{
+"c": "🌟",
+"n": "glowing star",
+"g": "Symbols"
+},
+{
+"c": "🌠",
+"n": "shooting star",
+"g": "Symbols"
+},
+{
+"c": "🌡",
+"n": "thermometer",
+"g": "Symbols"
+},
+{
+"c": "🌢",
+"n": "black droplet",
+"g": "Symbols"
+},
+{
+"c": "🌣",
+"n": "white sun",
+"g": "Symbols"
+},
+{
+"c": "🌤",
+"n": "white sun with small cloud",
+"g": "Symbols"
+},
+{
+"c": "🌥",
+"n": "white sun behind cloud",
+"g": "Symbols"
+},
+{
+"c": "🌦",
+"n": "white sun behind cloud with rain",
+"g": "Symbols"
+},
+{
+"c": "🌧",
+"n": "cloud with rain",
+"g": "Symbols"
+},
+{
+"c": "🌨",
+"n": "cloud with snow",
+"g": "Symbols"
+},
+{
+"c": "🌩",
+"n": "cloud with lightning",
+"g": "Symbols"
+},
+{
+"c": "🌪",
+"n": "cloud with tornado",
+"g": "Symbols"
+},
+{
+"c": "🌫",
+"n": "fog",
+"g": "Symbols"
+},
+{
+"c": "🌬",
+"n": "wind blowing face",
+"g": "Symbols"
+},
+{
+"c": "🌭",
+"n": "hot dog",
+"g": "Symbols"
+},
+{
+"c": "🌮",
+"n": "taco",
+"g": "Symbols"
+},
+{
+"c": "🌯",
+"n": "burrito",
+"g": "Symbols"
+},
+{
+"c": "🚀",
+"n": "rocket",
+"g": "Travel"
+},
+{
+"c": "🚁",
+"n": "helicopter",
+"g": "Travel"
+},
+{
+"c": "🚂",
+"n": "steam locomotive",
+"g": "Travel"
+},
+{
+"c": "🚃",
+"n": "railway car",
+"g": "Travel"
+},
+{
+"c": "🚄",
+"n": "high-speed train",
+"g": "Travel"
+},
+{
+"c": "🚅",
+"n": "high-speed train with bullet nose",
+"g": "Travel"
+},
+{
+"c": "🚆",
+"n": "train",
+"g": "Travel"
+},
+{
+"c": "🚇",
+"n": "metro",
+"g": "Travel"
+},
+{
+"c": "🚈",
+"n": "light rail",
+"g": "Travel"
+},
+{
+"c": "🚉",
+"n": "station",
+"g": "Travel"
+},
+{
+"c": "🚊",
+"n": "tram",
+"g": "Travel"
+},
+{
+"c": "🚋",
+"n": "tram car",
+"g": "Travel"
+},
+{
+"c": "🚌",
+"n": "bus",
+"g": "Travel"
+},
+{
+"c": "🚍",
+"n": "oncoming bus",
+"g": "Travel"
+},
+{
+"c": "🚎",
+"n": "trolleybus",
+"g": "Travel"
+},
+{
+"c": "🚏",
+"n": "bus stop",
+"g": "Travel"
+},
+{
+"c": "🚐",
+"n": "minibus",
+"g": "Travel"
+},
+{
+"c": "🚑",
+"n": "ambulance",
+"g": "Travel"
+},
+{
+"c": "🚒",
+"n": "fire engine",
+"g": "Travel"
+},
+{
+"c": "🚓",
+"n": "police car",
+"g": "Travel"
+},
+{
+"c": "🚔",
+"n": "oncoming police car",
+"g": "Travel"
+},
+{
+"c": "🚕",
+"n": "taxi",
+"g": "Travel"
+},
+{
+"c": "🚖",
+"n": "oncoming taxi",
+"g": "Travel"
+},
+{
+"c": "🚗",
+"n": "automobile",
+"g": "Travel"
+},
+{
+"c": "🚘",
+"n": "oncoming automobile",
+"g": "Travel"
+},
+{
+"c": "🚙",
+"n": "recreational vehicle",
+"g": "Travel"
+},
+{
+"c": "🚚",
+"n": "delivery truck",
+"g": "Travel"
+},
+{
+"c": "🚛",
+"n": "articulated lorry",
+"g": "Travel"
+},
+{
+"c": "🚜",
+"n": "tractor",
+"g": "Travel"
+},
+{
+"c": "🚝",
+"n": "monorail",
+"g": "Travel"
+},
+{
+"c": "🚞",
+"n": "mountain railway",
+"g": "Travel"
+},
+{
+"c": "🚟",
+"n": "suspension railway",
+"g": "Travel"
+},
+{
+"c": "🚠",
+"n": "mountain cableway",
+"g": "Travel"
+},
+{
+"c": "🚡",
+"n": "aerial tramway",
+"g": "Travel"
+},
+{
+"c": "🚢",
+"n": "ship",
+"g": "Travel"
+},
+{
+"c": "🚣",
+"n": "rowboat",
+"g": "Travel"
+},
+{
+"c": "🚤",
+"n": "speedboat",
+"g": "Travel"
+},
+{
+"c": "🚥",
+"n": "horizontal traffic light",
+"g": "Travel"
+},
+{
+"c": "🚦",
+"n": "vertical traffic light",
+"g": "Travel"
+},
+{
+"c": "🚧",
+"n": "construction sign",
+"g": "Travel"
+},
+{
+"c": "🚨",
+"n": "police cars revolving light",
+"g": "Travel"
+},
+{
+"c": "🚩",
+"n": "triangular flag on post",
+"g": "Travel"
+},
+{
+"c": "🚪",
+"n": "door",
+"g": "Travel"
+},
+{
+"c": "🚫",
+"n": "no entry sign",
+"g": "Travel"
+},
+{
+"c": "🚬",
+"n": "smoking symbol",
+"g": "Travel"
+},
+{
+"c": "🚭",
+"n": "no smoking symbol",
+"g": "Travel"
+},
+{
+"c": "🚮",
+"n": "put litter in its place symbol",
+"g": "Travel"
+},
+{
+"c": "🚯",
+"n": "do not litter symbol",
+"g": "Travel"
+},
+{
+"c": "🚰",
+"n": "potable water symbol",
+"g": "Travel"
+},
+{
+"c": "🚱",
+"n": "non-potable water symbol",
+"g": "Travel"
+},
+{
+"c": "🚲",
+"n": "bicycle",
+"g": "Travel"
+},
+{
+"c": "🚳",
+"n": "no bicycles",
+"g": "Travel"
+},
+{
+"c": "🚴",
+"n": "bicyclist",
+"g": "Travel"
+},
+{
+"c": "🚵",
+"n": "mountain bicyclist",
+"g": "Travel"
+},
+{
+"c": "🚶",
+"n": "pedestrian",
+"g": "Travel"
+},
+{
+"c": "🚷",
+"n": "no pedestrians",
+"g": "Travel"
+},
+{
+"c": "🚸",
+"n": "children crossing",
+"g": "Travel"
+},
+{
+"c": "🚹",
+"n": "mens symbol",
+"g": "Travel"
+},
+{
+"c": "🚺",
+"n": "womens symbol",
+"g": "Travel"
+},
+{
+"c": "🚻",
+"n": "restroom",
+"g": "Travel"
+},
+{
+"c": "🚼",
+"n": "baby symbol",
+"g": "Travel"
+},
+{
+"c": "🚽",
+"n": "toilet",
+"g": "Travel"
+},
+{
+"c": "🚾",
+"n": "water closet",
+"g": "Travel"
+},
+{
+"c": "🚿",
+"n": "shower",
+"g": "Travel"
+},
+{
+"c": "🛀",
+"n": "bath",
+"g": "Travel"
+},
+{
+"c": "🛁",
+"n": "bathtub",
+"g": "Travel"
+},
+{
+"c": "🛂",
+"n": "passport control",
+"g": "Travel"
+},
+{
+"c": "🛃",
+"n": "customs",
+"g": "Travel"
+},
+{
+"c": "🛄",
+"n": "baggage claim",
+"g": "Travel"
+},
+{
+"c": "🛅",
+"n": "left luggage",
+"g": "Travel"
+},
+{
+"c": "🏠",
+"n": "house building",
+"g": "Travel"
+},
+{
+"c": "🏡",
+"n": "house with garden",
+"g": "Travel"
+},
+{
+"c": "🏢",
+"n": "office building",
+"g": "Travel"
+},
+{
+"c": "🏣",
+"n": "japanese post office",
+"g": "Travel"
+},
+{
+"c": "🏤",
+"n": "european post office",
+"g": "Travel"
+},
+{
+"c": "🏥",
+"n": "hospital",
+"g": "Travel"
+},
+{
+"c": "🏦",
+"n": "bank",
+"g": "Travel"
+},
+{
+"c": "🏧",
+"n": "automated teller machine",
+"g": "Travel"
+},
+{
+"c": "🏨",
+"n": "hotel",
+"g": "Travel"
+},
+{
+"c": "🏩",
+"n": "love hotel",
+"g": "Travel"
+},
+{
+"c": "🏪",
+"n": "convenience store",
+"g": "Travel"
+},
+{
+"c": "🏫",
+"n": "school",
+"g": "Travel"
+},
+{
+"c": "🏬",
+"n": "department store",
+"g": "Travel"
+},
+{
+"c": "🏭",
+"n": "factory",
+"g": "Travel"
+},
+{
+"c": "🏮",
+"n": "izakaya lantern",
+"g": "Travel"
+},
+{
+"c": "🏯",
+"n": "japanese castle",
+"g": "Travel"
+},
+{
+"c": "🏰",
+"n": "european castle",
+"g": "Travel"
+},
+{
+"c": "🏱",
+"n": "white pennant",
+"g": "Travel"
+},
+{
+"c": "🏲",
+"n": "black pennant",
+"g": "Travel"
+},
+{
+"c": "🏳",
+"n": "waving white flag",
+"g": "Travel"
+},
+{
+"c": "🏴",
+"n": "waving black flag",
+"g": "Travel"
+},
+{
+"c": "🏵",
+"n": "rosette",
+"g": "Travel"
+},
+{
+"c": "🏶",
+"n": "black rosette",
+"g": "Travel"
+},
+{
+"c": "🏷",
+"n": "label",
+"g": "Travel"
+},
+{
+"c": "🏸",
+"n": "badminton racquet and shuttlecock",
+"g": "Travel"
+},
+{
+"c": "🏹",
+"n": "bow and arrow",
+"g": "Travel"
+},
+{
+"c": "🏺",
+"n": "amphora",
+"g": "Travel"
+},
+{
+"c": "🏻",
+"n": "emoji modifier fitzpatrick type-1-2",
+"g": "Travel"
+},
+{
+"c": "🏼",
+"n": "emoji modifier fitzpatrick type-3",
+"g": "Travel"
+},
+{
+"c": "🏽",
+"n": "emoji modifier fitzpatrick type-4",
+"g": "Travel"
+},
+{
+"c": "🏾",
+"n": "emoji modifier fitzpatrick type-5",
+"g": "Travel"
+},
+{
+"c": "🏿",
+"n": "emoji modifier fitzpatrick type-6",
+"g": "Travel"
+}
+]
+}

@@ -1,0 +1,81 @@
+# The sysadmin toolbox.
+#
+# ⚠️ THIS WHOLE LIST WAS LEFT BEHIND IN THE REWRITE, and the reason it was is
+# worth stating because it explains a dozen other gaps: the boundary of what
+# came across from fedora-buchhwin-hyprland ran exactly along "does this program
+# have a colour file?". packages/dnf-tools.txt is, word for word, the list of
+# programs render.qml writes a theme for — btop, bat, fastfetch, git-delta,
+# tmux, alacritty. nmap, strace, rsync, fzf and atuin have no colours, so they
+# fell through. Nobody decided that.
+#
+# The owner works in systems administration and uses this machine for
+# that, so on 07.08.2026 he asked for all of them back.
+#
+# ⚠️ NOT ONE OF THESE STARTS A SERVICE. They are binaries on the PATH; nothing
+# here runs until it is typed, which is why a list this long costs nothing at
+# idle on a laptop.
+#
+# ⚠️ bat, git-delta and tmux are NOT repeated here — they are in dnf-tools.txt
+# because they are themed. dnf would accept the duplicate; a reader would have
+# to work out which list owns them.
+
+# --- sessions and remote access ---------------------------------------------
+fuse-sshfs                  # mount a remote filesystem over ssh, no server side
+rsync
+rclone                      # the same idea for object storage
+openssh-clients
+
+# --- files and search -------------------------------------------------------
+eza                         # ls with git status; `ll` is an alias for it
+fd-find                     # the binary is `fd`
+ripgrep                     # the binary is `rg`
+fzf
+zoxide                      # `cd` that learns; initialised in .zshrc as `cd`
+ncdu                        # which directory ate the disk
+duf                         # df, readable
+atuin                       # searchable shell history on Ctrl+R
+
+# --- network and diagnostics ------------------------------------------------
+nmap
+mtr                         # traceroute and ping in one continuous view
+tcpdump
+iperf3
+bind-utils                  # dig, host
+socat
+iotop-c                     # the -c build is the maintained one
+sysstat                     # iostat, sar, pidstat
+lsof
+strace
+pciutils                    # lspci — for a human; lib/10-gpu.sh reads sysfs
+
+# --- containers -------------------------------------------------------------
+# podman only. It is what Fedora ships, runs rootless, and speaks the Docker
+# API — installing both side by side causes more trouble than it solves.
+podman
+podman-compose
+
+# --- code -------------------------------------------------------------------
+gh                          # GitHub from the terminal
+ShellCheck                  # what the CI runs over lib/ and bin/
+direnv                      # per-directory environments, hooked in .zshrc
+
+# --- the shell itself -------------------------------------------------------
+# ⚠️ zsh is in dnf-core.txt and has been installed since M1 — with no .zshrc and
+# never as the login shell. These two are what make it worth having, and they
+# are Fedora packages rather than git clones so they update with everything
+# else. lib/80-shellenv.sh sources them in the order that matters.
+zsh-autosuggestions
+zsh-syntax-highlighting
+
+# --- brought back from fedora-buchhwin-hyprland (08.08.2026) -----------------
+# ⚠️ These fell out in the rewrite for the same reason the rest of this file did:
+# the boundary ran along "does this program have a colour file?". None of them
+# do, so none of them came across, and nobody decided that.
+remmina                     # RDP and VNC — the one a sysadmin job needs daily
+remmina-plugins-rdp
+keepassxc                   # passwords, offline, in a file you own
+wireguard-tools             # wg / wg-quick; NetworkManager can import the conf
+gvfs-mtp                    # plug a phone in and see it in the file manager
+playerctl                   # the media keys talk to whatever is playing over MPRIS
+ImageMagick                 # convert / identify — the scriptable half of image work
+gettext                     # msgfmt and friends; also what many build scripts want

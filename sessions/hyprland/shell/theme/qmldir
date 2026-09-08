@@ -1,0 +1,11 @@
+# Singletons must be declared here, not only marked `pragma Singleton`.
+# Without this file an `import "../theme"` from a subdirectory resolves to
+# nothing and every token silently reads as undefined — QML renders that as
+# black, so the failure looks like a design decision rather than a bug.
+#
+# The colour singleton is called Scheme, NOT Palette: QtQuick ships its own
+# `Palette` type, which silently shadows ours and turns the entire desktop
+# black. Never name a singleton after a Qt built-in.
+singleton Scheme 1.0 Scheme.qml
+singleton Theme 1.0 Theme.qml
+singleton FromImage 1.0 FromImage.qml

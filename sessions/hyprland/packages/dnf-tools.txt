@@ -1,0 +1,19 @@
+# The themed toolbox.
+#
+# Chosen by name, not inherited: these are the programs the renderer generates
+# a colour scheme for, so installing them is part of the promise that changing
+# the palette changes everything. A theme written for a program that is not
+# there is not harmful, but it is not the deal either.
+#
+# ⚠️ Installed WITHOUT weak dependencies, like the desktop list.
+btop                        # themes/*.theme, 37 keys, pointer color_theme
+bat                         # .tmTheme + `bat cache --build` — the file alone is invisible
+fastfetch                   # no include mechanism: follows the terminal's ANSI colours
+git-delta                   # included from ~/.config/git/config, never from ~/.gitconfig
+tmux                        # source-file
+alacritty                   # the second terminal, themed from the same tokens as kitty
+
+# ⚠️ starship and lazygit are NOT here: neither is packaged in Fedora
+# (`dnf repoquery` says so, checked again on 5 August 2026). They come from
+# COPR — see lib/30-desktop.sh, and `bhctl doctor` reports it when a COPR stops
+# resolving, which is the whole risk of taking one.

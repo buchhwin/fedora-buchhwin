@@ -1,0 +1,1615 @@
+#!/usr/bin/env bash
+# buchhwin control — a thin front for the shell's own IPC.
+#
+# Deliberately small. Anything that needs to know how the desktop works lives
+# in QML; this only routes.
+set -uo pipefail
+REPO_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/.." && pwd)"
+
+# ⚠️⚠️ THIS LINE IS A SAFETY FEATURE, AND ITS ABSENCE COST THE ONE GUARD THAT
+# CAN KEEP SOMEBODY OUT OF THEIR OWN MACHINE.
+#
+# This file called `die`, `warn` and `ok` twenty-one times and defined none of
+# them. It runs under `set -uo pipefail` and deliberately NOT under `-e`, so a
+# call to a function that does not exist is a `command not found` (127) and
+# execution simply CARRIES ON past it.
+#
+# `bhctl greeter enable` is built around three refusals — greetd installed, a
+# config present, and `greeter test` having passed on this machine — and the
+# comment above the third says "the refusal is the feature. This is the only
+# command in bhctl that can leave a machine nobody can log into." Measured on
+# 10.08.2026 with stubs, on a machine where all three conditions were false:
+#
+#     bhctl: line 476: die: command not found
+#     bhctl: line 477: die: command not found
+#     bhctl: line 480: die: command not found
+#     sudo systemctl disable sddm.service
+#     sudo systemctl enable greetd.service
+#     bhctl exit=0
+#
+# Every refusal printed nothing, and the machine was switched over anyway.
+#
+# ⚠️ Sourcing is safe rather than merely convenient: common.sh sets its four
+# paths with `${VAR:-…}`, so the values above survive, and it defines functions
+# and colours and nothing else. `tests/bhctl-usage.sh` now fails if a helper is
+# called here without being defined.
+# shellcheck source=lib/common.sh
+. "$REPO_DIR/lib/common.sh"
+CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
+# `niri diff` renders into a sandbox and has to map the sandbox paths back to
+# the real ones before comparing; the generator writes both of these into the
+# file it produces.
+DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
+
+usage() {
+    cat <<'EOF'
+bhctl theme [<palette> [<accent>]]   switch or show the colour scheme
+bhctl theme apply                    re-render foreign app themes
+bhctl theme spotify                  re-render, then re-inject into Spotify
+bhctl wallpaper [<file>]             show or set the wallpaper
+bhctl calendar                       check the Google calendar connection
+bhctl location [<town>]              show or set where this machine is
+bhctl niri apply                     regenerate ~/.config/niri/config.kdl
+bhctl niri diff                      show what a regeneration would change
+bhctl power [apply]                  show or write the lid behaviour
+bhctl power report [seconds]         measure draw, heat and clocks (checks itself first)
+bhctl drive setup                    sign in to Google Drive (opens a browser)
+bhctl drive status                   whether the Drive mount is up
+bhctl greeter status                 which login screen is enabled, and why
+bhctl greeter test                   start the greeter nested, without switching to it
+bhctl greeter sync                   copy the shell and the palette to the login screen
+bhctl greeter enable                 make our greeter the login screen
+bhctl greeter disable                put sddm back
+bhctl doctor                         check the installation
+bhctl binds reset                    drop frozen key bindings from shell.json
+bhctl prune                          drop the instance dirs quickshell leaves
+bhctl shell reset                    restore default settings and restart
+bhctl update                         pull the repository and run the installer
+bhctl backup [<file>]                write a tar of everything this desktop owns
+bhctl restore <file>                 put one back
+EOF
+}
+
+# ---------------------------------------------------------------- what we own
+#
+# ⚠️ THE LIST IS NAMED, NOT GUESSED. "Back up the config directory" would sweep
+# in every other program's settings, and a restore built on that would put a
+# stranger's Firefox profile back along with the desktop. These are the paths
+# this project writes, and nothing else.
+#
+# ⚠️ AND THE GENERATED FILES ARE IN IT ON PURPOSE, even though `bhctl niri
+# apply` and a theme render can rebuild them. A backup is taken to be restored
+# on a bad day, and "it will regenerate" assumes a working shell — which is the
+# one thing you do not have when you reach for a backup.
+owned_paths() {
+    printf '%s\n' \
+        "$CONFIG_HOME/buchhwin" \
+        "$CONFIG_HOME/niri" \
+        "$CONFIG_HOME/kitty" \
+        "$CONFIG_HOME/alacritty" \
+        "$CONFIG_HOME/btop" \
+        "$CONFIG_HOME/qt6ct" \
+        "$CONFIG_HOME/gtk-3.0" \
+        "$CONFIG_HOME/gtk-4.0"
+}
+
+# Quickshell leaves an instance directory behind for EVERY run and never removes
+# one. Measured on the test machine after two days: 407 directories, 15 MB, in
+# /run/user/<uid> — which is a tmpfs, so it is RAM. Each run adds exactly one.
+#
+# ⚠️ NOT `flock` ON instance.lock. That is the obvious way to tell a live
+# instance from a dead one and it does not work: measured, `flock -n` succeeded
+# on all 407 of them INCLUDING the directory belonging to the running shell, so
+# a prune built on it would have deleted the live instance's socket out from
+# under it.
+#
+# `qs list` names the instances that are actually alive. Anything else under
+# by-id/ belongs to a process that is gone.
+prune_instances() {
+    local dir="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/quickshell/by-id"
+    [[ -d "$dir" ]] || return 0
+    command -v qs >/dev/null || return 0
+
+    local live
+    # ⚠️ If the listing itself fails, do NOTHING. An empty answer would
+    # otherwise read as "nothing is alive" and take the running shell with it.
+    live="$(qs list --all --json 2>/dev/null)" || return 0
+    [[ -n "$live" ]] || return 0
+    live="$(printf '%s' "$live" | sed -n 's/.*"id": "\([^"]*\)".*/\1/p')"
+
+    local d name
+    for d in "$dir"/*/; do
+        [[ -d "$d" ]] || continue
+        name="$(basename "$d")"
+        grep -qxF "$name" <<< "$live" && continue
+        rm -rf "$d"
+    done
+}
+
+# One runner for every tool. This used to be a second copy of the installer's
+# render(), with the tool name baked in — so adding a tool meant editing both.
+run_tool() {
+    local log="/tmp/buchhwin-$1.log"
+    BUCHHWIN_TOOL="$1" QT_QPA_PLATFORM=offscreen timeout 60 qs -p "$REPO_DIR/shell" >/dev/null 2>&1
+    local code=$?
+    # ⚠️ TWO DIFFERENT FAILURES, and this used to see only one of them.
+    #
+    # A tool that REFUSES exits 0 and says ABORT in its report — that is the
+    # designed path, and the report is the only place it shows. A tool that
+    # CRASHES says nothing at all, and the exit code was being thrown away
+    # here, so a segfault came back as success while the log still held the
+    # previous run's cheerful "done". lib/common.sh has always checked the
+    # code; this is the copy that did not.
+    if (( code != 0 )); then
+        echo "$1 crashed or timed out (exit $code) — see $log" >&2
+        [[ -f "$log" ]] && tail -3 "$log" >&2
+        return 1
+    fi
+    if grep -q ABORT "$log" 2>/dev/null; then
+        sed -n '/ABORT/,$p' "$log" >&2
+        return 1
+    fi
+    prune_instances
+    return 0
+}
+render() { run_tool render; }
+
+case "${1:-}" in
+theme)
+    shift
+    case "${1:-}" in
+    ""|show)
+        jq -r '.theme | "palette: \(.palette)  accent: \(.accent)"' \
+            "$CONFIG_HOME/buchhwin/shell.json" 2>/dev/null || echo "no settings yet"
+        # index.txt is GENERATED by the installer and gitignored, so any deploy
+        # that syncs the repo with --delete removes it. Falling back to the
+        # directory itself means `bhctl theme` never reports "no palettes" on a
+        # machine that plainly has eleven of them.
+        printf 'available: '
+        if [[ -s "$REPO_DIR/shell/theme/palettes/index.txt" ]]; then
+            tr '\n' ' ' < "$REPO_DIR/shell/theme/palettes/index.txt"
+        else
+            ( cd "$REPO_DIR/shell/theme/palettes" && ls -1 ./*.json 2>/dev/null \
+                | sed 's|^\./||; s|\.json$||' | tr '\n' ' ' )
+        fi
+        echo
+        ;;
+    apply) render && echo "themes re-rendered" ;;
+    spotify)
+        # ⚠️ TWO STEPS IN ONE COMMAND, AND THE ORDER IS THE POINT. spicetify
+        # injects whatever colour file is on disk at the moment it runs, so
+        # applying before the renderer has written one injects the previous
+        # palette — or nothing at all on a fresh machine.
+        #
+        # ⚠️ THIS IS ALSO THE COMMAND FOR AFTER A SPOTIFY UPDATE. An update
+        # replaces the very files spicetify patched, so the theming is gone and
+        # nothing says so. That is the price of theming a program whose files we
+        # do not own; it is written down here, in docs/CONFIG.md and on the row
+        # in the settings window rather than being carried quietly.
+        spice="$HOME/.local/bin/spicetify"
+        [[ -x "$spice" ]] || { echo "spicetify is not installed — run install.sh" >&2; exit 1; }
+        render || exit 1
+        if "$spice" backup apply >/dev/null 2>&1; then
+            echo "Spotify themed with the current palette"
+        else
+            # Not silent, and not fatal either: a Spotify that is running holds
+            # its own files open, which is the ordinary cause.
+            echo "spicetify could not apply — close Spotify and try again" >&2
+            "$spice" backup apply 2>&1 | tail -5 >&2
+            exit 1
+        fi
+        ;;
+    *)
+        pal="$1"; accent="${2:-}"
+        [[ -f "$REPO_DIR/shell/theme/palettes/$pal.json" ]] || { echo "no such palette: $pal" >&2; exit 1; }
+        [[ -n "$accent" ]] || accent="$(jq -r '.accents[0]' "$REPO_DIR/shell/theme/palettes/$pal.json")"
+        f="$CONFIG_HOME/buchhwin/shell.json"
+        tmp="$(mktemp)"
+        jq --arg p "$pal" --arg a "$accent" '.theme.palette=$p | .theme.accent=$a' "$f" > "$tmp" \
+            && mv "$tmp" "$f"
+        render
+        echo "palette: $pal  accent: $accent"
+        ;;
+    esac
+    ;;
+location)
+    shift
+    f="$CONFIG_HOME/buchhwin/shell.json"
+    case "${1:-}" in
+    ""|show)
+        jq -r '.location // {} | if .name then
+                 "place:  \(.name)\ncoords: \(.lat), \(.lon)\nsource: \(.source // "unknown")"
+               else "nothing set" end' "$f" 2>/dev/null || echo "no settings yet"
+        # Where the guess would come from, so "nothing set" is actionable.
+        printf 'timezone: %s\n' "$(timedatectl show -p Timezone --value 2>/dev/null)"
+        ;;
+    *)
+        town="$*"
+        # The same geocoder the shell uses. No API key, which is the only
+        # reason this works without a setup step.
+        r="$(curl -s --max-time 10 "https://geocoding-api.open-meteo.com/v1/search?count=1&language=de&format=json&name=$(jq -rn --arg t "$town" '$t|@uri')")"
+        name="$(jq -r '.results[0].name // empty' <<<"$r")"
+        [[ -n "$name" ]] || { echo "no such place: $town" >&2; exit 1; }
+        country="$(jq -r '.results[0].country // empty' <<<"$r")"
+        lat="$(jq -r '.results[0].latitude' <<<"$r")"
+        lon="$(jq -r '.results[0].longitude' <<<"$r")"
+        tmp="$(mktemp)"
+        jq --arg n "$name${country:+, $country}" --argjson la "$lat" --argjson lo "$lon" \
+           '.location = {name: $n, lat: $la, lon: $lo, source: "manual"}' "$f" > "$tmp" \
+            && mv "$tmp" "$f"
+        echo "place: $name${country:+, $country}  ($lat, $lon)"
+        ;;
+    esac
+    ;;
+calendar)
+    # Deliberately its own busctl calls rather than asking the shell: when the
+    # calendar is empty the first question is whether the ACCOUNT is there, and
+    # that has to be answerable with the shell dead.
+    objs="$(busctl --user --json=short call org.gnome.OnlineAccounts \
+             /org/gnome/OnlineAccounts org.freedesktop.DBus.ObjectManager \
+             GetManagedObjects 2>/dev/null)"
+    if [[ -z "$objs" ]]; then
+        echo "online accounts are not answering (is goa-daemon running?)" >&2
+        exit 1
+    fi
+
+    path="$(jq -r '.data[0] | to_entries[]
+            | select(.value["org.gnome.OnlineAccounts.Account"].ProviderType.data == "google")
+            | select(.value["org.gnome.OnlineAccounts.Account"].CalendarDisabled.data != true)
+            | .key' <<<"$objs" | head -1)"
+
+    if [[ -z "$path" ]]; then
+        echo "no Google account with the calendar switched on"
+        echo "add one with: gnome-online-accounts-gtk"
+        exit 1
+    fi
+
+    name="$(jq -r --arg p "$path" '.data[0][$p]["org.gnome.OnlineAccounts.Account"].PresentationIdentity.data' <<<"$objs")"
+    echo "account:  $name"
+    echo "path:     $path"
+
+    tok="$(busctl --user --json=short call org.gnome.OnlineAccounts "$path" \
+           org.gnome.OnlineAccounts.OAuth2Based GetAccessToken 2>/dev/null)"
+    if [[ -z "$tok" ]]; then
+        echo "token:    REFUSED — reconnect the account" >&2
+        exit 1
+    fi
+    # The token itself is never printed. It is a bearer credential, and a
+    # diagnostic that leaks one is worse than no diagnostic.
+    echo "token:     ok, valid for $(jq -r '.data[1]' <<<"$tok")s"
+
+    bearer="$(jq -r '.data[0]' <<<"$tok")"
+
+    # ⚠️ THE SCOPES ARE THE ANSWER, AND NOTHING ASKED FOR THEM. The symptom was
+    # HTTP 403 on CalDAV with a token GOA said was valid and an account GOA said
+    # had the calendar switched on — so "reconnect the account" was the obvious
+    # advice and it was wrong twice over. A 403 with a good token is not an
+    # authentication problem, it is a permission one, and the permissions are on
+    # the token.
+    #
+    # Google publishes them: tokeninfo takes the access token and says what it
+    # is allowed to do. The token itself is never printed — a diagnostic that
+    # leaks a bearer credential is worse than no diagnostic — but its scopes are
+    # not secret, and they are the whole diagnosis.
+    # ⚠️ THE SCOPES ARE THE ANSWER, AND NOTHING EVER ASKED FOR THEM. The symptom
+    # was HTTP 403 on CalDAV with a token GOA called valid, on an account GOA
+    # said had the calendar switched on — so "reconnect the account" was the
+    # obvious advice and there was no way to tell whether it was right.
+    #
+    # A 403 with a good token is not an authentication problem, it is a
+    # permission one, and the permissions are on the token. Google publishes
+    # them: tokeninfo says what an access token is allowed to do. The token
+    # itself is never printed — a diagnostic that leaks a bearer credential is
+    # worse than no diagnostic — but its scopes are not secret and they are the
+    # whole diagnosis.
+    scopes="$(curl -s "https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=$bearer" \
+              | jq -r '.scope // empty' 2>/dev/null)"
+    echo "scopes:"
+    if [[ -n "$scopes" ]]; then
+        tr ' ' '\n' <<<"$scopes" | sed 's/^/           /'
+    else
+        echo "           (could not read them)"
+    fi
+
+    # ⚠️ THE CALENDAR ID IS A PATH SEGMENT, so the address has to be
+    # percent-encoded. That is the cheap explanation for a 403 and it gets ruled
+    # out before the expensive one.
+    enc="$(jq -rn --arg s "$name" '$s|@uri')"
+
+    # ⚠️ THE CODE COMES BACK IN A VARIABLE, NOT ON STDOUT. The first version of
+    # this returned it by echoing, and every caller wrapped it in `$( )` — which
+    # swallowed the human-readable line along with it, so the whole "endpoints"
+    # section printed nothing at all while looking like it had run.
+    probe_code=""
+    probe() {   # probe <label> <method> <url>
+        local label="$1" method="$2" url="$3"
+        if [[ "$method" == "PROPFIND" ]]; then
+            probe_code="$(curl -s -o /dev/null -w '%{http_code}' -X PROPFIND \
+                          -H "Depth: 0" -H "Authorization: Bearer $bearer" "$url" 2>/dev/null)"
+        else
+            probe_code="$(curl -s -o /dev/null -w '%{http_code}' \
+                          -H "Authorization: Bearer $bearer" "$url" 2>/dev/null)"
+        fi
+        printf '  %-26s HTTP %s\n' "$label" "$probe_code"
+    }
+
+    echo "endpoints:"
+    probe "caldav, address as-is" PROPFIND \
+          "https://apidata.googleusercontent.com/caldav/v2/$name/events/"
+    raw="$probe_code"
+    probe "caldav, address encoded" PROPFIND \
+          "https://apidata.googleusercontent.com/caldav/v2/$enc/events/"
+    encoded="$probe_code"
+    probe "calendar api v3" GET \
+          "https://www.googleapis.com/calendar/v3/users/me/calendarList?maxResults=1"
+    rest="$probe_code"
+
+    # The verdict, rather than three numbers to interpret.
+    #
+    # ⚠️ The message this replaces said "no Google account with the calendar
+    # switched on", which is FALSE when the account is there and answering 403.
+    # A message that names the wrong cause costs more time than no message.
+    if [[ "$raw" == "207" || "$raw" == "200" ]]; then
+        echo "reachable"
+    elif [[ "$encoded" == "207" || "$encoded" == "200" ]]; then
+        echo "NOT reachable — but the ENCODED address works, so the shell is"
+        echo "asking with an unencoded '@' in the path. That one is ours."
+    elif [[ "$scopes" != *"auth/calendar"* ]]; then
+        echo "NOT reachable, and the reason is in the scope list above: the token"
+        echo "carries no calendar scope at all. GOA says the calendar is enabled"
+        echo "for this account, but the grant Google actually issued covers only"
+        echo "sign-in and profile — so 403 is the correct answer to the question"
+        echo "we are asking, and no amount of retrying will change it."
+        echo
+        echo "Remove the account and add it again, and tick Calendar during the"
+        echo "consent step:  gnome-online-accounts-gtk"
+    elif [[ "$rest" == "200" ]]; then
+        echo "NOT reachable over CalDAV, though the REST API answers and the"
+        echo "token does carry a calendar scope. Google is refusing CalDAV"
+        echo "specifically — the endpoint wants the full auth/calendar scope."
+    else
+        echo "NOT reachable, and neither is the REST API. Reconnect the account:"
+        echo "  gnome-online-accounts-gtk"
+    fi
+    ;;
+drive)
+    # Google Drive through rclone. The shell owns the switch; this owns the one
+    # step the shell cannot do, which is a sign-in that needs a browser.
+    shift
+    remote="$(jq -r '.drive.remote // "gdrive"' "$CONFIG_HOME/buchhwin/shell.json" 2>/dev/null)"
+    [[ -n "$remote" && "$remote" != null ]] || remote=gdrive
+    case "${1:-status}" in
+    ""|status)
+        command -v rclone >/dev/null || die "rclone is not installed"
+        printf 'remote:   %s\n' "$remote"
+        printf 'known:    %s\n' \
+            "$(grep -qx "$remote:" <<< "$(rclone listremotes 2>/dev/null)" \
+               && echo yes || echo 'NO — run: bhctl drive setup')"
+        # ⚠️ NO `|| echo`. `systemctl is-active` PRINTS the state and exits
+        # non-zero when it is not active, so a fallback fires as well and the
+        # status grows a stray line. Exactly the fault `bhctl greeter status`
+        # had an hour ago, in the same shape — which is why the substitute is
+        # only for a genuinely empty answer.
+        m="$(systemctl --user is-active buchhwin-drive.service 2>/dev/null)"
+        printf 'mount:    %s\n' "${m:-unknown}"
+        ;;
+    setup)
+        # ⚠️ IT RUNS rclone's OWN WIZARD RATHER THAN SCRIPTING THE TOKEN. The
+        # OAuth dance opens a browser and writes a refresh token; reproducing
+        # that by hand would mean holding a client secret in a public repo.
+        command -v rclone >/dev/null || die "rclone is not installed"
+        echo "rclone will ask a series of questions. The answers that matter:"
+        echo "  name          $remote"
+        echo "  storage       drive"
+        echo "  client_id     leave empty"
+        echo "  scope         1  (full access)  or  2  (read only)"
+        echo "  advanced      no"
+        echo "  auto config   yes — it opens a browser"
+        echo
+        rclone config
+        ;;
+    *) die "unknown: bhctl drive $1" ;;
+    esac
+    ;;
+
+greeter)
+    shift
+    case "${1:-status}" in
+        ""|status)
+            echo "login screen: SDDM (owned by Fedora KDE)"
+            systemctl is-enabled sddm.service 2>/dev/null || true
+            ;;
+        *) die "Buchhwin does not manage a greeter; use Fedora KDE's SDDM settings" ;;
+    esac
+    exit 0
+
+    # The login screen: ours (greetd + shell/ui/greeter) or Fedora's (sddm).
+    #
+    # ⚠️ EVERY VERB HERE IS ABOUT THE ONE FAILURE THAT CANNOT BE DEBUGGED FROM
+    # INSIDE THE DESKTOP. If the greeter does not come up there is no session to
+    # fix it from — only Ctrl+Alt+F3 and a TTY. So: `test` runs it WITHOUT
+    # switching to it, `enable` refuses until `test` has passed on this machine,
+    # and `disable` is one word and never checks anything.
+    shift
+    share=/usr/share/buchhwin
+    stamp=/var/lib/buchhwin/greeter-tested
+
+    # ⚠️ The state is captured, not piped: `… | grep -q` under `pipefail` reports
+    # failure the instant grep leaves early, which here would read as "the
+    # greeter is not enabled" — see tests/pipefail-grep.sh.
+    greeter_enabled() { grep -qx enabled <<< "$(systemctl is-enabled greetd.service 2>/dev/null)"; }
+    sddm_enabled()    { grep -qx enabled <<< "$(systemctl is-enabled sddm.service   2>/dev/null)"; }
+
+    case "${1:-status}" in
+    ""|status)
+        printf 'login screen:  '
+        if greeter_enabled; then printf 'buchhwin (greetd)\n'
+        elif sddm_enabled;  then printf 'sddm\n'
+        else printf '\033[38;5;203mNONE ENABLED\033[0m — the machine will boot to a console\n'; fi
+
+        # ⚠️ `|| echo` IS WRONG HERE AND THE OUTPUT SAID SO. `systemctl
+        # is-enabled` prints "disabled" AND exits 1, so the fallback fired as
+        # well and the status printed "disabled" followed by a stray line
+        # reading "not enabled". Caught by reading the output rather than by
+        # trusting the shape of the command — the exit code of a query is not a
+        # failure. Only a genuinely empty answer gets a substitute now.
+        state() { local v; v="$(systemctl is-enabled "$1" 2>/dev/null)"; printf '%s' "${v:-unknown}"; }
+        printf 'greetd:        %s, %s\n' \
+            "$(rpm -q greetd >/dev/null 2>&1 && echo installed || echo 'NOT installed')" \
+            "$(state greetd.service)"
+        printf 'sddm:          %s, %s\n' \
+            "$(rpm -q sddm >/dev/null 2>&1 && echo installed || echo 'NOT installed')" \
+            "$(state sddm.service)"
+
+        # ⚠️ THE COPY IS THE PART THAT GOES STALE, so it is the part that is
+        # reported. The greeter runs as the greetd user and cannot read a 0700
+        # home, so it runs from $share/shell — and a copy from three commits ago
+        # is a login screen from three commits ago. Nothing else notices that.
+        if [[ -d "$share/shell" ]]; then
+            printf 'greeter shell: %s\n' \
+                "$(date -r "$share/shell/shell.qml" '+%Y-%m-%d %H:%M' 2>/dev/null || echo '?')"
+            if ! diff -rq "$REPO_DIR/shell" "$share/shell" >/dev/null 2>&1; then
+                printf '               \033[38;5;179mdiffers from the repo — run: bhctl greeter sync\033[0m\n'
+            fi
+        else
+            printf 'greeter shell: \033[38;5;203mmissing\033[0m — run: bhctl greeter sync\n'
+        fi
+        if [[ -f "$stamp" ]]; then
+            printf 'tested here:   %s\n' "$(cat "$stamp")"
+        else
+            printf 'tested here:   \033[38;5;179mnever\033[0m — run: bhctl greeter test\n'
+        fi
+        ;;
+
+    sync)
+        # ⚠️ THE SAME CODE THE INSTALLER RUNS, NOT A SECOND COPY OF IT. The rule
+        # this project has paid for four times is that a list must not exist
+        # twice, and a copy-and-snapshot procedure is a list.
+        # shellcheck source=/dev/null
+        . "$REPO_DIR/lib/65-greeter.sh"
+        greeter_copy_shell || die "could not copy the shell to $share"
+        greeter_snapshot   || warn "the palette snapshot failed"
+        ok "the login screen now matches this checkout"
+        ;;
+
+    test)
+        # ⚠️ NESTED, AND THAT IS THE WHOLE POINT. Switching the real login
+        # screen to something untested is how a machine stops accepting logins.
+        # This runs the greeter inside the session you are already in: if it is
+        # broken you close a window instead of rebooting into a black screen.
+        #
+        # ⚠️ IT PROVES THE FACE, NOT THE PROTOCOL. greetd does not answer in a
+        # nested compositor because there is no greetd session, so the password
+        # field will say exactly that — and that IS the correct result here.
+        # What this checks is that the surface comes up, is drawn, and admits
+        # what it cannot do. The protocol half is proven by logging in.
+        command -v niri >/dev/null || die "niri is not installed"
+        [[ -d "$share/shell" ]] || die "no greeter copy yet — run: bhctl greeter sync"
+        [[ -f /etc/greetd/niri.kdl ]] || die "no /etc/greetd/niri.kdl — run the installer"
+        echo "starting the greeter nested — Mod+Shift+E or Ctrl+Alt+Delete closes it"
+        if niri --config /etc/greetd/niri.kdl; then
+            sudo mkdir -p "$(dirname "$stamp")"
+            date '+%Y-%m-%d %H:%M' | sudo tee "$stamp" >/dev/null
+            ok 'the greeter came up and exited cleanly — "bhctl greeter enable" will work now'
+        else
+            die "the greeter did not run cleanly — nothing was switched"
+        fi
+        ;;
+
+    enable)
+        rpm -q greetd >/dev/null 2>&1 || die "greetd is not installed"
+        [[ -f /etc/greetd/config.toml ]] || die "no /etc/greetd/config.toml — run the installer"
+        # ⚠️ IT REFUSES WITHOUT A TEST, AND THE REFUSAL IS THE FEATURE. This is
+        # the only command in bhctl that can leave a machine nobody can log into.
+        [[ -f "$stamp" ]] || die "the greeter has never been tested here — run: bhctl greeter test"
+        # One at a time, and greetd last: two enabled login managers race for
+        # tty1 and resolve differently on different boots. The worst case of
+        # this order is a machine with none, which a TTY can fix.
+        sudo systemctl disable sddm.service >/dev/null 2>&1 || true
+        if ! sudo systemctl enable greetd.service >/dev/null 2>&1; then
+            sudo systemctl enable sddm.service >/dev/null 2>&1 || true
+            die "greetd would not enable — sddm put back"
+        fi
+        sudo systemctl set-default graphical.target >/dev/null 2>&1 || true
+        ok "greetd is the login screen — sddm stays installed and disabled"
+        echo "  the way back, from a TTY if need be:  bhctl greeter disable"
+        ;;
+
+    disable)
+        # ⚠️ NO PRECONDITIONS AT ALL. This is the escape hatch, and an escape
+        # hatch that checks things is an escape hatch that can refuse.
+        sudo systemctl disable greetd.service >/dev/null 2>&1 || true
+        if rpm -q sddm >/dev/null 2>&1; then
+            sudo systemctl enable sddm.service >/dev/null 2>&1 \
+                || warn "sddm would not enable: sudo systemctl enable sddm.service"
+            ok "sddm is the login screen again"
+        else
+            warn "sddm is not installed — there is now NO login screen"
+            warn "  sudo dnf install sddm && sudo systemctl enable sddm.service"
+        fi
+        ;;
+    *) die "unknown: bhctl greeter $1" ;;
+    esac
+    ;;
+
+power)
+    # ⚠️ THE LID IS THE ONE THING ON THE POWER PAGE THE SHELL CANNOT DO. Idle,
+    # locking and suspend are all ours — Quickshell's IdleMonitor over
+    # ext-idle-notify — but closing the lid has to work when the shell has
+    # crashed, is restarting, or was never started. That is logind's job, and
+    # logind is configured in /etc.
+    #
+    # So this is the one setting with a second step. The shell writes the wish
+    # into shell.json; this writes it where logind will read it.
+    shift
+    f="$CONFIG_HOME/buchhwin/shell.json"
+    drop=/etc/systemd/logind.conf.d/50-buchhwin.conf
+
+    # ⚠️ HandleLidSwitch IS THE BATTERY CASE, and that is not a guess: logind's
+    # own manual says HandleLidSwitchExternalPower is "completely ignored by
+    # default (for backwards compatibility) -- an explicit value must be set
+    # before it will be used". So both are always written, or the mains setting
+    # silently does nothing.
+    read_lid() {
+        local key="$1" v
+        v="$(jq -r ".power.$key // empty" "$f" 2>/dev/null)"
+        case "$v" in
+        suspend|lock|ignore) printf '%s' "$v" ;;
+        # An empty or unknown value is not a reason to write something
+        # arbitrary into /etc. suspend is logind's own default and ours.
+        *) printf 'suspend' ;;
+        esac
+    }
+
+    case "${1:-}" in
+    ""|show)
+        if [[ -f "$f" ]]; then
+            echo "wanted:   battery=$(read_lid lidClosedBattery)  mains=$(read_lid lidClosedAc)"
+        else
+            echo "wanted:   no settings file yet"
+        fi
+        if [[ -f "$drop" ]]; then
+            echo "in place: $drop"
+            grep -E '^Handle' "$drop" | sed 's/^/          /'
+        else
+            echo "in place: nothing — logind's defaults apply (lid closed = suspend)"
+        fi
+        ;;
+    apply)
+        [[ -f "$f" ]] || { echo "no settings file at $f" >&2; exit 1; }
+        command -v jq >/dev/null || { echo "jq is not installed" >&2; exit 1; }
+        bat="$(read_lid lidClosedBattery)"
+        ac="$(read_lid lidClosedAc)"
+
+        tmp="$(mktemp)"
+        {
+            echo "# Written by bhctl power apply. Edit the Power page instead —"
+            echo "# this file is rewritten from shell.json."
+            echo "[Login]"
+            echo "HandleLidSwitch=$bat"
+            echo "HandleLidSwitchExternalPower=$ac"
+        } > "$tmp"
+
+        if [[ "$(id -u)" == "0" ]]; then
+            install -Dm644 "$tmp" "$drop"
+        elif command -v sudo >/dev/null; then
+            sudo install -Dm644 "$tmp" "$drop"
+        else
+            echo "writing $drop needs root, and sudo is not installed" >&2
+            rm -f "$tmp"
+            exit 1
+        fi
+        rc=$?
+        rm -f "$tmp"
+        [[ "$rc" == "0" ]] || { echo "could not write $drop" >&2; exit 1; }
+
+        echo "lid: battery=$bat  mains=$ac  -> $drop"
+        # ⚠️ SAID RATHER THAN DONE. Restarting systemd-logind mid-session is not
+        # something a settings change should do behind your back: it has been
+        # known to take sessions with it. The honest version is to say when it
+        # takes effect.
+        echo "takes effect after the next reboot, or:"
+        echo "  sudo systemctl restart systemd-logind"
+        ;;
+    report)
+        # ⚠️⚠️ THIS TOOL CHECKS THAT IT IS MEASURING BEFORE IT REPORTS A NUMBER,
+        # and that is the whole reason it exists in this shape.
+        #
+        # The plan for M10 says it plainly: without a baseline every setting is
+        # superstition. What it does NOT say, and what this project has paid
+        # for four times, is that a measuring tool which quietly reads the same
+        # value twice looks exactly like a machine that is behaving. Four
+        # startup timings were wrong that way and three of them were reported as
+        # fact; a settle harness was green three times and worthless three
+        # times; a scroll probe returned one result and then four bit-identical
+        # images. So: two readings, a stated interval, and if the counter did
+        # not move it says so instead of printing a watt figure.
+        #
+        # ⚠️ AND ON A MACHINE WITH NO BATTERY IT SAYS THAT TOO. The VM has none,
+        # and "0.0 W" from a machine that cannot measure is the most expensive
+        # kind of answer.
+        secs="${2:-10}"
+        case "$secs" in ''|*[!0-9]*) echo "usage: bhctl power report [seconds]" >&2; exit 1 ;; esac
+        (( secs >= 2 )) || { echo "at least 2 seconds, or the counter cannot move" >&2; exit 1; }
+
+        echo "== power report =="
+        echo "host:     $(uname -n)   kernel $(uname -r)"
+        echo "on:       $(date '+%Y-%m-%d %H:%M:%S')"
+        echo "interval: ${secs}s"
+        echo
+
+        # ---------------------------------------------------------- the battery
+        bat=""
+        for d in /sys/class/power_supply/*; do
+            [[ -r "$d/type" ]] || continue
+            [[ "$(cat "$d/type" 2>/dev/null)" == "Battery" ]] || continue
+            bat="$d"; break
+        done
+
+        if [[ -z "$bat" ]]; then
+            echo "battery:  NONE ON THIS MACHINE — no discharge rate can be measured here."
+            echo "          Run this on the laptop; a VM cannot answer it."
+        else
+            ac_online=0
+            for a in /sys/class/power_supply/A{C,DP}*; do
+                [[ -r "$a/online" ]] && ac_online="$(cat "$a/online" 2>/dev/null || echo 0)"
+            done
+
+            # ⚠️ TWO WAYS TO GET WATTS AND THEY ARE NOT INTERCHANGEABLE.
+            # `power_now` is microwatts and is what most laptops expose;
+            # where it is missing, current_now x voltage_now is the same
+            # figure in microamps x microvolts. Guessing one is how a report
+            # ends up a million times out.
+            read_uw() {
+                if [[ -r "$bat/power_now" ]]; then
+                    cat "$bat/power_now"
+                elif [[ -r "$bat/current_now" && -r "$bat/voltage_now" ]]; then
+                    awk -v i="$(cat "$bat/current_now")" -v v="$(cat "$bat/voltage_now")" \
+                        'BEGIN { printf "%d", (i/1000000.0) * v }'
+                else
+                    echo ""
+                fi
+            }
+            e_now() { [[ -r "$bat/energy_now" ]] && cat "$bat/energy_now" || echo ""; }
+
+            uw1="$(read_uw)"; e1="$(e_now)"
+            sleep "$secs"
+            uw2="$(read_uw)"; e2="$(e_now)"
+
+            if [[ -z "$uw1" && -z "$e1" ]]; then
+                echo "battery:  present, but neither power_now nor energy_now is readable."
+                echo "          Nothing here can be believed; do not report a figure."
+            else
+                echo "battery:  $(basename "$bat")   mains=$ac_online"
+                [[ -r "$bat/capacity" ]] && echo "charge:   $(cat "$bat/capacity")%"
+
+                # The self-check, and it is printed whether it passes or not.
+                moved="no"
+                [[ -n "$e1" && -n "$e2" && "$e1" != "$e2" ]] && moved="yes"
+                [[ -n "$uw1" && -n "$uw2" && "$uw1" != "$uw2" ]] && moved="yes"
+                echo "moving:   $moved   (two readings ${secs}s apart differ)"
+
+                if [[ "$moved" == "no" ]]; then
+                    echo "⚠️  the counters did not change. On mains that is expected;"
+                    echo "    on battery it means this reading is NOT a measurement."
+                fi
+                if [[ -n "$uw2" ]]; then
+                    awk -v a="$uw1" -v b="$uw2" 'BEGIN { printf "draw:     %.2f W  (start %.2f W)\n", b/1000000.0, a/1000000.0 }'
+                fi
+                # The honest figure when it exists: energy actually spent over a
+                # known interval, rather than one instantaneous sample.
+                if [[ -n "$e1" && -n "$e2" && "$e1" != "$e2" ]]; then
+                    awk -v a="$e1" -v b="$e2" -v t="$secs" \
+                        'BEGIN { d=(a-b)/1000000.0; printf "over %ds:  %.3f Wh spent -> %.2f W average\n", t, d, d*3600.0/t }'
+                fi
+            fi
+        fi
+        echo
+
+        # ------------------------------------------------------------ the heat
+        printf 'temps:    '
+        found=0
+        for z in /sys/class/thermal/thermal_zone*; do
+            [[ -r "$z/temp" && -r "$z/type" ]] || continue
+            t="$(cat "$z/temp" 2>/dev/null)"
+            [[ "$t" =~ ^[0-9]+$ ]] || continue
+            awk -v n="$(cat "$z/type")" -v t="$t" 'BEGIN { printf "%s %.1f°C  ", n, t/1000.0 }'
+            found=1
+        done
+        (( found )) || printf 'no thermal zones on this machine'
+        echo
+
+        # ----------------------------------------------------------- the clocks
+        if [[ -r /proc/cpuinfo ]]; then
+            awk '/^cpu MHz/ { n++; s+=$4; if ($4>max) max=$4 }
+                 END { if (n) printf "clocks:   %d cores, mean %.0f MHz, peak %.0f MHz\n", n, s/n, max }' \
+                /proc/cpuinfo
+        fi
+        gov="$(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor 2>/dev/null || true)"
+        epp="$(cat /sys/devices/system/cpu/cpu0/cpufreq/energy_performance_preference 2>/dev/null || true)"
+        [[ -n "$gov" ]] && echo "governor: $gov${epp:+   epp: $epp}"
+
+        # ---------------------------------------------------------- the profile
+        if command -v powerprofilesctl >/dev/null; then
+            echo "profile:  $(powerprofilesctl get 2>/dev/null || echo '?')   (tuned-ppd)"
+        elif command -v tuned-adm >/dev/null; then
+            echo "profile:  $(tuned-adm active 2>/dev/null | sed 's/.*: //' || echo '?')"
+        else
+            echo "profile:  no power-profiles daemon on this machine"
+        fi
+        echo
+
+        # ------------------------------------------------- who is spending it
+        #
+        # ⚠️ powertop NEEDS ROOT and takes its own time to gather. It is offered
+        # rather than run silently: a tool that hangs for twenty seconds without
+        # saying why is a tool people stop running.
+        if command -v powertop >/dev/null; then
+            echo "top consumers: powertop --dump needs root. Run:"
+            echo "  sudo powertop --dump --time=$secs | sed -n '/Top 10 Power Consumers/,/^$/p'"
+        else
+            echo "top consumers: powertop is not installed"
+        fi
+        if command -v turbostat >/dev/null; then
+            echo "c-states:      sudo turbostat --quiet --show Busy%,PkgWatt,CorWatt --num_iterations 1"
+        else
+            echo "c-states:      turbostat is not installed (package: kernel-tools)"
+        fi
+        ;;
+    *)
+        usage
+        exit 1
+        ;;
+    esac
+    ;;
+wallpaper)
+    shift
+    f="$CONFIG_HOME/buchhwin/shell.json"
+    case "${1:-}" in
+    ""|show)
+        jq -r '.wallpaper.current // "none"' "$f" 2>/dev/null || echo "no settings yet"
+        ;;
+    *)
+        img="$1"
+        [[ -f "$img" ]] || { echo "no such file: $img" >&2; exit 1; }
+        # An ABSOLUTE file:// URL, because that is what the shell stores and
+        # what Image.source needs. A bare relative path would resolve against
+        # whatever directory the shell happened to start in.
+        url="file://$(readlink -f "$img")"
+        tmp="$(mktemp)"
+        jq --arg u "$url" '.wallpaper.current=$u' "$f" > "$tmp" && mv "$tmp" "$f"
+        echo "wallpaper: $url"
+        # ⚠️ ONLY WHEN THERE IS NO SHELL, and that was the whole of the "two
+        # render runs per wallpaper change" report.
+        #
+        # A running shell watches shell.json, re-derives the palette and its
+        # theming service renders — measured, four changes out of four, one run
+        # each. Doing it here as well meant THREE offscreen quickshell
+        # processes for one picture: wallpaper-palette, our render, and the
+        # shell's. No debounce can merge those; they are in different
+        # processes, and the second is not a rebound but a duplicate.
+        #
+        # The unit is the question, not `pgrep qs`: the renderer itself is a
+        # `qs`, so a process check would answer yes to its own reflection.
+        if systemctl --user is-active --quiet buchhwin-shell; then
+            echo "  the running shell re-derives and re-renders by itself"
+            echo "  (bhctl theme apply forces one, if you want it now)"
+        else
+            # No shell: rebuild the derived palette and rewrite GTK, Qt, kitty
+            # and niri from it, or nothing would happen at all.
+            run_tool wallpaper-palette && render
+            # A refusal is not a failure — the image is set, it just cannot make
+            # a readable scheme, so the previous one stays. Say so instead of
+            # letting the colours quietly not change.
+            if grep -q REFUSED /tmp/buchhwin-wallpaper-palette.log 2>/dev/null; then
+                grep REFUSED /tmp/buchhwin-wallpaper-palette.log >&2
+                echo "  the colour scheme was left as it was" >&2
+            fi
+        fi
+        ;;
+    esac
+    ;;
+niri)
+    shift
+    cfg="$CONFIG_HOME/niri/config.kdl"
+    case "${1:-apply}" in
+    apply)
+        mkdir -p "$CONFIG_HOME/niri" "$CONFIG_HOME/environment.d"
+        run_tool niri || exit 1
+        if command -v niri >/dev/null; then
+            # niri live-reloads on write, so a broken file is already loaded by
+            # the time we get here. Say so loudly rather than let it look fine.
+            if grep -q "config is valid" <<< "$(niri validate -c "$cfg" 2>&1)"; then
+                echo "config.kdl regenerated and valid"
+            else
+                echo "config.kdl regenerated but INVALID:" >&2
+                niri validate -c "$cfg" 2>&1 | sed 's/^/  /' >&2
+                exit 1
+            fi
+        else
+            echo "config.kdl regenerated (niri not installed, not validated)"
+        fi
+        ;;
+    diff)
+        tmp="$(mktemp -d)"
+        mkdir -p "$tmp/buchhwin" "$tmp/niri" "$tmp/environment.d" "$tmp/share"
+
+        # ⚠️⚠️ COPY THE SETTINGS IN, or this compares the machine against
+        # NOTHING. Config.qml:663-667 resolves shell.json out of
+        # XDG_CONFIG_HOME, so pointing that at an empty directory makes the
+        # generator fall back to the schema defaults — `_failed` is set,
+        # `settled` goes true anyway (Config.qml:121), and it renders a config
+        # for a machine nobody owns.
+        #
+        # The result was not "sometimes wrong", it was wrong on every configured
+        # machine: a single key differing from its default was enough. Measured
+        # on the test VM, where `cursor.theme` was "apple" and this printed the
+        # default "Breeze_Dark" as the incoming value. `doctor` reuses this
+        # command, so it had been reporting "niri config STALE" — and the
+        # remedy it suggested, `bhctl niri apply`, could never clear it.
+        #
+        # tests/niri-config.sh:31 has always done this correctly, and :74 names
+        # the empty case "defaults (no shell.json)" — which is exactly what this
+        # was accidentally measuring.
+        [[ -f "$CONFIG_HOME/buchhwin/shell.json" ]] \
+            && cp "$CONFIG_HOME/buchhwin/shell.json" "$tmp/buchhwin/shell.json"
+
+        # ⚠️ AND XDG_DATA_HOME WITH IT. The generator also writes a desktop-file
+        # override under $XDG_DATA_HOME/applications. Without this line a plain
+        # `bhctl niri diff` — and therefore every `bhctl doctor` — wrote into the
+        # real ~/.local/share on a machine it was only supposed to look at.
+        XDG_CONFIG_HOME="$tmp" XDG_DATA_HOME="$tmp/share" run_tool niri \
+            || { rm -rf "$tmp"; exit 1; }
+
+        # ⚠️ PUT THE REAL DIRECTORIES BACK BEFORE COMPARING, or this never says
+        # "no changes". The generator writes absolute paths out of
+        # XDG_CONFIG_HOME — `LG_CONFIG_FILE` is one — and this runs it against a
+        # temporary directory, so that line differed on every single run
+        # regardless of whether anything had actually changed.
+        #
+        # ⚠️ The data home is substituted FIRST and it has to be: "$tmp/share"
+        # begins with "$tmp", so replacing the shorter one first would rewrite
+        # it to "$CONFIG_HOME/share" and reintroduce the very difference this
+        # is here to remove.
+        # ⚠️ SAY SO WHEN THERE IS NOTHING TO COMPARE. `diff` has its stderr
+        # discarded below — it has to be, or a missing colors.kdl would be
+        # reported as a difference — and that means a missing file on EITHER
+        # side came out as: no output, non-zero exit, not a word. `doctor` reads
+        # an empty answer as "no differences" and printed "niri config ok",
+        # so a diff that could not run at all looked exactly like a clean one.
+        # ⚠️ AND `diff` ITSELF HAS TO EXIST. The comparison below discards
+        # diff's stderr — it has to, or a missing optional include would be
+        # reported as a difference — and that swallowed "diff: command not
+        # found" too. A minimal Fedora image does not ship diffutils, so in the
+        # CI container this printed absolutely nothing, exited non-zero, and the
+        # test above it could only report "0 bytes of output". Two days of
+        # `doctor` saying "niri config ok" would have come from the same hole.
+        command -v diff >/dev/null || {
+            echo "diff is not installed (dnf install diffutils)" >&2
+            rm -rf "$tmp"; exit 1
+        }
+        if [[ ! -f "$tmp/niri/config.kdl" ]]; then
+            echo "the generator produced no config.kdl to compare against" >&2
+            rm -rf "$tmp"; exit 1
+        fi
+        if [[ ! -f "$cfg" ]]; then
+            echo "no $cfg on this machine — run: bhctl niri apply" >&2
+            rm -rf "$tmp"; exit 1
+        fi
+        sed -i -e "s|$tmp/share|$DATA_HOME|g" -e "s|$tmp|$CONFIG_HOME|g" \
+            "$tmp/niri/config.kdl"
+        if diff -u "$cfg" "$tmp/niri/config.kdl" 2>/dev/null; then
+            echo "no changes"
+        fi
+        rm -rf "$tmp"
+        ;;
+    *) usage; exit 2 ;;
+    esac
+    ;;
+binds)
+    # ⚠️ THE ONE HANDLE THAT UNFREEZES A MACHINE. `doctor` can only report that
+    # shell.json carries its own copy of the key bindings; this removes it, and
+    # from then on the built-in set applies again — including every key added
+    # since the file was written.
+    #
+    # ⚠️ It DELETES a key from his settings file, so it says what it is about to
+    # do and only does it when asked by name. Anything he bound himself is in
+    # that list too, and there is no way to tell his entries from the frozen
+    # ones — see Migrations.qml step 7 -> 8, which only removes the list when
+    # every single entry is one of ours.
+    case "${2:-}" in
+    reset)
+        cfg="$CONFIG_HOME/buchhwin/shell.json"
+        [[ -f "$cfg" ]] || { echo "no shell.json — nothing to reset"; exit 0; }
+        # ⚠️⚠️ THE RESCUE COULD FAIL AND STILL REPORT SUCCESS. This file runs
+        # under `set -uo pipefail` and deliberately NOT `-e`, so the edit
+        # failing left the `exec` at the end of this branch to run anyway. It
+        # printed "config.kdl regenerated and valid" over a settings file whose
+        # frozen bindings had not been touched, on exactly the machine where
+        # somebody is already having a bad day. The guard below is why that
+        # cannot happen again, and it is checked from the REPORT rather than
+        # only from an exit code — a tool that refuses exits 0 and says so in
+        # its report, which is the shape run_tool already knows.
+        #
+        # ⚠️ THE EDIT IS QML NOW, NOT python3 — rule 2, and rewriting a settings
+        # file is configuration logic by any reading. shell/tools/binds.qml
+        # carries the reason it must not import config/: this is the command you
+        # run when shell.json is what crashes quickshell, so the rescue may not
+        # depend on the adapter that crashes on it.
+        rm -f /tmp/buchhwin-binds.log
+        # ⚠️ A SUBSHELL, not `VAR=x run_tool …`. A variable assignment in front
+        # of a FUNCTION call is not scoped to that call — it stays set in the
+        # shell afterwards — so the counting run further down would inherit
+        # `reset` and delete bindings during `bhctl doctor`. A report that edits
+        # your settings is the worst possible shape for this file.
+        ( export BUCHHWIN_BINDS_MODE=reset BUCHHWIN_BINDS_FILE="$cfg"
+          run_tool binds )
+        rc=$?
+        verdict="$(head -1 /tmp/buchhwin-binds.log 2>/dev/null || true)"
+        case "$verdict" in
+        removed\ *)
+            echo "binds: ${verdict#removed } frozen entries removed — the built-in set applies again" ;;
+        none)
+            echo "binds: already the built-in set — nothing to do"
+            exit 0 ;;
+        *)
+            echo "binds: shell.json was NOT changed (${verdict:-no report}, exit $rc)" >&2
+            exit "${rc:-1}" ;;
+        esac
+        # The generator has to run, or the file is right and the compositor
+        # still has yesterday's config. This is the half people forget.
+        exec "$0" niri apply
+        ;;
+    *)  echo "usage: bhctl binds reset" >&2; exit 2 ;;
+    esac
+    ;;
+
+doctor)
+    printf 'niri        %s\n' "$(niri --version 2>/dev/null | head -1 || echo MISSING)"
+    printf 'quickshell  %s\n' "$(qs --version 2>/dev/null | cut -d, -f1 || echo MISSING)"
+    printf 'shell unit  %s\n' "$(systemctl --user is-active buchhwin-shell 2>/dev/null || echo inactive)"
+    printf 'config      %s\n' "$([[ -f $CONFIG_HOME/buchhwin/shell.json ]] && echo ok || echo MISSING)"
+
+    # ─────────────────────────────────────────────────────────────────────
+    # ⚠️⚠️ WHY A SWITCH WOULD SPRING BACK, AND WHY A SLIDER WOULD DO NOTHING.
+    #
+    # His two reports are one shape: "manche switches gehen nicht wie z.b. der    # english-ok: the report, quoted
+    # dock switch … der schalter springt zurück", and later "die slider egal      # english-ok: the report, quoted
+    # welcher macht nix … ich weiß nicht ob das optisch ist oder nicht".          # english-ok: the report, quoted
+    #
+    # Every one of the rows writes on the machines this has been measured on —
+    # tests/switch-writes.sh drives all of them and none refuses. So the fault is
+    # not the write path; it is a shell.json that cannot be written INTO.
+    #
+    # `Config.set` walks the dotted path. A section that is `null` in the file
+    # makes the walk stop and the write is refused — for EVERY row over that
+    # block at once, which is exactly what "egal welcher" means.
+    #
+    # ⚠️ A MISSING BLOCK IS NOT THE FAULT and must not be reported as one. Absent
+    # means "use the default" and works perfectly; `null` is the broken state.
+    # Reporting both would send the next round after twenty healthy keys.
+    #
+    # ⚠️ NO PARSER, ON PURPOSE. A null is a literal in the file, and jq is not a
+    # dependency of this script. Rule 2 of the project: no configuration logic in
+    # anything but QML — reading a line is not configuration logic, parsing the
+    # document would be.
+    cfgfile="$CONFIG_HOME/buchhwin/shell.json"
+    if [[ -f "$cfgfile" ]]; then
+        nulls="$(grep -oE '"[A-Za-z_][A-Za-z0-9_]*"[[:space:]]*:[[:space:]]*null' "$cfgfile" 2>/dev/null \
+                 | sed 's/"\([^"]*\)".*/\1/' | sort -u || true)"
+        if [[ -n "$nulls" ]]; then
+            printf 'settings    BROKEN — these are null in shell.json, and every row over them refuses:\n'
+            printf '              %s\n' $nulls
+            # ⚠️ THE FIX HAS TO NAME SOMETHING THAT EXISTS. The first draft of
+            # this line said `bhctl reset settings`, and there is no such verb —
+            # bhctl knows theme, location, calendar, drive, greeter, power,
+            # wallpaper, niri, binds and doctor. A diagnosis that ends in an
+            # invented command is worse than one that ends in nothing: it sends
+            # the reader off to debug the tool instead of the fault.
+            printf '              fix: delete those lines from the file above.\n'
+            printf '              An absent section is fine — it means "use the default".\n'
+            printf '              Only a null one breaks, and it breaks every row over it.\n'
+        else
+            printf 'settings    no null section in shell.json\n'
+        fi
+    fi
+
+    # What the shell itself recorded when a write was turned away. The signal is
+    # new; the journal line is older, so this reads both spellings.
+    if command -v journalctl >/dev/null; then
+        refused="$(journalctl --user -u buchhwin-shell --since today 2>/dev/null \
+                   | grep -c 'Config.set: no such' || true)"
+        if [[ "${refused:-0}" -gt 0 ]]; then
+            printf 'settings    %s refused write(s) today — the paths are in:\n' "$refused"
+            printf '              journalctl --user -u buchhwin-shell --since today | grep "Config.set"\n'
+        else
+            printf 'settings    no refused write recorded today\n'
+        fi
+    fi
+    if [[ -f "$CONFIG_HOME/niri/config.kdl" ]]; then
+        if command -v niri >/dev/null \
+           && grep -q "config is valid" <<< "$(niri validate -c "$CONFIG_HOME/niri/config.kdl" 2>&1)"; then
+            printf 'niri config valid (%s lines)\n' "$(wc -l < "$CONFIG_HOME/niri/config.kdl")"
+        else
+            printf 'niri config INVALID — run: bhctl niri apply\n'
+        fi
+    else
+        printf 'niri config MISSING — run: bhctl niri apply\n'
+    fi
+    # ─────────────────────────────────────────────────────────────────────
+    # ⚠️⚠️ IS SOMETHING ELSE DRAWING A BAR?
+    #
+    # He asked "wieso ist die da? was soll das in der vm?" about a bar across      # english-ok: the question, quoted
+    # the top of his screen, and then answered it himself: "es sieht wie waybar    # english-ok: his answer, quoted
+    # aus". It was waybar. Fedora's niri package recommends it, its shipped    # english-ok: his answer, quoted
+    # config spawns it at login, and on a machine where niri was started once
+    # before this desktop generated its own config, that first session had it.
+    #
+    # ⚠️ TWO QUESTIONS, NOT ONE. Removing the package does not close the window:
+    # the process keeps drawing from a binary that is no longer on disk. Anyone
+    # reading "not installed" and looking at a bar would go looking for the
+    # fault in OUR shell, which is the wrong half of the machine entirely.
+    #
+    # ⚠️ AND IT MATTERS BEYOND TIDINESS: waybar prints the machine's IP address
+    # next to its clock, so it is on every screenshot that leaves this machine.
+    # ─────────────────────────────────────────────────────────────────────
+    # ⚠️ WHY THE PER-PROGRAMME SOUND LIST CAN BE EMPTY, in numbers rather than a
+    # shrug. He reported "der pfeil ... erkennt aber nichts obwohl spotify       # english-ok: the report, quoted
+    # offen ist", and the only way to tell "pipewire has nothing" from "we drop
+    # what pipewire has" was to run pw-dump by hand and compare. A list that can
+    # be empty has to be able to say which of the two it is — rule 5.
+    if command -v pw-dump >/dev/null; then
+        classes="$(pw-dump 2>/dev/null | grep -o '"media.class": "[^"]*"' | sed 's/.*: "//; s/"//' || true)"
+        streams="$(grep -c '^Stream/Output/Audio$' <<< "$classes" || true)"
+        sinks="$(grep -c '^Audio/Sink$' <<< "$classes" || true)"
+        printf 'audio      %s playback stream(s), %s sink(s) in pipewire\n' \
+               "${streams:-0}" "${sinks:-0}"
+        if [ "${streams:-0}" -gt 0 ]; then
+            printf '             the quick panel should list %s programme(s) under the sound arrow.\n' "${streams}"
+            printf '             If it lists none, that is ours, not pipewire.\n'
+        fi
+    fi
+
+    unwanted_list="$REPO_DIR/packages/dnf-unwanted.txt"
+    if [[ -f "$unwanted_list" ]]; then
+        foreign_run=""; foreign_pkg=""
+        while read -r p; do
+            [[ -n "$p" ]] || continue
+            pgrep -x "$p" >/dev/null 2>&1 && foreign_run+=" $p"
+            rpm -q "$p" >/dev/null 2>&1 && foreign_pkg+=" $p"
+        done < <(grep -vE '^[[:space:]]*(#|$)' "$unwanted_list" | sed 's/[[:space:]]*#.*//' | tr -d ' ')
+        if [[ -n "$foreign_run" ]]; then
+            printf 'foreign    ON SCREEN RIGHT NOW:%s\n' "$foreign_run"
+            printf '             this desktop replaces it. Close it and remove it:\n'
+            printf '             pkill -x%s && sudo dnf remove%s\n' "$foreign_run" "$foreign_run"
+        elif [[ -n "$foreign_pkg" ]]; then
+            printf 'foreign    installed but not running:%s\n' "$foreign_pkg"
+            printf '             sudo dnf remove%s\n' "$foreign_pkg"
+        else
+            printf 'foreign    no replaced program is installed or running\n'
+        fi
+    fi
+    # ─────────────────────────────────────────────────────────────────────
+    # ⚠️ IS THIS MACHINE STILL LISTENING TO THE DEFAULTS?
+    #
+    # He reported on 07.08.2026 that Super+F does not toggle fullscreen and that
+    # the window title bars are still there. Both work on a fresh install —
+    # `Mod+F` is bound, `toggle-windowed-fullscreen` is a real niri action, the
+    # generated config validates, and `prefer-no-csd` is in it. So the fault is
+    # not in the code; it is that HIS machine never received them.
+    #
+    # There are exactly two ways that happens, and neither says a word on its
+    # own. This is where they get to.
+    cfg="$CONFIG_HOME/buchhwin/shell.json"
+    kdl="$CONFIG_HOME/niri/config.kdl"
+
+    if [[ -f "$cfg" ]]; then
+        # ⚠️ ONE: a `binds` array in shell.json FREEZES the keys for ever.
+        # It should not be there at all. It got there when `keys.binds` was a
+        # `var` inside a nested JsonObject and carried the defaults as its own
+        # default value — so the file was written with all 63 of them in it.
+        # "The file wins as soon as it says anything" then means every LATER
+        # default is ignored: a key added months afterwards simply never
+        # appears. That is the whole of his fullscreen report.
+        # ⚠️ THE SAME TOOL AS `bhctl binds reset`, in its counting mode. One
+        # reader for one fact: a second implementation here is how "doctor says
+        # ok, reset says there are 63" happens, and the two would be read by the
+        # same person five seconds apart.
+        #
+        # ⚠️ IT COSTS A quickshell START, and that is measured rather than waved
+        # through — see the note in the handouts. It buys the last python3 out
+        # of this file, and doctor is not on any hot path.
+        rm -f /tmp/buchhwin-binds.log
+        ( export BUCHHWIN_BINDS_MODE=count BUCHHWIN_BINDS_FILE="$cfg"
+          run_tool binds ) || true
+        n_binds="$(head -1 /tmp/buchhwin-binds.log 2>/dev/null || true)"
+        n_binds="${n_binds#count }"
+        # `=~` rather than an extglob pattern: this file never runs
+        # `shopt -s extglob`, and `+([0-9])` without it is matched literally —
+        # so every answer would take the "not readable" branch.
+        if ! [[ "$n_binds" =~ ^[0-9]+$ ]]; then
+            printf 'binds       shell.json is not readable as JSON\n'
+        elif [[ "$n_binds" == "0" ]]; then
+            printf 'binds       ok (the built-in set)\n'
+        else
+            printf 'binds       FROZEN: %s in shell.json — new keys will NEVER appear\n' "$n_binds"
+            printf '            run: bhctl binds reset\n'
+        fi
+
+        # TWO: the generated config does not match the settings it came from.
+        # A `bhctl theme apply` does not rewrite config.kdl, and neither does
+        # copying the repo across — only `bhctl niri apply` does.
+        #
+        # ⚠️ THE CONTENT, NOT THE TIMESTAMP. The first version compared mtimes,
+        # and it cried wolf immediately: `bhctl binds reset` writes shell.json
+        # and then regenerates — but the generator does not rewrite a file whose
+        # content is unchanged, so config.kdl keeps its old mtime and looked
+        # stale while being perfectly current. A check that is wrong when
+        # everything is fine gets ignored the day it is right, which is the same
+        # failure the hand-typed verb list in tools/smoke.qml had this week.
+        #
+        # `bhctl niri diff` already answers the real question: generate into a
+        # temporary directory and compare. Reusing it also means the two can
+        # never disagree.
+        if [[ -f "$kdl" ]]; then
+            # ⚠️ THE EXIT CODE, NOT JUST THE OUTPUT. This used to test only
+            # whether the diff printed anything, so a `niri diff` that could not
+            # run — no generator output, no config to compare — printed nothing
+            # and was read as "no differences". The one line meant to prove the
+            # generated config is current was green precisely when it knew least.
+            diffout="$("$0" niri diff 2>&1)"; diffrc=$?
+            if (( diffrc != 0 )); then
+                printf 'niri config UNKNOWN — the comparison could not run\n'
+                printf '%s\n' "$diffout" | head -2 | sed 's/^/            /'
+            elif [[ -n "$(grep -v '^no changes$' <<< "$diffout")" ]]; then
+                printf 'niri config STALE — it does not match shell.json\n'
+                printf '            run: bhctl niri apply   (see: bhctl niri diff)\n'
+            else
+                printf 'niri config ok (matches shell.json)\n'
+            fi
+            # And the two things he named, checked directly rather than implied.
+            grep -q "Mod+F " "$kdl" \
+                && printf 'Mod+F       ok (in config.kdl)\n' \
+                || printf 'Mod+F       MISSING from config.kdl — run: bhctl niri apply\n'
+            grep -q "prefer-no-csd" "$kdl" \
+                && printf 'no title bar ok (prefer-no-csd in config.kdl)\n' \
+                || printf 'no title bar MISSING — run: bhctl niri apply\n'
+        fi
+    fi
+    # ─────────────────────────────────────────────────────────────────────
+
+    # ⚠️ The SERVICE line, not the first line containing an "@". systemd-analyze
+    # prints two sentences of explanation first — and one of them contains the
+    # word "@" — so the old grep reported "The time when unit became active or
+    # started is printed after the @ character" as though it were a measurement.
+    # A number that is not a number is worse than no number.
+    printf 'startup     %s\n' "$(systemd-analyze --user critical-chain buchhwin-shell.service 2>/dev/null | grep -m1 '^buchhwin-shell\.service' | sed 's/^ *//' || echo 'not measured')"
+    # ---------------------------------------------------------------- graphics
+    #
+    # ⚠️ PRINTED ON EVERY MACHINE, INCLUDING ONES WITH NO NVIDIA. A doctor that
+    # goes silent when there is nothing to report is indistinguishable from one
+    # that forgot the check — and this section is also the only place, over SSH,
+    # where the value for `gpu.renderDevice` can be looked up.
+    #
+    # Every command here answers as an ordinary user: sysfs reads and
+    # `mokutil --sb-state`. `doctor` must never need a password.
+    gpus=""; nvaddr=""; othergpu=0
+    for d in /sys/bus/pci/devices/*; do
+        [[ -r "$d/class" && -r "$d/vendor" ]] || continue
+        # 0x03xxxx is a display controller. The class test is what keeps an
+        # NVIDIA card's HDMI audio function — same vendor, class 0x0403 — from
+        # being counted as a second GPU. tests/gpu-detect.sh has that fixture.
+        [[ "$(<"$d/class")" == 0x03* ]] || continue
+        v="$(<"$d/vendor")"
+        case "$v" in
+            0x10de) n=NVIDIA; nvaddr="$(basename "$d")" ;;
+            0x1002) n=AMD;    othergpu=$(( othergpu + 1 )) ;;
+            0x8086) n=Intel;  othergpu=$(( othergpu + 1 )) ;;
+            *)      n="$v";   othergpu=$(( othergpu + 1 )) ;;
+        esac
+        gpus+="${gpus:+ · }$n ($(basename "$d"))"
+    done
+    if [[ -n "$nvaddr" && $othergpu -gt 0 ]]; then
+        printf 'gpu         %s — hybrid\n' "$gpus"
+    else
+        printf 'gpu         %s\n' "${gpus:-none detected}"
+    fi
+
+    # The certificate akmods signs modules with. Named once because it appears
+    # three times below, and because a path is not a place for a line break.
+    mokkey=/etc/pki/akmods/certs/public_key.der   # english-ok: .der is the certificate encoding
+    if [[ -n "$nvaddr" ]]; then
+        nvver="$(cat /proc/driver/nvidia/version 2>/dev/null | head -1 \
+                 | grep -oE '[0-9]+\.[0-9]+(\.[0-9]+)?' | head -1)"
+        if [[ -d /sys/module/nvidia ]]; then
+            printf 'nvidia      module loaded%s\n' "${nvver:+ ($nvver)}"
+        elif compgen -G "/lib/modules/$(uname -r)/extra/nvidia/nvidia.ko*" >/dev/null; then
+            printf 'nvidia      built for %s, NOT loaded\n' "$(uname -r)"
+        else
+            printf 'nvidia      no module built for %s\n' "$(uname -r)"
+        fi
+
+        # ⚠️ THE FOUR-PART CONDITION, same as the card in the settings window,
+        # so the two can never disagree about whether there is a problem.
+        if command -v mokutil >/dev/null; then
+            if grep -q "SecureBoot enabled" <<< "$(mokutil --sb-state 2>/dev/null)"; then
+                if [[ -d /sys/module/nvidia ]]; then
+                    printf 'secureboot  enabled, and the module loads\n'
+                elif grep -q "already enrolled" \
+                          <<< "$(mokutil --test-key "$mokkey" 2>/dev/null)"; then
+                    printf 'secureboot  enabled, key enrolled — but the module is not loaded\n'
+                elif [[ -n "$(mokutil --list-new 2>/dev/null)" ]]; then
+                    printf 'secureboot  enabled, an enrolment is WAITING — reboot and answer the blue screen\n'
+                else
+                    printf 'secureboot  enabled, akmods key NOT enrolled\n'
+                    printf '            run: sudo mokutil --import %s\n' "$mokkey"
+                fi
+                # Said every time, because the report is read by somebody who
+                # has just seen the word "blocking" and needs to know how much
+                # it costs before deciding to care.
+                printf '            (the desktop is unaffected: niri draws on the integrated GPU)\n'
+            else
+                printf 'secureboot  off — the module needs no signature\n'
+            fi
+        else
+            printf 'secureboot  unknown (mokutil is not installed)\n'
+        fi
+    fi
+
+    # The render device niri is actually configured with, and the driver beside
+    # each candidate — the settings window shows the same pairing, and this is
+    # how to find it over a connection that has no settings window.
+    #
+    # ⚠️⚠️ READ FROM THE GENERATED config.kdl, NOT FROM shell.json, and the
+    # change is not only about deleting a python3. The two can disagree: a
+    # setting written but never applied (`bhctl niri apply` not run, or the
+    # generator refused) leaves shell.json saying one thing and the compositor
+    # doing another. A doctor that reports the INTENTION while the machine acts
+    # on something else sends the reader down the wrong path — which is the
+    # whole failure mode this report exists to prevent.
+    #
+    # ⚠️ AND IT IS NOT CONFIG LOGIC IN BASH. Nothing here decides anything; it
+    # reads back one line of a file we generated, to say what took effect.
+    # tools/niri.qml writes it in exactly one shape, and only one:
+    #
+    #     debug {
+    #         render-drm-device "/dev/dri/by-path/…-render"
+    #     }
+    rd="$(sed -n 's/^[[:space:]]*render-drm-device[[:space:]]*"\(.*\)".*$/\1/p' \
+             "$CONFIG_HOME/niri/config.kdl" 2>/dev/null | head -1)"
+    printf 'render      %s\n' "${rd:-niri chooses}"
+    for n in /dev/dri/renderD*; do
+        [[ -e "$n" ]] || continue
+        b="$(basename "$n")"
+        p="$(readlink -f "/sys/class/drm/$b/device" 2>/dev/null)"
+        drv="$(basename "$(readlink -f "/sys/class/drm/$b/device/driver" 2>/dev/null)")"
+        path="$n"
+        [[ -n "$p" && -e "/dev/dri/by-path/pci-$(basename "$p")-render" ]] \
+            && path="/dev/dri/by-path/pci-$(basename "$p")-render"
+        printf '            %s  (%s)\n' "$path" "${drv:-unknown}"
+    done
+
+    # ------------------------------------------------------------- monitors
+    #
+    # ⚠️ WRITTEN FOR A REPORT NOBODY COULD ANSWER FROM HERE: "HDMI Monitore
+    # werden nicht erkannt, DisplayPort schon". The obvious suspect was the       # english-ok: his report, quoted
+    # config generator, and it is innocent — tools/niri.qml cannot switch an
+    # output off, has no `off`, no allow-list, and writes nothing at all when
+    # `outputs` is empty. The next suspect was hybrid graphics, and that one
+    # died too: the machine it happens on is an EliteBook with no discrete GPU.
+    #
+    # So this does not guess. It puts the two lists side by side — what the
+    # KERNEL sees on the card, and what NIRI is willing to draw on — because the
+    # gap between them names the layer the fault is in:
+    #
+    #   not in either        the cable, the port, or a dock that needs a driver
+    #                        (DisplayLink appears as no DRM connector at all)
+    #   kernel: disconnected the cable or the monitor, not this desktop
+    #   kernel yes, niri no  a compositor problem, and `outputs` can address it
+    #   both, wrong mode     HDMI 1.4b does 4K at 30 Hz and no faster
+    #
+    # It is deliberately in bhctl rather than the settings window: the person
+    # who needs it has a monitor that is not there, and may be reading this over
+    # a connection with no desktop at all.
+    printf '\n'
+    have_conn=0
+    for c in /sys/class/drm/card*-*; do
+        [[ -e "$c/status" ]] || continue
+        have_conn=1
+        cn="$(basename "$c")"
+        cn="${cn#card*-}"          # card1-HDMI-A-1 -> HDMI-A-1
+        st="$(cat "$c/status" 2>/dev/null)"
+        mode="$(head -1 "$c/modes" 2>/dev/null)"
+        printf 'connector   %-14s %-13s %s\n' "$cn" "$st" "${mode:-—}"
+    done
+    (( have_conn )) || printf 'connector   none under /sys/class/drm\n'
+
+    # ⚠️ NIRI_SOCKET IS SET HERE RATHER THAN ASSUMED. Over ssh it is not in the
+    # environment, and without it `niri msg` answers "are you running this
+    # within niri?" — which reads as a dead compositor rather than a missing
+    # variable, and cost this project an hour once already.
+    if command -v niri >/dev/null; then
+        if [[ -z "${NIRI_SOCKET:-}" ]]; then
+            NIRI_SOCKET="$(ls "${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"/niri.*.sock 2>/dev/null | head -1)"
+            export NIRI_SOCKET
+        fi
+        # ⚠️⚠️ `niri msg outputs` WITHOUT `-j`, AND THAT IS THE WHOLE POINT.
+        # This used to be `-j` piped into an embedded python3 script that
+        # reassembled the mode out of `current_mode` (an INDEX into `modes`) and
+        # `refresh_rate` (milli-hertz). Every one of those steps was a chance to
+        # be wrong, and one of them was: `%.3g` printed 74.994 Hz as "75".
+        #
+        # niri already formats exactly this. Measured, one output, verbatim:
+        #
+        #   Output "Red Hat, Inc. QEMU Monitor Unknown" (Virtual-1)
+        #     Current mode: 1280x800 @ 74.994 Hz (preferred)
+        #     Variable refresh rate: not supported
+        #     Logical position: 0, 0
+        #     Scale: 1
+        #
+        # So there is no parser here at all, which also takes the last python3
+        # out of this command. Rule 3's first route — ask the running programme,
+        # it knows its own truth better than our retelling of it.
+        #
+        # ⚠️ THE INDENT IS ADDED, not niri's. Every other line in this report is
+        # `label       value`, and an unindented block in the middle of it reads
+        # as a different program's output — which it is, and that is precisely
+        # what should not show.
+        nout="$(niri msg outputs 2>/dev/null)"
+        if [[ -n "$nout" ]]; then
+            printf 'niri sees\n'
+            # ⚠️ THE MODE LIST IS COUNTED, NOT PRINTED. niri lists every mode a
+            # monitor advertises — 26 on the test machine, and this report is
+            # read on a laptop with three screens. Eighty lines of modes is not
+            # a diagnosis, it is where the diagnosis hides. The COUNT stays,
+            # because "0 modes" and "26 modes" are different faults.
+            printf '%s\n' "$nout" | awk '
+                /^[[:space:]]*Available modes:/ { inmodes = 1; n = 0; next }
+                inmodes && /^Output / { printf "      (%d modes)\n", n; inmodes = 0 }
+                inmodes { n++; next }
+                { print }
+                END { if (inmodes) printf "      (%d modes)\n", n }
+            ' | sed 's/^/            /'
+        else
+            printf 'niri sees   no answer (NIRI_SOCKET=%s)\n' "${NIRI_SOCKET:-unset}"
+        fi
+    fi
+
+    # ⚠️ THE LAST THEMING RUN, WHICH NOTHING OUTSIDE THE SETTINGS WINDOW COULD
+    # SEE. services/Theming.qml has said "bhctl doctor can read it" in a comment
+    # since the day it was written, and bin/bhctl never touched the file — so a
+    # generator that REFUSED to install a config left one banner inside a window
+    # you may not be able to open, and nothing at all over SSH. The refusal path
+    # is the one that matters: it means the settings you just changed did not
+    # apply and the previous config is still live.
+    tlog=/tmp/buchhwin-theming.log
+    if [[ -f "$tlog" ]]; then
+        if grep -qE 'REFUSED|FAILED' "$tlog"; then
+            printf 'last theme  the last run did NOT apply:\n'
+            grep -E 'REFUSED|FAILED' "$tlog" | tail -1 | sed 's/^/            /'
+            printf '            after fixing it: open the settings window and press "Try again"\n'
+        else
+            printf 'last theme  %s\n' "$(tail -1 "$tlog")"
+        fi
+    else
+        printf 'last theme  has not run yet in this session\n'
+    fi
+
+    # ⚠️ THE PRICE OF THE TWO COPRs, paid where it can be seen.
+    #
+    # starship and lazygit are the only two packages here that Fedora does not
+    # ship, and taking a COPR means taking on somebody else's repository going
+    # away. That risk was accepted on the condition that it says so out loud
+    # rather than leaving two programs quietly missing after an update.
+    for pair in "starship:atim/starship" "lazygit:atim/lazygit"; do
+        p="${pair%%:*}"; repo="${pair##*:}"
+        if command -v "$p" >/dev/null 2>&1; then
+            # ⚠️ Cut to the version itself. lazygit --version answers with a
+            # whole line of build metadata — "commit=, build date=, build
+            # source=unknown, version=0.47.2, os=linux…" — and a doctor report
+            # that is mostly noise is a report nobody reads to the end.
+            printf '%-11s %s\n' "$p" "$("$p" --version 2>/dev/null | head -1 \
+                | grep -oE '[0-9]+\.[0-9]+(\.[0-9]+)?' | head -1)"
+        elif dnf repoquery --qf '%{name}' "$p" >/dev/null 2>&1 &&
+             [[ -n "$(dnf repoquery --qf '%{name}' "$p" 2>/dev/null)" ]]; then
+            printf '%-11s MISSING but available — sudo dnf install %s\n' "$p" "$p"
+        else
+            printf '%-11s MISSING and the copr %s does not resolve\n' "$p" "$repo"
+        fi
+    done
+    # Every generated theme needs something pointing at it. This is the same
+    # question tests/reachable.sh asks, asked on the machine you are sitting at.
+    miss=""
+    grep -qE '^ *include  *theme\.conf' "$CONFIG_HOME/kitty/kitty.conf" 2>/dev/null || miss+=" kitty"
+    grep -q 'colors/buchhwin\.conf' "$CONFIG_HOME/qt6ct/qt6ct.conf" 2>/dev/null || miss+=" qt6ct"
+    grep -qE '^color_theme *= *"buchhwin"' "$CONFIG_HOME/btop/btop.conf" 2>/dev/null || miss+=" btop"
+    grep -q 'buchhwin\.toml' "$CONFIG_HOME/alacritty/alacritty.toml" 2>/dev/null || miss+=" alacritty"
+    grep -q 'buchhwin\.conf' "$CONFIG_HOME/tmux/tmux.conf" 2>/dev/null || miss+=" tmux"
+    grep -q 'buchhwin' "$CONFIG_HOME/bat/config" 2>/dev/null || miss+=" bat"
+    grep -q 'buchhwin-delta' "$CONFIG_HOME/git/config" 2>/dev/null || miss+=" delta"
+    if [[ -n "$miss" ]]; then
+        printf 'theming     no pointer for:%s (their colours never arrive)\n' "$miss"
+    else
+        printf 'theming     every generated theme is pointed at\n'
+    fi
+    # Two things that are invisible until they are counted.
+    #
+    # A second shell draws its own bar and its own notch on top of the first
+    # one's, and looks exactly like the first one behaving strangely — which is
+    # how a stray instance went unnoticed here for half an hour of debugging.
+    shells=$(pgrep -c -x qs 2>/dev/null || echo 0)
+    if (( shells > 1 )); then
+        printf 'shell       \033[38;5;203m%s instances running\033[0m — one of them is a stray\n' "$shells"
+    fi
+
+    # And the directories quickshell leaves behind, in a tmpfs, one per run.
+    inst=$(ls "${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/quickshell/by-id" 2>/dev/null | wc -l)
+    if (( inst > 20 )); then
+        printf 'instances   %s directories left behind — run `bhctl prune`\n' "$inst"
+    else
+        printf 'instances   %s directory(ies), nothing to clean up\n' "$inst"
+    fi
+
+    # "as little XWayland as possible" is only a claim until something counts.
+    if command -v niri >/dev/null && niri msg -j windows >/dev/null 2>&1; then
+        if pgrep -x Xwayland >/dev/null 2>&1; then
+            printf 'xwayland    RUNNING — these windows are not Wayland-native:\n'
+            command -v xlsclients >/dev/null && xlsclients 2>/dev/null | sed 's/^/            /'
+        else
+            printf 'xwayland    not running (every window is Wayland-native)\n'
+        fi
+    fi
+    ;;
+"prune")
+    # Called by buchhwin-shell.service before every start, and by hand. The
+    # numbers are printed because a cleanup that says nothing is one nobody can
+    # tell apart from a cleanup that did nothing.
+    d="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/quickshell/by-id"
+    before=$(ls "$d" 2>/dev/null | wc -l)
+    prune_instances
+    after=$(ls "$d" 2>/dev/null | wc -l)
+    echo "quickshell instance directories: $before → $after"
+    ;;
+
+"shell")
+    [[ "${2:-}" == "reset" ]] || { usage; exit 2; }
+    cp "$CONFIG_HOME/buchhwin/shell.json" "$CONFIG_HOME/buchhwin/shell.json.bak" 2>/dev/null
+    # ⚠️ NO "version" KEY, deliberately. This used to write 1 while the
+    # installer wrote 2 and the code said 3 — three places claiming to know the
+    # schema version, two of them wrong. A file without one reads as 0 and is
+    # migrated forward, which is the same path a genuinely old file takes, so
+    # the only place that has to know the number is the code.
+    printf '{\n  "theme": { "palette": "everforest-dark", "accent": "green" }\n}\n' \
+        > "$CONFIG_HOME/buchhwin/shell.json"
+    systemctl --user restart buchhwin-shell 2>/dev/null
+    echo "settings reset (previous kept as shell.json.bak)"
+    ;;
+"update")
+    # ⚠️ REFUSES ON A DIRTY TREE. `git pull` on top of local edits either
+    # conflicts or silently merges, and the person running this is asking for
+    # "make it current", not "resolve my half-finished change". Saying so costs
+    # one line; the other way costs an evening.
+    cd "$REPO_DIR" || exit 2
+    if ! git rev-parse --git-dir >/dev/null 2>&1; then
+        echo "$REPO_DIR is not a git checkout — nothing to pull" >&2
+        echo "  (this is normal on a machine the tree was rsynced to)" >&2
+        exit 1
+    fi
+    if [[ -n "$(git status --porcelain)" ]]; then
+        echo "there are uncommitted changes here — refusing to pull over them" >&2
+        git status --short >&2
+        exit 1
+    fi
+    before="$(git rev-parse --short HEAD)"
+    # ⚠️⚠️ THE DIVERGED CLONE IS NAMED HERE, BECAUSE "pull failed" NAMES NOTHING.
+    # After this repository's history was rewritten with `git-filter-repo` to get
+    # a leaked password out of it, every clone made before that run shares NO
+    # COMMON ANCESTOR with origin any more — git sees two unrelated histories and
+    # `--ff-only` is exactly the form that refuses them:
+    #
+    #     hint: Diverging branches can't be fast-forwarded
+    #     fatal: Not possible to fast-forward, aborting.
+    #
+    # That happened on a real machine, and the two lines it printed sent nobody
+    # anywhere. The warning had been sitting in a handout the whole time, which
+    # is the lesson: a warning in a document does nothing while the person is
+    # standing in front of the error. The place to say it is here.
+    #
+    # ⚠️ FETCH FIRST, or there is nothing to compare against — `git pull` would
+    # fetch and fail in the same breath, and the merge-base question could only
+    # be asked after the answer stopped mattering. A fetch that fails (no
+    # network) is not treated as a fault: the pull below gets to give its own
+    # error, which is the right one for being offline.
+    upstream="$(git rev-parse --abbrev-ref --symbolic-full-name '@{u}' 2>/dev/null)"
+    if [[ -n "$upstream" ]] && git fetch --quiet 2>/dev/null; then
+        # No merge base at all is the rewritten-history case, and ONLY that one.
+        # A clone that is merely behind, or that carries local commits, has a
+        # merge base — those are ordinary situations with ordinary answers, and
+        # sending them down the recipe below would tell somebody to throw away
+        # work they still have.
+        if ! git merge-base HEAD "$upstream" >/dev/null 2>&1; then
+            echo "this clone and $upstream share no common history" >&2
+            echo "  the history was rewritten; a clone from before it cannot fast-forward" >&2
+            echo "  nothing here is lost — check first, then take origin's side:" >&2
+            echo >&2
+            echo "    git log --oneline $upstream..HEAD   # empty? then nothing of yours is here" >&2
+            echo "    git reset --hard $upstream" >&2
+            echo "    ./install.sh" >&2
+            exit 1
+        fi
+    fi
+    git pull --ff-only || { echo "pull failed" >&2; exit 1; }
+    after="$(git rev-parse --short HEAD)"
+    if [[ "$before" == "$after" ]]; then
+        echo "already current at $after"
+        exit 0
+    fi
+    echo "$before → $after"
+    # ⚠️ The installer, not just a shell restart. A pull can change package
+    # lists, units and the generated niri config, and none of those reach the
+    # machine by restarting quickshell — that is the same "a change with nobody
+    # to apply it" fault this project keeps finding.
+    exec bash "$REPO_DIR/install.sh"
+    ;;
+
+"backup")
+    out="${2:-$HOME/buchhwin-backup-$(date +%Y%m%d-%H%M%S).tar.gz}"
+    # Only the paths that exist; tar treats a missing one as an error and would
+    # write nothing at all because of a directory somebody never installed.
+    mapfile -t have < <(owned_paths | while read -r p; do [[ -e "$p" ]] && echo "$p"; done)
+    if (( ${#have[@]} == 0 )); then
+        echo "nothing of this desktop is installed here" >&2
+        exit 1
+    fi
+    tar -czf "$out" -C / "${have[@]#/}" 2>/dev/null || {
+        echo "could not write $out" >&2; exit 1; }
+    echo "wrote $out"
+    printf '  %s\n' "${have[@]}"
+    ;;
+
+"restore")
+    src="${2:-}"
+    [[ -n "$src" && -f "$src" ]] || { echo "usage: bhctl restore <file>" >&2; exit 2; }
+    # ⚠️ LISTED BEFORE IT IS UNPACKED, and refused if it holds anything outside
+    # what this project owns. A tar is a file somebody can hand you, and
+    # unpacking one into $HOME on trust is how a backup tool becomes a way in.
+    bad="$(tar -tzf "$src" 2>/dev/null | while read -r entry; do
+        case "/$entry" in
+            "$CONFIG_HOME"/buchhwin*|"$CONFIG_HOME"/niri*|"$CONFIG_HOME"/kitty*|\
+            "$CONFIG_HOME"/alacritty*|"$CONFIG_HOME"/btop*|"$CONFIG_HOME"/qt6ct*|\
+            "$CONFIG_HOME"/gtk-3.0*|"$CONFIG_HOME"/gtk-4.0*) ;;
+            *) echo "$entry" ;;
+        esac
+    done | head -5)"
+    if [[ -n "$bad" ]]; then
+        echo "that archive holds paths this desktop does not own — refusing:" >&2
+        sed 's/^/  /' <<< "$bad" >&2
+        exit 1
+    fi
+    tar -xzf "$src" -C / || { echo "restore failed" >&2; exit 1; }
+    echo "restored from $src"
+    echo "  run: bhctl niri apply && systemctl --user restart buchhwin-shell"
+    ;;
+
+*) usage ;;
+esac

@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+cfg="${XDG_CONFIG_HOME:-$HOME/.config}/buchhwin-dwl/appearance.json"
+stage="${XDG_DATA_HOME:-$HOME/.local/share}/buchhwin-dwl/build/dwl-scenefx-port"
+scene="${XDG_DATA_HOME:-$HOME/.local/share}/buchhwin-dwl/scenefx"
+[[ -f "$stage/config.h" && -f "$stage/dwl.c" && -f "$cfg" ]] || {
+  echo "The SceneFX build tree is missing; run the Fedora installer first." >&2
+  exit 1
+}
+read -r border gaps < <(python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); print(d.get("border",1),d.get("gaps",8))' "$cfg")
+[[ "$border" =~ ^[0-8]$ && "$gaps" =~ ^([0-9]|[1-3][0-9]|40)$ ]] || exit 2
+sed -i -E "s/static const unsigned int borderpx = [0-9]+;/static const unsigned int borderpx = $border;/; s/static const unsigned int gappx = [0-9]+;/static const unsigned int gappx = $gaps;/" "$stage/config.h"
+(
+  cd "$stage"
+  export PKG_CONFIG_PATH="$scene/lib64/pkgconfig"
+  make clean >/dev/null
+  make LDFLAGS="-Wl,-rpath,$scene/lib64" >/dev/null
+  WLR_BACKENDS=headless WLR_LIBINPUT_NO_DEVICES=1 WLR_RENDERER=gles2 timeout 3s ./dwl -s true >/dev/null 2>&1 || [[ $? -eq 124 ]]
+)
+pkexec install -m755 "$stage/dwl" /usr/local/bin/dwl-buchhwin

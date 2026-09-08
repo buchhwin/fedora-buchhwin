@@ -1,0 +1,4 @@
+# The lock screen — its OWN process, see ../../shell.qml.
+# See ../common/qmldir for why this file must exist.
+LockScreen 1.0 LockScreen.qml
+LockFace 1.0 LockFace.qml

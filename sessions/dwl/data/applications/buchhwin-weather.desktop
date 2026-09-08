@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Buchhwin Weather
+Comment=Location-aware weather for the dwl bar
+Exec=true
+NoDisplay=true
+X-Geoclue-Reason=Show local weather in the desktop bar

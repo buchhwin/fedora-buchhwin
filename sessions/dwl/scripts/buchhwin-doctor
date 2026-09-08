@@ -1,0 +1,72 @@
+#!/usr/bin/env bash
+set -u
+ok=0; bad=0
+good(){ printf '\033[32m[OK]\033[0m %s\n' "$*"; ok=$((ok+1)); }
+fail(){ printf '\033[31m[FAIL]\033[0m %s\n' "$*"; bad=$((bad+1)); }
+info(){ printf '\033[36m[INFO]\033[0m %s\n' "$*"; }
+
+commands=(
+  dwl-buchhwin qs zsh python3
+  kitty buchhwin-terminal buchhwin-audioctl buchhwin-btctl
+  dolphin okular gwenview kate vlc wlr-randr wdisplays cliphist
+  nmcli bluetoothctl wpctl pactl
+  brightnessctl playerctl
+  grim slurp swappy wl-copy notify-send swaybg swayidle gammastep udiskie
+)
+for cmd in "${commands[@]}"; do
+  command -v "$cmd" >/dev/null 2>&1 && good "$cmd -> $(command -v "$cmd")" || fail "$cmd missing"
+done
+
+# Accept both native Brave packages and the Flatpak installed by this project.
+if browser="$(command -v brave-browser || command -v brave)"; then
+  good "browser -> $browser"
+elif command -v flatpak >/dev/null 2>&1 && flatpak info com.brave.Browser >/dev/null 2>&1; then
+  good "browser -> Flatpak com.brave.Browser"
+else
+  fail "Brave missing (native package or Flatpak com.brave.Browser)"
+fi
+
+if command -v dwl-buchhwin >/dev/null 2>&1; then
+  wlr_library="$(ldd "$(command -v dwl-buchhwin)" 2>/dev/null | awk '/libwlroots/ { print $3; exit }')"
+  [[ -n "$wlr_library" && -f "$wlr_library" ]] && good "wlroots -> $wlr_library" || fail "wlroots runtime library not found"
+  # Citrix is not a native Wayland client, so a dwl without XWayland cannot
+  # run the Workspace app at all.
+  ldd "$(command -v dwl-buchhwin)" 2>/dev/null | grep -q 'libxcb' \
+    && good "XWayland support compiled in" \
+    || fail "dwl was built without XWayland; Citrix will not run"
+fi
+
+# The whole UI is glyph-based; a missing Nerd Font shows up as empty boxes
+# rather than as an error message.
+if fc-list 2>/dev/null | grep -qi 'MesloLGS Nerd Font'; then
+  good "MesloLGS Nerd Font installed"
+else
+  fail "MesloLGS Nerd Font missing (bar icons will render as empty boxes)"
+fi
+
+# A missing polkit agent is invisible until something needs authentication.
+polkit_found=""
+for candidate in \
+  /usr/libexec/kf6/polkit-kde-authentication-agent-1 \
+  /usr/libexec/polkit-kde-authentication-agent-1 \
+  /usr/lib/polkit-kde-authentication-agent-1 \
+  /usr/bin/lxpolkit; do
+  [[ -x "$candidate" ]] && { polkit_found="$candidate"; break; }
+done
+[[ -n "$polkit_found" ]] && good "polkit agent -> $polkit_found" \
+  || fail "no polkit agent found (install polkit-kde)"
+
+[[ -f "${XDG_CONFIG_HOME:-$HOME/.config}/quickshell/buchhwin/shell.qml" ]] && good "Quickshell config installed" || fail "Quickshell config missing"
+[[ -f "${XDG_CONFIG_HOME:-$HOME/.config}/buchhwin-dwl/session.py" ]] && good "dwl status bridge installed" || fail "dwl status bridge missing"
+[[ -f "${XDG_CONFIG_HOME:-$HOME/.config}/buchhwin-dwl/display-profile.json" ]] && good "display profile saved" || info "No display profile yet (open Settings -> Displays)"
+
+systemctl is-active --quiet NetworkManager.service 2>/dev/null && good "NetworkManager active" || fail "NetworkManager not active"
+systemctl is-active --quiet bluetooth.service 2>/dev/null && good "Bluetooth service active" || info "Bluetooth inactive (fine if unused)"
+
+# Plasma remains the supported fallback desktop.
+[[ -f /usr/share/wayland-sessions/plasma.desktop ]] \
+  && good "Plasma fallback session available" \
+  || fail "Plasma Wayland session missing"
+
+printf '\n%d checks passed, %d failed.\n' "$ok" "$bad"
+(( bad == 0 ))

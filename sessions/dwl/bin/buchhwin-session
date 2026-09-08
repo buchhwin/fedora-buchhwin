@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+export XDG_SESSION_TYPE=wayland
+export XDG_CURRENT_DESKTOP=buchhwin:KDE
+export XDG_SESSION_DESKTOP=buchhwin
+export KDE_FULL_SESSION=true
+export KDE_SESSION_VERSION=6
+export XDG_MENU_PREFIX=plasma-
+export MOZ_ENABLE_WAYLAND=1
+export QT_QPA_PLATFORM=wayland
+export SDL_VIDEODRIVER=wayland
+export CLUTTER_BACKEND=wayland
+export _JAVA_AWT_WM_NONREPARENTING=1
+export PATH="$HOME/.local/bin:$PATH"
+export STARSHIP_CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}/buchhwin-dwl/starship.toml"
+export ZDOTDIR="${XDG_CONFIG_HOME:-$HOME/.config}/buchhwin-dwl/zsh"
+# KDE/Qt applications inherit Breeze and the Plasma color configuration while
+# GTK applications remain dark inside this session only.
+export QT_STYLE_OVERRIDE=Breeze
+export GTK_THEME=Breeze-Dark
+
+# Read Plasma's cursor preferences without modifying the Plasma desktop.
+if command -v kreadconfig6 >/dev/null 2>&1; then
+  cursor_theme="$(kreadconfig6 --file kcminputrc --group Mouse --key cursorTheme 2>/dev/null || true)"
+  cursor_size="$(kreadconfig6 --file kcminputrc --group Mouse --key cursorSize 2>/dev/null || true)"
+  [[ -n "$cursor_theme" ]] && export XCURSOR_THEME="$cursor_theme"
+  [[ "$cursor_size" =~ ^[0-9]+$ ]] && export XCURSOR_SIZE="$cursor_size"
+fi
+
+CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
+SETTINGS="$CONFIG_HOME/buchhwin-dwl/settings.env"
+STATUS_BRIDGE="$CONFIG_HOME/buchhwin-dwl/session.py"
+
+# Use the desktop's dedicated Zsh configuration. Personal shell history,
+# aliases, tokens and dotfiles are neither required nor copied by the project.
+[[ -f "$SETTINGS" ]] && source "$SETTINGS"
+if command -v buchhwin-appearance >/dev/null 2>&1; then
+  eval "$(buchhwin-appearance env)"
+fi
+if [[ "${LOAD_ZSH_CONFIG:-1}" == "1" ]] && command -v zsh >/dev/null 2>&1; then
+  exec zsh -lc '
+    zshrc="${ZDOTDIR}/.zshrc"
+    [[ -r "$zshrc" ]] && source "$zshrc"
+    config_home="${XDG_CONFIG_HOME:-$HOME/.config}"
+    exec /usr/local/bin/dwl-buchhwin -s "$config_home/buchhwin-dwl/session.py"
+  ' buchhwin-zsh
+fi
+
+exec /usr/local/bin/dwl-buchhwin -s "$STATUS_BRIDGE"

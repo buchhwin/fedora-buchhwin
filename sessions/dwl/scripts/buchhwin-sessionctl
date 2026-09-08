@@ -1,0 +1,35 @@
+#!/usr/bin/env python3
+"""Manage dwl-only idle locking, display power and night light."""
+import json, os, signal, subprocess, sys
+from pathlib import Path
+
+path = Path(os.environ.get("XDG_CONFIG_HOME", Path.home()/".config"))/"buchhwin-dwl"/"session-services.json"
+defaults = {"lockMinutes": 10, "displayMinutes": 15, "suspendMinutes": 30,
+            "nightLight": False, "temperature": 4000}
+
+def load():
+    try: return defaults | json.loads(path.read_text())
+    except Exception: return defaults.copy()
+def stop(name):
+    subprocess.run(["pkill", "-x", name], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+def apply(state):
+    stop("swayidle"); stop("gammastep")
+    lock, display, suspend = (int(state[k]) for k in ("lockMinutes","displayMinutes","suspendMinutes"))
+    args=["swayidle", "-w"]
+    if lock: args += ["timeout", str(lock*60), "swaylock -f -c 181818"]
+    if display: args += ["timeout", str(display*60), "buchhwin-display-power off", "resume", "buchhwin-display-power on"]
+    if suspend: args += ["timeout", str(suspend*60), "systemctl suspend"]
+    if len(args)>2 and subprocess.run(["sh","-c","command -v swayidle"],stdout=subprocess.DEVNULL).returncode==0:
+        subprocess.Popen(args, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True)
+    if state["nightLight"] and subprocess.run(["sh","-c","command -v gammastep"],stdout=subprocess.DEVNULL).returncode==0:
+        subprocess.Popen(["gammastep","-l","geoclue2","-t",f"6500:{int(state['temperature'])}"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True)
+
+state=load(); command=sys.argv[1] if len(sys.argv)>1 else "state"
+if command == "state": print(json.dumps(state))
+elif command == "apply": apply(state)
+elif command == "set" and len(sys.argv)==4:
+    key, value=sys.argv[2:];
+    if key not in defaults: raise SystemExit("Unknown setting")
+    state[key] = value.lower()=="true" if isinstance(defaults[key],bool) else int(value)
+    path.parent.mkdir(parents=True,exist_ok=True); path.write_text(json.dumps(state,indent=2)+"\n"); apply(state); print("Saved")
+else: raise SystemExit("usage: buchhwin-sessionctl state|apply|set KEY VALUE")

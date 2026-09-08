@@ -1,0 +1,54 @@
+# The settings window (M8) — its own folder, because it is its own window.
+#
+# ⚠️ Registered here for the same reason as everywhere else: quickshell loads
+# through a virtual filesystem, where QML's implicit "types in my own folder"
+# rule does not apply. Without an entry the type does not exist, and QML says so
+# by drawing nothing. See ../common/qmldir.
+#
+# SettingRow and SettingGroup live here rather than in common/ because nothing
+# outside this window has settings rows in it. Toggle and TextField DO live in
+# common/, because they are controls rather than rows and the shell already had
+# five hand-drawn text fields for want of one.
+SettingsWindow 1.0 SettingsWindow.qml
+SettingsContent 1.0 SettingsContent.qml
+SettingsRail 1.0 SettingsRail.qml
+SettingGroup 1.0 SettingGroup.qml
+SettingRow 1.0 SettingRow.qml
+# A row that does something instead of holding a value. Deliberately not a
+# SettingRow `kind` — see the note at the top of the file.
+ActionRow 1.0 ActionRow.qml
+DevicePicker 1.0 DevicePicker.qml
+# One program per line with its four states side by side — the App Theming page
+# is a table because thirteen identical rows are not a list. Keeps SettingRow's
+# one rule: it reads and writes exactly one dotted key.
+ThemingRow 1.0 ThemingRow.qml
+# One rounded track, N segments, exactly one true. Pulled out of ThemingRow so
+# the App Theming table and a two-to-four-way choice row are the same object
+# rather than two that drift. It writes nothing — the caller answers `chosen`.
+Segmented 1.0 Segmented.qml
+# The settings-window slider: thin track, a handle you can see, and the number
+# in a box you can type in. NOT common/LevelRow, which is the volume and
+# brightness bar and is right as it is where it lives.
+SettingSlider 1.0 SettingSlider.qml
+# Press a key, get the name niri calls it. Refuses what it cannot name.
+KeyCapture 1.0 KeyCapture.qml
+# The two settings that cannot be a row, each for a structural reason and each
+# named in the exemption list of tests/setting-rows.sh: `outputs` is one object
+# per monitor, `binds` is the whole keybinding list.
+#
+# ⚠️ OutputScales IS GONE — its screen-scale block is now one row among four on
+# the Displays page, because a scale next to a resolution is where anybody looks
+# for it, and it was the only control on Size & Shape that was not a SettingRow.
+# The `outputs` exemption stands; what changed is where it is spent.
+BindsList 1.0 BindsList.qml
+# One monitor's row. Not a SettingRow because `outputs` has no dotted path —
+# see the note at the top of the file — but composed from the same Toggle,
+# Dropdown and SettingSlider so the two cannot drift apart visually.
+OutputRow 1.0 OutputRow.qml
+# The drag-to-arrange canvas. Its own file because it is the one control in this
+# window that is a picture rather than a list.
+OutputArrangement 1.0 OutputArrangement.qml
+# "Reset everything" asking first, on a surface of its own. NOT a PopupWindow —
+# a grab lets the compositor write `visible` and a written value replaces the
+# binding, which is B25 and is why that list once never reopened.
+ResetSheet 1.0 ResetSheet.qml

@@ -1,0 +1,4 @@
+[Unit]
+Description=buchhwin dwl graphical session
+Requires=graphical-session.target
+After=graphical-session-pre.target

@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=buchhwin
+Comment=dwl + Quickshell Wayland desktop
+Exec=/usr/local/bin/buchhwin-session
+Type=Application
+DesktopNames=buchhwin

@@ -1,0 +1,2 @@
+# See ../common/qmldir.
+singleton Ipc 1.0 Ipc.qml

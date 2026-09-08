@@ -1,0 +1,6 @@
+# Generated at install time from the palette folder.
+sessions/hyprland/shell/theme/palettes/index.txt
+*.bak
+
+# Generated from the current wallpaper — never committed.
+sessions/hyprland/shell/theme/palettes/wallpaper.json

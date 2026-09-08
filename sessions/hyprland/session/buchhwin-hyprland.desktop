@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=Buchhwin Hyprland
+Comment=Buchhwin session on Hyprland with Fedora KDE as fallback
+Exec=/usr/local/bin/buchhwin-hyprland-session
+Type=Application
+DesktopNames=Hyprland;buchhwin;

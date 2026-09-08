@@ -1,0 +1,43 @@
+# Base system. Installed on every profile.
+dnf-plugins-core
+git-core
+curl
+jq                  # the installer's structured-data tool of choice
+# ⚠️ AND python3, WHICH WAS USED IN FOUR PLACES AND DECLARED IN NONE. This line
+# used to read "there is no python here" while lib/40-apps.sh rewrote Brave's
+# Preferences with it, lib/70-services.sh read the keyboard layout with it, and
+# bin/bhctl used it for BOTH `binds reset` and `doctor`. On Fedora Workstation
+# it happens to be present because dnf itself is Python, which is why the claim
+# survived; on a minimal install `bhctl binds reset` — the one handle that
+# unfreezes a machine — would simply not work.
+#
+# The rule it was trying to state is real and stays: above the installer
+# everything is QML, because one language is simpler and stays consistent.
+# Python is a TOOL here, in bash that has no desktop to run QML on, and it never
+# carries configuration logic. Nothing new is written in it.
+python3
+tar
+unzip
+zsh
+NetworkManager
+pipewire
+pipewire-pulseaudio
+wireplumber
+polkit
+xdg-user-dirs
+# ⚠️ THE FOUR THE PREDECESSOR HAD AND THIS DID NOT. Each is a package whose
+# absence is only noticed at the moment it is needed, which is the worst kind:
+# ⚠️⚠️ upower WAS MISSING ON A LAPTOP PROJECT. services/Power.qml has existed
+# since M2 and the shell says so at every start: "Could not launch service
+# org.freedesktop.UPower: The name is not activatable". So there was no battery
+# reading anywhere — not in the notch, not in the quick panel, not in `doctor` —
+# on a desktop whose whole point is laptops. /sys/class/power_supply/BAT1 was
+# there the entire time; nothing was reading it.
+upower
+udisks2                     # mount a USB stick without a password
+avahi                       # .local names resolve — nas.local, printer.local
+nss-mdns                    # ...and glibc actually asks avahi for them
+tuned-ppd                   # power profiles; replaced power-profiles-daemon in F41
+libnotify
+desktop-file-utils
+nano                        # the editor that is on every server you will ever ssh into
