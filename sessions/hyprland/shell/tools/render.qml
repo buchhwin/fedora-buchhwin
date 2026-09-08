@@ -130,7 +130,6 @@ Scope {
         case "gtk":       v = g.gtk;       break
         case "qt":        v = g.qt;        break
         case "kitty":     v = g.kitty;     break
-        case "niri":      v = g.niri;      break
         case "alacritty": v = g.alacritty; break
         case "btop":      v = g.btop;      break
         case "bat":       v = g.bat;       break
@@ -1718,7 +1717,7 @@ Scope {
             root.neutralPal = FromImage.neutral(Theme.dark, 0)
 
             var mGtk = stateOf("gtk"), mQt = stateOf("qt")
-            var mKitty = stateOf("kitty"), mNiri = stateOf("niri")
+            var mKitty = stateOf("kitty")
             var mBtop = stateOf("btop"), mAla = stateOf("alacritty")
             var mTmux = stateOf("tmux"), mBat = stateOf("bat")
             var mDelta = stateOf("delta"), mLazy = stateOf("lazygit")
@@ -1727,7 +1726,7 @@ Scope {
             note("buchhwin render — palette " + Scheme.name +
                  " (" + Scheme.displayName + "), accent " + Config.theme.accent)
             note("  states: gtk=" + mGtk + " qt=" + mQt + " kitty=" + mKitty +
-                 " niri=" + mNiri + " btop=" + mBtop + " alacritty=" + mAla +
+                 " btop=" + mBtop + " alacritty=" + mAla +
                  " tmux=" + mTmux + " bat=" + mBat + " delta=" + mDelta +
                  " lazygit=" + mLazy + "   (theming.enabled " + Config.theming.enabled +
                  ", theming.mode " + Config.theming.mode + ")")
@@ -1746,8 +1745,6 @@ Scope {
                      gtkSettings, offIni("gtk"), "gtk4 settings", "gtk")
             emitFile(mKitty, f5, root.cfg + "/kitty/theme.conf",
                      kittyTheme, offText("#", "kitty"), "kitty", "kitty")
-            emitFile(mNiri, f6, root.cfg + "/niri/colors.kdl",
-                     niriColours, offText("//", "niri"), "niri colours", "niri")
             emitFile(mQt, f7, root.cfg + "/qt6ct/colors/buchhwin.conf",
                      qtColors, offText("#", "qt"), "qt6ct", "qt")
             emitFile(mBtop, f8, root.cfg + "/btop/themes/buchhwin.theme",

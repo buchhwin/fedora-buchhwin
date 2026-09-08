@@ -12,6 +12,9 @@ One KDE-based home for the Buchhwin `dwl` and Hyprland sessions.
   Bluetooth manager.
 - Compositor and shell settings use dedicated Buchhwin paths. The installer
   does not change Plasma's fonts, theme, MIME defaults or desktop settings.
+- Hyprland state lives under
+  `~/.config/buchhwin-sessions/hyprland`; `overrides.lua` and `shell.json` are
+  user-owned and are never overwritten by an update.
 
 ## Install
 

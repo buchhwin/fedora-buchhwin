@@ -195,14 +195,6 @@ ColumnLayout {
         }
         ThemingRow {
             Layout.fillWidth: true
-            key: "theming.niri"
-            label: "niri"
-            states: root.states
-            labelWidth: root.nameWidth
-            usable: Config.theming.enabled
-        }
-        ThemingRow {
-            Layout.fillWidth: true
             key: "theming.btop"
             label: "btop"
             hint: "Ctrl+Shift+Escape opens it."

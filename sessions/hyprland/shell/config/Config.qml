@@ -1167,7 +1167,6 @@ Singleton {
                 property string qt: "inherit"
                 property string kitty: "inherit"
                 property string alacritty: "inherit"
-                property string niri: "inherit"
                 property string btop: "inherit"
                 property string bat: "inherit"
                 property string fastfetch: "inherit"
@@ -2613,7 +2612,7 @@ Singleton {
             // guessed; see packages/dnf-desktop.txt for why a foreign program
             // is here at all.
             property list<string> autostart: [
-                "/usr/libexec/polkit-mate-authentication-agent-1"
+                "/usr/libexec/polkit-kde-authentication-agent-1"
             ]
 
             // ⚠️ WHAT WAS OPEN LAST TIME, and the honest limit belongs with the

@@ -187,7 +187,14 @@ FocusScope {
         { id: "system", section: "System", icon: "memory",
           title: "System", source: "pages/SystemPage.qml",
           blurb: "What this machine is, and the button that puts every setting back." }
-    ]
+    ].filter(function(page) {
+        // Fedora KDE's System Settings owns hardware configuration. The old
+        // compositor-specific editors are intentionally not exposed until a
+        // Hyprland writer exists for them; showing controls that do not apply
+        // would be worse than sending the user to the working KDE module.
+        return ["displays", "keyboard", "keys", "pointing", "windows", "machine"]
+               .indexOf(page.id) < 0
+    })
 
     // ---------------------------------------------------------------- history
     // Back and forward, which the reference puts at the top of the content.

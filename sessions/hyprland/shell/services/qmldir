@@ -5,7 +5,6 @@
 # QML's implicit same-folder rule does not apply. See common/qmldir.
 singleton Apps 1.0 Apps.qml
 singleton Compositor 1.0 Compositor.qml
-singleton Niri 1.0 Niri.qml
 singleton Hyprland 1.0 Hyprland.qml
 # Opens the same programs again after a restart. Records while you work, not at
 # shutdown, and restores once per session rather than once per shell start.

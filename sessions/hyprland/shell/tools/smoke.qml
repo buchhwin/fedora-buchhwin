@@ -380,7 +380,7 @@ Scope {
 
             // ------------------------------------------------------ services
             root.service("Compositor", Services.Compositor)
-            root.service("Niri", Services.Niri)
+            root.service("Hyprland", Services.Hyprland)
             root.service("Power", Services.Power)
             root.service("Audio", Services.Audio)
             root.service("Net", Services.Net)

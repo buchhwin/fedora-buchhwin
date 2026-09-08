@@ -28,6 +28,20 @@ test -f sessions/dwl/session/buchhwin.desktop
 test ! -e sessions/hyprland/shell/ui/greeter/GreeterScreen.qml
 test ! -e sessions/hyprland/shell/ui/quick/NetworkList.qml
 test ! -e sessions/hyprland/shell/ui/quick/BluetoothList.qml
+test ! -e sessions/hyprland/shell/services/Niri.qml
+test ! -e sessions/hyprland/shell/tools/niri.qml
+
+if grep -Rqs 'Services\.Niri\|BUCHHWIN_TOOL=niri' \
+        sessions/hyprland/shell sessions/hyprland/bin sessions/hyprland/lib; then
+    echo "Hyprland runtime still calls the old Niri backend" >&2
+    exit 1
+fi
+
+grep -q 'rpm -q plasma-desktop' sessions/hyprland/lib/00-preflight.sh
+grep -q 'systemctl enable sddm.service' sessions/hyprland/lib/30-desktop.sh
+grep -q 'XDG_CONFIG_HOME="$config_home"' sessions/hyprland/bin/buchhwin-hyprland-session
+grep -q 'overrides.lua' sessions/hyprland/config/hypr/hyprland.lua
+grep -q 'overrides.lua' sessions/hyprland/lib/60-shell.sh
 
 grep -q 'systemsettings.*kcm_networkmanagement' \
     sessions/hyprland/shell/ui/quick/QuickSettings.qml

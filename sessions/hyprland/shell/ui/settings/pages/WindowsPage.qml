@@ -59,7 +59,7 @@ ColumnLayout {
             hint: "App ids, separated by commas. Only worth it for windows transparent enough to show it."
             kind: "picks"
             options: Services.Suggest.appIds
-            placeholder: "kitty, org.gnome.Nautilus"
+            placeholder: "kitty, org.kde.dolphin"
         }
         SettingRow {
             Layout.fillWidth: true

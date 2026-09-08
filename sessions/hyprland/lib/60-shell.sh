@@ -10,7 +10,10 @@ phase_shell() {
     # Everything applications see in this session lives below one dedicated
     # XDG root. Plasma continues to use ~/.config and therefore keeps its own
     # fonts, Qt/GTK themes, terminal settings and application preferences.
-    local kde_config_home="$CONFIG_HOME"
+    local kde_config_home="${XDG_CONFIG_HOME:-$HOME/.config}"
+    case "$kde_config_home" in
+        */buchhwin-sessions/hyprland) kde_config_home="${kde_config_home%/buchhwin-sessions/hyprland}" ;;
+    esac
     local CONFIG_HOME="$kde_config_home/buchhwin-sessions/hyprland"
     local XDG_CONFIG_HOME="$CONFIG_HOME"
     export XDG_CONFIG_HOME
@@ -20,6 +23,9 @@ phase_shell() {
     mkdir -p "$CONFIG_HOME/buchhwin/hyprland"
     install -m 0644 "$REPO_DIR/config/hypr/hyprland.lua" \
         "$CONFIG_HOME/buchhwin/hyprland/hyprland.lua"
+    if [[ ! -e "$CONFIG_HOME/buchhwin/hyprland/overrides.lua" ]]; then
+        install -m 0644 /dev/null "$CONFIG_HOME/buchhwin/hyprland/overrides.lua"
+    fi
     sudo install -m 0755 "$REPO_DIR/bin/buchhwin-hyprland-session" \
         /usr/local/bin/buchhwin-hyprland-session
     sudo install -m 0644 "$REPO_DIR/session/buchhwin-hyprland.desktop" \
@@ -313,7 +319,7 @@ phase_shell() {
 
     # FileView writes a file, it does not create the folder above it. On a
     # fresh machine none of these exist yet.
-    mkdir -p "$CONFIG_HOME/niri" "$CONFIG_HOME/environment.d" \
+    mkdir -p "$CONFIG_HOME/environment.d" \
              "$CONFIG_HOME/gtk-3.0" "$CONFIG_HOME/gtk-4.0" \
              "$CONFIG_HOME/kitty" "$CONFIG_HOME/qt6ct/colors" \
              "$CONFIG_HOME/btop/themes" "$CONFIG_HOME/alacritty" \

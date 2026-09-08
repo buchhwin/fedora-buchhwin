@@ -515,7 +515,7 @@ Singleton {
     // in config.kdl is the kind of cost that is invisible until it is on a
     // battery. tools/niri.qml compares before it writes, so an unchanged config
     // still costs nothing but the process.
-    function applyNiri() {
+    function applyHyprland() {
         if (root.busy) {
             // A render is mid-flight and it ends with this same generator, so
             // the change is already going to be picked up.
@@ -524,7 +524,7 @@ Singleton {
         }
         root.busy = true
         root.log("reloading Hyprland")
-        niriProc.running = true
+        hyprlandProc.running = true
     }
 
     function render() {
@@ -559,7 +559,7 @@ Singleton {
             // ⚠️ `busy` STAYS TRUE until the niri pass is done too, or a second
             // change arriving in between would start a render while this one is
             // still finishing its other half.
-            niriProc.running = true
+            hyprlandProc.running = true
         }
     }
 
@@ -578,7 +578,7 @@ Singleton {
     // named "second run writes nothing" for exactly this — so an unchanged
     // config costs one process and no compositor reload.
     Process {
-        id: niriProc
+        id: hyprlandProc
         command: ["hyprctl", "reload"]
 
         onExited: function (code) {

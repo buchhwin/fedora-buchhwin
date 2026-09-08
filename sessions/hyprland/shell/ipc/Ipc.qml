@@ -550,8 +550,9 @@ Singleton {
         target: "windows"
 
         function halve(): string {
-            Services.Niri.halveColumns()
-            return Services.Niri.lastHalveResult
+            Services.Hyprland.run(["resizeactive", "exact 50% 100%"])
+            Services.Hyprland.run(["moveactive", "exact 0 0"])
+            return "focused window moved to the left half"
         }
     }
 

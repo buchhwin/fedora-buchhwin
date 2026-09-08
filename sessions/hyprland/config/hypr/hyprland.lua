@@ -36,7 +36,7 @@ hl.config({
 hl.exec_cmd("systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_DESKTOP XDG_CONFIG_HOME")
 hl.exec_cmd("dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_DESKTOP XDG_CONFIG_HOME")
 hl.exec_cmd("systemctl --user start graphical-session.target")
-hl.exec_cmd("systemctl --user restart buchhwin-shell.service")
+hl.exec_cmd("systemctl --user start buchhwin-shell.service")
 
 local function exec(key, command)
     hl.bind(key, hl.dsp.exec_cmd(command))
@@ -49,14 +49,14 @@ exec("SUPER + SHIFT + C", "kate")
 exec("SUPER + I", "systemsettings")
 exec("SUPER + N", "systemsettings kcm_networkmanagement")
 exec("SUPER + B", "systemsettings kcm_bluetooth")
-exec("SUPER + L", "qs -c buchhwin ipc call lock lock")
+exec("SUPER + SHIFT + L", "qs -c buchhwin ipc call lock lock")
 
 hl.bind("SUPER + Q", hl.dsp.window.close())
 hl.bind("SUPER + F", hl.dsp.window.fullscreen())
 hl.bind("SUPER + V", hl.dsp.window.float({ action = "toggle" }))
-hl.bind("SUPER + H", hl.dsp.focus({ direction = "left" }))
-hl.bind("SUPER + J", hl.dsp.focus({ direction = "down" }))
-hl.bind("SUPER + K", hl.dsp.focus({ direction = "up" }))
+hl.bind("SUPER + Left", hl.dsp.focus({ direction = "left" }))
+hl.bind("SUPER + Down", hl.dsp.focus({ direction = "down" }))
+hl.bind("SUPER + Up", hl.dsp.focus({ direction = "up" }))
 hl.bind("SUPER + Right", hl.dsp.focus({ direction = "right" }))
 
 for i = 1, 9 do
@@ -74,3 +74,9 @@ exec("XF86AudioMute", "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle")
 exec("XF86AudioMicMute", "wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle")
 exec("XF86MonBrightnessUp", "brightnessctl set 5%+")
 exec("XF86MonBrightnessDown", "brightnessctl set 5%-")
+exec("Print", "grim -g \"$(slurp)\" - | wl-copy")
+
+-- This optional file belongs to the user. The installer creates it once and
+-- never overwrites it, so machine-specific monitors, rules and binds survive
+-- every repository update without leaking into the Plasma session.
+pcall(dofile, os.getenv("XDG_CONFIG_HOME") .. "/buchhwin/hyprland/overrides.lua")

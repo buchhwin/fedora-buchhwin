@@ -1,5 +1,5 @@
-# Foreign programs this desktop REPLACES, and which Fedora's niri package pulls
-# in as weak dependencies. One list, read by three callers: lib/common.sh
+# Foreign programs this desktop replaces if they arrived only as weak
+# dependencies. One list, read by three callers: lib/common.sh
 # (removes them), .github/workflows/ci.yml (proves they never arrive in a clean
 # container) and tests/no-foreign-bar.sh (proves the installer acts on all of
 # them). A second copy of this list is how one of them quietly stops being
@@ -16,7 +16,7 @@
 # FOR. `dnf repoquery --installed --qf '%{reason}'` answers "Weak Dependency"
 # for something that arrived as a recommendation and "User" for something
 # somebody installed on purpose. Measured on the lab VM: waybar, fuzzel and
-# swaylock all said "Weak Dependency"; niri and kitty said "User". A desktop
+# swaylock all said "Weak Dependency". A desktop
 # that removes a program its owner chose is worse than one that leaves a second
 # bar on screen.
 waybar          # a second bar across the top — the island is our surface

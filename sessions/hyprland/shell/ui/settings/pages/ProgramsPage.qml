@@ -57,7 +57,7 @@ ColumnLayout {
             label: "File manager"
             kind: "command"
             options: Services.Suggest.programs(["System", "Utility"])
-            placeholder: "nautilus"
+            placeholder: "dolphin"
         }
         SettingRow {
             Layout.fillWidth: true
@@ -73,7 +73,7 @@ ColumnLayout {
             label: "Image viewer"
             kind: "command"
             options: Services.Suggest.programs(["Graphics"])
-            placeholder: "loupe"
+            placeholder: "gwenview"
         }
         SettingRow {
             Layout.fillWidth: true

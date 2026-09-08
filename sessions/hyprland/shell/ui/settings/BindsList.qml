@@ -120,7 +120,7 @@ ColumnLayout {
         // fingerprint so a palette change cannot touch them. Without this line
         // the new key would sit in shell.json doing nothing until somebody
         // typed `bhctl niri apply`.
-        Services.Theming.applyNiri()
+        Services.Theming.applyHyprland()
     }
 
     BarText {
@@ -178,7 +178,7 @@ ColumnLayout {
                 // config, which is deliberately outside the theming fingerprint
                 // so a palette change cannot rewrite it — so nothing rewrote it
                 // at all. Now the button finishes.
-                Services.Theming.applyNiri()
+                Services.Theming.applyHyprland()
             }
         }
     }
@@ -203,7 +203,7 @@ ColumnLayout {
             BarText { text: "Put them all back"; color: Theme.fg }
             onClicked: {
                 Config.clearRebinds()
-                Services.Theming.applyNiri()
+                Services.Theming.applyHyprland()
             }
         }
     }
@@ -267,7 +267,7 @@ ColumnLayout {
                     }
                     onClicked: {
                         Config.setRebind(bindRow.modelData.def, bindRow.modelData.def)
-                        Services.Theming.applyNiri()
+                        Services.Theming.applyHyprland()
                     }
                 }
             }

@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-config_home="${XDG_CONFIG_HOME:-$HOME/.config}/buchhwin-sessions/hyprland"
+case "${XDG_CONFIG_HOME:-}" in
+    */buchhwin-sessions/hyprland) config_home="$XDG_CONFIG_HOME" ;;
+    *) config_home="${XDG_CONFIG_HOME:-$HOME/.config}/buchhwin-sessions/hyprland" ;;
+esac
 export XDG_CONFIG_HOME="$config_home"
 config="$XDG_CONFIG_HOME/buchhwin/hyprland/hyprland.lua"
 [[ -r "$config" ]] || { echo "Missing Buchhwin Hyprland config: $config" >&2; exit 1; }
