@@ -27,6 +27,10 @@ sound-theme-freedesktop
 wf-recorder
 grim
 slurp
+# Annotating a screenshot (Super+Ctrl+Print). The shell draws no editor of its
+# own, so this is not a duplicate of anything — it is the same tool the dwl
+# session uses, so both sessions annotate the same way.
+swappy
 
 # KDE is the only desktop integration layer. Do not add GNOME portals,
 # keyrings, file managers, network applets or Bluetooth frontends here.

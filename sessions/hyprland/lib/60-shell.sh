@@ -20,16 +20,51 @@ phase_shell() {
 
     # Dedicated compositor paths: no file below is read by Plasma and no KDE
     # preference is overwritten. SDDM only receives an additional session.
-    mkdir -p "$CONFIG_HOME/buchhwin/hyprland"
-    install -m 0644 "$REPO_DIR/config/hypr/hyprland.lua" \
-        "$CONFIG_HOME/buchhwin/hyprland/hyprland.lua"
-    if [[ ! -e "$CONFIG_HOME/buchhwin/hyprland/overrides.lua" ]]; then
-        install -m 0644 /dev/null "$CONFIG_HOME/buchhwin/hyprland/overrides.lua"
+    #
+    # The compositor config is a MODULE TREE, not a single file: hyprland.lua is
+    # an entry point that require()s buchhwin/*.lua in a fixed order, and load
+    # order is what decides which setting wins.
+    local hypr_home="$CONFIG_HOME/buchhwin/hyprland"
+    mkdir -p "$hypr_home"
+    install -m 0644 "$REPO_DIR/config/hypr/hyprland.lua" "$hypr_home/hyprland.lua"
+
+    # ⚠️ REPLACED WHOLESALE, NOT MERGED. A module dropped upstream has to
+    # disappear here too — a stale file that nothing require()s any more is
+    # harmless, but one that the entry point still names by an old path is a
+    # config that silently keeps applying settings nobody can find.
+    rm -rf "$hypr_home/buchhwin"
+    mkdir -p "$hypr_home/buchhwin"
+    install -m 0644 "$REPO_DIR"/config/hypr/buchhwin/*.lua "$hypr_home/buchhwin/"
+
+    # Written by the shell's generator, never by hand and never by this
+    # installer. The directory has to exist before the first generator run.
+    mkdir -p "$hypr_home/generated"
+
+    # Yours: machine-specific monitors, extra rules, personal binds. Created
+    # once, empty, and never touched again by an update.
+    if [[ ! -e "$hypr_home/overrides.lua" ]]; then
+        install -m 0644 /dev/null "$hypr_home/overrides.lua"
     fi
+
     sudo install -m 0755 "$REPO_DIR/bin/buchhwin-hyprland-session" \
         /usr/local/bin/buchhwin-hyprland-session
     sudo install -m 0644 "$REPO_DIR/session/buchhwin-hyprland.desktop" \
         /usr/share/wayland-sessions/buchhwin-hyprland.desktop
+
+    # The buchhwin-* helpers the keybindings call. Symlinked rather than copied,
+    # for the same reason the shell tree below is: a git pull is immediately
+    # live and there is only ever one copy to reason about. The glob is over
+    # scripts/ on purpose — bin/ holds the two entries that are installed
+    # system-wide instead, and must not end up on the user's PATH twice.
+    local bin_home="$HOME/.local/bin"
+    mkdir -p "$bin_home"
+    local helper
+    for helper in "$REPO_DIR"/scripts/buchhwin-*; do
+        [[ -e "$helper" ]] || continue
+        chmod 0755 "$helper"
+        ln -sfn "$helper" "$bin_home/$(basename "$helper")"
+    done
+
     mkdir -p "$CONFIG_HOME/xdg-desktop-portal"
     install -m 0644 "$REPO_DIR/config/xdg-desktop-portal/hyprland-portals.conf" \
         "$CONFIG_HOME/xdg-desktop-portal/hyprland-portals.conf"

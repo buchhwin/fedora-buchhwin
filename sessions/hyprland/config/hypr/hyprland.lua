@@ -1,82 +1,63 @@
--- Buchhwin Hyprland session. Kept separate from every Plasma setting.
-hl.monitor({ output = "", mode = "preferred", position = "auto", scale = "auto" })
+-- Buchhwin Hyprland session — entry point.
+--
+-- This file deliberately contains no settings. It only wires modules together,
+-- because the order in which they load IS the precedence: a later hl.config()
+-- overrides an earlier one, so "who wins" has to be readable at a glance.
+--
+--   buchhwin/*    shipped by the repository, edited by hand
+--   generated/*   written by the shell from shell.json — never edit by hand
+--   overrides.lua yours; created empty once and never overwritten
+--
+-- Hyprland's own example config says it outright: "You can (and should!!) split
+-- this configuration into multiple files". require() is that mechanism.
 
-hl.env("XDG_CURRENT_DESKTOP", "Hyprland")
-hl.env("XDG_SESSION_DESKTOP", "Hyprland")
-hl.env("QT_QPA_PLATFORM", "wayland;xcb")
-hl.env("QT_QPA_PLATFORMTHEME", "qt6ct")
-hl.env("XCURSOR_THEME", "breeze_cursors")
-hl.env("XCURSOR_SIZE", "24")
+-- ⚠️ package.path FIRST, OR EVERY require() BELOW FAILS.
+-- Hyprland loads this file through --config with an absolute path, and Lua's
+-- default search path has no idea where that was. debug.getinfo gives us the
+-- directory of *this* file, which is the one thing that is always right —
+-- XDG_CONFIG_HOME would be a second source of truth that can disagree.
+local here = debug.getinfo(1, "S").source:match("^@(.*)/") or "."
+package.path = here .. "/?.lua;" .. here .. "/?/init.lua;" .. package.path
 
-hl.config({
-    general = {
-        gaps_in = 6,
-        gaps_out = 12,
-        border_size = 2,
-        layout = "dwindle",
-    },
-    decoration = {
-        rounding = 12,
-        active_opacity = 1.0,
-        inactive_opacity = 0.96,
-        blur = { enabled = true, size = 6, passes = 2 },
-        shadow = { enabled = true, range = 12 },
-    },
-    input = {
-        kb_layout = "de",
-        follow_mouse = 1,
-        repeat_rate = 40,
-        repeat_delay = 300,
-        touchpad = { natural_scroll = true, tap_to_click = true },
-    },
-})
-
--- Start only Buchhwin's user units. Plasma's panel and desktop are not part of
--- this session, while KDE's system services and applications remain available.
-hl.exec_cmd("systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_DESKTOP XDG_CONFIG_HOME")
-hl.exec_cmd("dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_DESKTOP XDG_CONFIG_HOME")
-hl.exec_cmd("systemctl --user start graphical-session.target")
-hl.exec_cmd("systemctl --user start buchhwin-shell.service")
-
-local function exec(key, command)
-    hl.bind(key, hl.dsp.exec_cmd(command))
+-- Existence is checked before require() rather than wrapping it in pcall.
+-- pcall(require, …) cannot tell "the file is not there yet" from "the file is
+-- there and has a syntax error", and silently skipping a broken generated
+-- config is exactly how a desktop ends up with no keybindings and no clue why.
+local function present(relative)
+    local handle = io.open(here .. "/" .. relative, "r")
+    if not handle then return false end
+    handle:close()
+    return true
 end
 
-exec("SUPER + Return", "kitty")
-exec("SUPER + Space", "qs -c buchhwin ipc call launcher toggle")
-exec("SUPER + E", "dolphin")
-exec("SUPER + SHIFT + C", "kate")
-exec("SUPER + I", "systemsettings")
-exec("SUPER + N", "systemsettings kcm_networkmanagement")
-exec("SUPER + B", "systemsettings kcm_bluetooth")
-exec("SUPER + SHIFT + L", "qs -c buchhwin ipc call lock lock")
+require("buchhwin.env")
+require("buchhwin.monitors")
+require("buchhwin.input")
+require("buchhwin.look")
+require("buchhwin.rules")
 
-hl.bind("SUPER + Q", hl.dsp.window.close())
-hl.bind("SUPER + F", hl.dsp.window.fullscreen())
-hl.bind("SUPER + V", hl.dsp.window.float({ action = "toggle" }))
-hl.bind("SUPER + Left", hl.dsp.focus({ direction = "left" }))
-hl.bind("SUPER + Down", hl.dsp.focus({ direction = "down" }))
-hl.bind("SUPER + Up", hl.dsp.focus({ direction = "up" }))
-hl.bind("SUPER + Right", hl.dsp.focus({ direction = "right" }))
+-- Generated values come after the hand-written defaults so a setting changed in
+-- the shell wins over the shipped default without either file knowing about the
+-- other. A fresh checkout has none of these and must still start.
+if present("generated/settings.lua") then require("generated.settings") end
 
-for i = 1, 9 do
-    local key = tostring(i)
-    hl.bind("SUPER + " .. key, hl.dsp.focus({ workspace = i }))
-    hl.bind("SUPER + SHIFT + " .. key, hl.dsp.window.move({ workspace = i }))
+-- Keys: exactly one source at a time. The generator writes the COMPLETE set
+-- (defaults with the user's rebinds already resolved), so when it exists the
+-- shipped defaults must not also run — two binds on one key is a conflict
+-- Hyprland resolves by silently keeping one of them.
+if present("generated/binds.lua") then
+    require("generated.binds")
+else
+    require("buchhwin.binds")
 end
 
-hl.bind("SUPER + mouse:272", hl.dsp.window.drag(), { mouse = true })
-hl.bind("SUPER + mouse:273", hl.dsp.window.resize(), { mouse = true })
+if present("generated/colors.lua") then require("generated.colors") end
 
-exec("XF86AudioRaiseVolume", "wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+")
-exec("XF86AudioLowerVolume", "wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-")
-exec("XF86AudioMute", "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle")
-exec("XF86AudioMicMute", "wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle")
-exec("XF86MonBrightnessUp", "brightnessctl set 5%+")
-exec("XF86MonBrightnessDown", "brightnessctl set 5%-")
-exec("Print", "grim -g \"$(slurp)\" - | wl-copy")
+-- Autostart last: it only registers a hyprland.start hook, but keeping it at
+-- the end means nothing it launches can race a config value that is still
+-- being assigned above.
+require("buchhwin.autostart")
 
--- This optional file belongs to the user. The installer creates it once and
--- never overwrites it, so machine-specific monitors, rules and binds survive
--- every repository update without leaking into the Plasma session.
-pcall(dofile, os.getenv("XDG_CONFIG_HOME") .. "/buchhwin/hyprland/overrides.lua")
+-- Yours. Machine-specific monitors, extra rules, personal binds — none of it
+-- leaks into the Plasma session and none of it is touched by an update.
+if present("overrides.lua") then require("overrides") end

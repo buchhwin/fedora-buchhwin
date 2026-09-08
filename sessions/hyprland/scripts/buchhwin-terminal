@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+# The terminal, with a fallback chain — the dwl session's wrapper, adapted.
+#
+# The point of a wrapper rather than binding "kitty" directly is that a key must
+# never do nothing. If kitty is missing, Konsole is always there: it ships with
+# the Fedora KDE base this session is installed on top of.
+#
+# No --config flag is needed the way dwl needs one. bin/buchhwin-hyprland-session
+# points XDG_CONFIG_HOME at the session's own directory before Hyprland starts,
+# so kitty finds $XDG_CONFIG_HOME/kitty/kitty.conf by itself — and a kitty
+# started from the Plasma session still reads the user's own config.
+set -euo pipefail
+
+# Terminal emulators otherwise start the account's login shell, which on Fedora
+# is Bash until 80-shellenv.sh has run. An explicit command from the caller
+# still wins.
+if (( $# == 0 )); then
+  set -- zsh -i
+fi
+
+if command -v kitty >/dev/null 2>&1; then
+  exec kitty "$@"
+fi
+
+if command -v konsole >/dev/null 2>&1; then
+  exec konsole -e "$@"
+fi
+
+notify-send "buchhwin" "No terminal found (looked for kitty and konsole)" 2>/dev/null || true
+exit 127

@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+# The web browser, with a fallback chain — the dwl session's wrapper, adapted.
+#
+# Where dwl reads BROWSER out of its settings.env, this session keeps its
+# settings in shell.json, so the browser is read from there when jq is around
+# (it is: packages/dnf-core.txt installs it). The env variable still wins, so a
+# one-off `BROWSER=firefox buchhwin-browser` behaves the way anyone would expect.
+#
+# Once the shell has generated its keybindings, Super+B launches the configured
+# program directly and never reaches this script. It stays the default and the
+# rescue path — a fresh install has no generated binds yet.
+set -euo pipefail
+
+config_home="${XDG_CONFIG_HOME:-$HOME/.config}"
+settings="$config_home/buchhwin/shell.json"
+
+browser_command="${BROWSER:-}"
+
+if [[ -z "$browser_command" && -r "$settings" ]] && command -v jq >/dev/null 2>&1; then
+  # A missing key, a null and an empty list all have to come back as the empty
+  # string, or the command below tries to run the word "null".
+  browser_command="$(jq -r '(.programs.browser // []) | if type == "array" then join(" ") else . end' \
+                       "$settings" 2>/dev/null || true)"
+  [[ "$browser_command" == "null" ]] && browser_command=""
+fi
+
+browser_command="${browser_command:-brave}"
+
+if command -v "${browser_command%% *}" >/dev/null 2>&1; then
+  exec sh -lc "$browser_command \"\$@\"" sh "$@"
+fi
+
+# "brave" must find the installed Brave Flatpak even when Plasma's default
+# browser is something else. The user's desktop-wide default is not touched.
+if [[ "${browser_command%% *}" == brave || "${browser_command%% *}" == brave-browser ]]; then
+  if command -v brave-browser >/dev/null 2>&1; then exec brave-browser "$@"; fi
+  if command -v flatpak >/dev/null 2>&1 && flatpak info com.brave.Browser >/dev/null 2>&1; then
+    exec flatpak run com.brave.Browser "$@"
+  fi
+fi
+
+desktop="$(xdg-settings get default-web-browser 2>/dev/null || true)"
+if [[ -n "$desktop" ]] && command -v gtk-launch >/dev/null 2>&1; then
+  exec gtk-launch "${desktop%.desktop}"
+fi
+
+for browser in brave brave-browser firefox chromium google-chrome-stable vivaldi; do
+  command -v "$browser" >/dev/null 2>&1 && exec "$browser" "$@"
+done
+
+notify-send "buchhwin" "No browser found. Set one under Settings → Programs." 2>/dev/null || true
+exit 127

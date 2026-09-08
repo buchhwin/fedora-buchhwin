@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# Visual Studio Code, with a fallback chain — the dwl session's wrapper, verbatim.
+#
+# dwl binds Super+C to this; so does the Hyprland session, which is why the
+# script exists in both instead of the key naming a binary that may be a Flatpak
+# on one machine and an RPM on another.
+set -euo pipefail
+
+if command -v code >/dev/null 2>&1; then exec code "$@"; fi
+if command -v code-insiders >/dev/null 2>&1; then exec code-insiders "$@"; fi
+
+if command -v flatpak >/dev/null 2>&1 && flatpak info com.visualstudio.code >/dev/null 2>&1; then
+  exec flatpak run com.visualstudio.code "$@"
+fi
+
+notify-send "buchhwin" "Visual Studio Code was not found" 2>/dev/null || true
+exit 127

@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+# Screenshots — the dwl session's script, adapted.
+#
+# Three modes, matching dwl's three keys:
+#   region  Super+S, Super+Print          pick an area, save, copy, notify
+#   full    Super+Shift+Print             the whole screen, save, copy, notify
+#   edit    Super+Ctrl+Print              pick an area and open it for annotation
+#
+# The save directory follows the user's XDG Pictures directory rather than a
+# hardcoded ~/Pictures, because that is the one the file manager also opens.
+set -euo pipefail
+
+mode="${1:-region}"
+
+if [[ -n "${SCREENSHOT_DIR:-}" ]]; then
+  dir="$SCREENSHOT_DIR"
+elif command -v xdg-user-dir >/dev/null 2>&1; then
+  dir="$(xdg-user-dir PICTURES)/Screenshots"
+else
+  dir="$HOME/Pictures/Screenshots"
+fi
+mkdir -p "$dir"
+
+file="$dir/$(date +'%Y-%m-%d_%H-%M-%S').png"
+
+case "$mode" in
+  region)
+    # slurp exits non-zero when the selection is cancelled with Escape. That is
+    # not an error worth a notification, so it leaves quietly.
+    geometry="$(slurp)" || exit 0
+    grim -g "$geometry" "$file"
+    ;;
+  full)
+    grim "$file"
+    ;;
+  edit)
+    geometry="$(slurp)" || exit 0
+    if command -v swappy >/dev/null 2>&1; then
+      # swappy owns the file from here: it does its own saving and copying.
+      grim -g "$geometry" - | swappy -f -
+      exit 0
+    fi
+    # No annotator installed — still take the shot rather than doing nothing,
+    # and say why it was not opened for editing.
+    grim -g "$geometry" "$file"
+    wl-copy < "$file"
+    notify-send "Screenshot saved" "$file
+Install swappy to annotate." 2>/dev/null || true
+    exit 0
+    ;;
+  *)
+    echo "usage: buchhwin-screenshot [region|full|edit]" >&2
+    exit 2
+    ;;
+esac
+
+wl-copy < "$file"
+notify-send "Screenshot saved" "$file" 2>/dev/null || true
