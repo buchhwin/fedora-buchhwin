@@ -58,13 +58,13 @@ Singleton {
     // ⚠️⚠️ AND IT PUTS THE SHIPPED WALLPAPER BACK, which it did not before.
     // Until a wallpaper shipped, "the defaults" and "how it looked after
     // installing" were the same thing. They are not any more: the installer
-    // seeds `palette: wallpaper` pointing at wallpapers/NiriWallpaper.jpg, so a
+    // seeds `palette: wallpaper` pointing at wallpapers/buchhwin-wallpaper.jpg, so a
     // reset that wrote everforest-dark would drop somebody into a green desktop
     // with no picture — a state their machine had never been in. Asked which
     // one "reset" should mean, he chose back-to-as-delivered.
     //
     // ⚠️ IT READS THE FOLDER RATHER THAN NAMING A FILE. Hard-coding
-    // NiriWallpaper.jpg here would put the shipped filename in a second place,
+    // buchhwin-wallpaper.jpg here would put the shipped filename in a second place,
     // and lib/60-shell.sh spends a paragraph explaining why it refused to do
     // that. The rule is the installer's own: the first image, alphabetically.
     // No pictures on disk and it falls back to what it always wrote, because a

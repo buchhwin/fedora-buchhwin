@@ -99,15 +99,15 @@ phase_shell() {
     # loads them through `sourceSize` anyway, so the bytes bought nothing. The
     # whole folder is 6.8 MB.
     #
-    # ⚠️ THE DEFAULT IS STILL NiriWallpaper.jpg, and it stays that way by an
+    # ⚠️ THE DEFAULT IS STILL buchhwin-wallpaper.jpg, and it stays that way by an
     # accident worth writing down rather than relying on: the pick below is
-    # `sort | head -1`, and "." sorts before "1", so NiriWallpaper.jpg comes
-    # ahead of NiriWallpaper1.jpg. A tenth picture named NiriWallpaper0.jpg
+    # `sort | head -1`, and "." sorts before "1", so buchhwin-wallpaper.jpg comes
+    # ahead of buchhwin-wallpaper1.jpg. A tenth picture named buchhwin-wallpaper0.jpg
     # would quietly become the default of every fresh machine.
     #
     # ⚠️⚠️ HIS OWN FOLDER USED TO WIN OVER IT, AND THAT SENTENCE STOOD HERE
     # UNTIL IT COST A ROUND. It now ADDS to the shipped nine instead of
-    # replacing them — see NiriShellWP below for what that cost and why.
+    # replacing them — see BuchhwinWP below for what that cost and why.
     # ⚠️ NOT "$HOME/Bilder": that is the German name for the pictures folder,
     # and this repository is public. `xdg-user-dir` answers with whatever the
     # machine actually calls it; the fallback is the XDG default rather than a
@@ -119,7 +119,7 @@ phase_shell() {
     local wp_dir="$pics/Wallpaper"
     local wp_src="${WALLPAPERS:-}"
 
-    # ⚠️ A FOLDER CALLED NiriShellWP IS THE WAY TO NAME YOUR OWN DEFAULT, and it
+    # ⚠️ A FOLDER CALLED BuchhwinWP IS THE WAY TO NAME YOUR OWN DEFAULT, and it
     # exists because the alternative was worse. He asked for one particular
     # picture to be the default — "das jetzige nix her macht" — and that picture  # english-ok: his words, quoted
     # is a 6 MB photograph from wallhaven. It cannot go in the repository: this
@@ -129,14 +129,14 @@ phase_shell() {
     # different hat.
     #
     # So the installer looks for a FOLDER by name instead. Put your pictures in
-    # one called NiriShellWP anywhere under your home — Syncthing, a USB stick,
+    # one called BuchhwinWP (or the older NiriShellWP) anywhere under your home — Syncthing, a USB stick,
     # wherever — and the first of them becomes the seeded default and the source
     # of the derived palette. Nothing is named, nothing is shipped, and a
     # stranger who clones this gets the fallback below.
     # ⚠️⚠️ BOTH SOURCES, NOT THE FIRST ONE THAT EXISTS — and this is the fix for
     # "und die neuen wallpaper fehlen auf der vm".                              # english-ok: his report, quoted
     #
-    # It used to be a first-match-wins chain: a folder called NiriShellWP under
+    # It used to be a first-match-wins chain: a folder called BuchhwinWP under
     # $HOME, ELSE the repository, ELSE /usr/share/backgrounds. When that was
     # written it was right, because the pictures were not in the repository at
     # all and a named folder was the only way to have any.
@@ -144,7 +144,7 @@ phase_shell() {
     # B5 reversed that and this chain was never revisited. Nine pictures ship
     # now, and his words are explicitly about every machine — "is ja egal wo    # english-ok: his words, quoted
     # ich teste auf welchem pc das wallpaper soll einfach default werden".      # english-ok: same quote, second line
-    # But every machine of his HAS a NiriShellWP folder, because Syncthing puts
+    # But every machine of his HAS such a folder, because Syncthing puts
     # one there. So on exactly the machines the brief is about, the nine shipped
     # pictures were found, skipped, and never copied.
     #
@@ -163,9 +163,19 @@ phase_shell() {
         if [[ -d "$REPO_DIR/wallpapers" ]]; then
             wp_srcs+=("$REPO_DIR/wallpapers")
         fi
+        # ⚠️ BOTH NAMES, NEW ONE FIRST, AND THE OLD ONE IS NOT DEAD WEIGHT.
+        # The folder is synced onto real machines already, under the name it had
+        # when this desktop ran on niri. Dropping that name would not remove a
+        # mention of niri so much as quietly stop finding the pictures on every
+        # machine that already has one. `-name` is ordered, so a BuchhwinWP
+        # folder wins wherever both exist.
         local wp_named
-        wp_named="$(find "$HOME" -maxdepth 4 -type d -name 'NiriShellWP' \
+        wp_named="$(find "$HOME" -maxdepth 4 -type d -name 'BuchhwinWP' \
                     -not -path '*/.*' 2>/dev/null | head -1)"
+        if [[ -z "$wp_named" ]]; then
+            wp_named="$(find "$HOME" -maxdepth 4 -type d -name 'NiriShellWP' \
+                        -not -path '*/.*' 2>/dev/null | head -1)"
+        fi
         if [[ -n "$wp_named" ]]; then
             wp_srcs+=("$wp_named")
         fi
@@ -210,7 +220,7 @@ phase_shell() {
 
     # The first image in the folder, as the file:// URL the shell stores.
     #
-    # ⚠️ A PICTURE FROM NiriShellWP WINS IF THERE IS ONE. Otherwise "first"
+    # ⚠️ A PICTURE FROM THE NAMED FOLDER WINS IF THERE IS ONE. Otherwise "first"
     # means first alphabetically out of everything that was copied, which on a
     # machine that also has Fedora's own backgrounds is whatever happens to sort
     # earliest — and that is how the default ended up being a picture nobody
@@ -225,19 +235,19 @@ phase_shell() {
     # soll einfach default werden das niriwallpaper mit passendem schema".      # english-ok: same quote, second line
     #
     # ⚠️ MEASURED ON THE FRESH VM, which is what it was rebuilt for: with a
-    # NiriShellWP folder holding one unrelated picture, a complete install came
+    # named folder holding one unrelated picture, a complete install came
     # up with THAT as `wallpaper.current` — on a machine that had just been
     # given all nine. Every machine of his has such a folder, so "the default on
     # every machine" was true nowhere.
     #
     # ⚠️ AND `sort` WAS THE SECOND HALF OF THE TRAP. It collates by locale, so
-    # whether a foreign name sorts before "NiriWallpaper.jpg" depends on
+    # whether a foreign name sorts before "buchhwin-wallpaper.jpg" depends on
     # LC_COLLATE rather than on anything anybody decided. `LC_ALL=C` makes the
     # order a fact instead of a setting — it is why the note at the top of this
     # phase can still say "." sorts before "1" and be right.
     local wp_first=""
-    if [[ -f "$wp_dir/NiriWallpaper.jpg" ]]; then
-        wp_first="$wp_dir/NiriWallpaper.jpg"
+    if [[ -f "$wp_dir/buchhwin-wallpaper.jpg" ]]; then
+        wp_first="$wp_dir/buchhwin-wallpaper.jpg"
     fi
     # A named folder still names the default when the shipped one is not there —
     # a stranger who cloned this without the wallpapers folder still gets theirs.

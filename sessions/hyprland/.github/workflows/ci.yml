@@ -68,7 +68,7 @@ jobs:
       # ⚠️ THESE THREE READ THE REPOSITORY AND NOTHING ELSE, and two of them
       # were run by hand for weeks — which means they were green whenever
       # somebody remembered, not whenever the code changed. Neither needs
-      # quickshell, niri or a running desktop, so there was never a reason for
+      # quickshell or a running desktop, so there was never a reason for
       # them to sit outside CI. That is the exact argument that moved six suites
       # into the qml job below.
       #
@@ -98,7 +98,7 @@ jobs:
       - name: keys reach the notch pages, not just the surface
         run: bash tests/notch-keys.sh
       # ⚠️ ADDED, AND IT NEEDED NOTHING. Pure awk over shell/**, no quickshell,
-      # no niri — it was outside CI for no reason at all, which is the exact
+      # no compositor — it was outside CI for no reason at all, which is the exact
       # pattern the comment above this block complains about. It guards the
       # fault that made the gear on the bar do nothing: an IPC handler reading
       # `root.<name>` for a property that no longer exists. QML says nothing
@@ -126,7 +126,7 @@ jobs:
       # ⚠️ A COMMENT WAS NOT ENOUGH. config/Backup.qml has warned in capitals
       # that a FileView hands back what it already holds since the day it was
       # written — and the trap still sprang four more times, the last of which
-      # shipped: tools/niri.qml wrote Brave's desktop file out as code.desktop,
+      # shipped: the config generator wrote Brave's desktop file out as code.desktop,
       # which deletes VS Code from the launcher because a user desktop file
       # replaces the system one. Static, so it runs without quickshell.
       - name: a FileView read right after a new path is cleared first
@@ -157,14 +157,12 @@ jobs:
         run: bash tests/pipefail-grep.sh
 
       # ⚠️⚠️ SIX SUITES THAT NEEDED NOTHING AND RAN NOWHERE. Each of these reads
-      # the repository with awk or grep and no more — no quickshell, no niri, no
+      # the repository with awk or grep and no more — no quickshell, no compositor, no
       # session — so they were green whenever somebody remembered, which is not
       # a check. That is the same argument that moved six others into the qml
       # job below, applied to the ones it missed.
       - name: no animation drives a layout size
         run: bash tests/motion.sh
-      - name: every name the greeter uses exists
-        run: bash tests/greeter-idents.sh
       # ⚠️ EXIT 2 IS NOT RED. This lane has no quickshell, so the functional
       # half of this suite says "I cannot run here" and exits 2 — and this
       # step counted that as a failure, which is why the whole lane was red
@@ -244,14 +242,15 @@ jobs:
     container: fedora:44
     steps:
       - uses: actions/checkout@v4
-      - name: install quickshell and niri
+      - name: install quickshell
         # install_weak_deps=False is the same guarantee the installer relies on:
-        # Fedora's niri package recommends waybar, alacritty, fuzzel and
-        # swaylock. Asserting it here means every run proves it still holds.
+        # asserting it here means every run proves the desktop still arrives
+        # without a second bar, launcher or lock screen coming along as a
+        # recommendation.
         # jq is required by tests/all-palettes.sh, which exits 2 without it —
         # it was never installed explicitly before.
         # ⚠️ diffutils, because a minimal Fedora image does not ship `diff`.
-        # `bhctl niri diff` discards diff's stderr — it must, or a missing
+        # `bhctl hypr diff` discards diff's stderr — it must, or a missing
         # optional include reads as a difference — so "command not found" was
         # swallowed and the whole command printed nothing at all. The check
         # that caught it could only say "0 bytes of output"; bin/bhctl now
@@ -266,7 +265,7 @@ jobs:
           # missing. Without them the suite is green having asked half the
           # question — which is the exact failure mode qt6ct sat in for months.
           dnf install -y --setopt=install_weak_deps=False \
-            quickshell qt6-qtdeclarative qt6-qtdeclarative-devel git-core niri jq \
+            quickshell qt6-qtdeclarative qt6-qtdeclarative-devel git-core jq \
             diffutils \
             material-icons-fonts fontconfig \
             btop bat fastfetch git-delta tmux alacritty
@@ -380,12 +379,6 @@ jobs:
       - name: every settings page builds, and the row counts agree
         run: bash tests/pages.sh
 
-      # ⚠️ ADDED. It needs niri and nothing else, and the container installs
-      # niri already. It guards a silent class of fault: a keybinding naming an
-      # action niri does not have. The motivating case was Super+F, where the
-      # two fullscreen actions were the wrong way round for weeks.
-      - name: every keybinding names an action niri really has
-        run: bash tests/bind-actions.sh
 
       # ⚠️ ALL of them. Eight suites existed and CI ran two, so six were only
       # ever run by hand — which means they were green whenever somebody
@@ -402,13 +395,11 @@ jobs:
       # suites either side of it do not: all-palettes proves each palette
       # resolves, reachable proves each generated file is pointed at — neither
       # asks whether SWITCHING actually arrives. The control is a file that must
-      # NOT change (config.kdl: niri's colours live in the include), and the
+      # NOT change (the compositor's colours live in their own generated module), and the
       # provenance header is masked so "it changed" cannot mean "it rewrote its
       # own first line".
       - name: switching the palette reaches every program
         run: bash tests/palette-reach.sh
-      - name: the generated niri config parses, cleanly
-        run: bash tests/niri-config.sh
       # ⚠️ EXITS 2 HERE AND SAYS SO. Neither Brave nor VS Code is installed on a
       # CI runner, so there is nothing to override and this skips — the point of
       # having it in the list anyway is that it runs on the test VM and on his
@@ -449,8 +440,6 @@ jobs:
       # that caught the reset writing defaults instead of deleting keys.
       - name: a page reset puts its own keys back and nothing else
         run: bash tests/reset-page.sh
-      - name: the greeter builds and knows its users
-        run: bash tests/greeter.sh
       - name: the backup names what it owns
         run: bash tests/backup.sh
       - name: what the shell generates parses back
@@ -482,7 +471,7 @@ jobs:
       # ⚠️ THESE TWO TOLERATE EXIT 2 ON PURPOSE, and it is not a loophole: both
       # carry their own environment guard and say "cannot run here" rather than
       # inventing an answer. `suggestions` wants a live Wayland socket for half
-      # its work, `xwayland` needs niri to say which windows are X11. Exit 2 is
+      # its work, `xwayland` needs the compositor to say which windows are X11. Exit 2 is
       # printed in the log, so a skip is visible rather than silent — the same
       # arrangement desktop-override has had since it was added.
       - name: the suggestion lists are real
