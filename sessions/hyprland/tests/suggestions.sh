@@ -199,15 +199,57 @@ else
         BUCHHWIN_TOOL=suggest-check BUCHHWIN_SUGGEST_OUT="$probe" \
         QT_QPA_PLATFORM=offscreen timeout 60 qs -p shell >/dev/null 2>&1
     fi
-    if [[ ! -f "$probe" ]] || grep -q '^timeout=yes' "$probe"; then
-        bad "the services never answered — nothing could be measured"
+    if [[ ! -f "$probe" ]]; then
+        bad "the probe wrote nothing at all — it crashed before it could report"
     else
         v() { grep -m1 "^$1=" "$probe" | cut -d= -f2-; }
-        required=(appIds allPrograms keyboardOptions durations)
+
+        # ⚠️ THE ONE SERVICE THAT MUST ANSWER, and it is asked by name. The probe
+        # used to write `timeout=yes` and nothing else whenever its wait ran out,
+        # and this said "the services never answered" — which was true of one of
+        # the two services waited on, and never said which. Installed is the one
+        # that is genuinely asked a question; if it has not answered, everything
+        # below it is measuring an empty machine and says so.
+        if [[ "$(v installed)" == yes ]]; then
+            ok "the installed-programs service answered"
+        else
+            bad "Installed never answered — its scan hung or died, so every list below is empty for that reason"
+        fi
+
+        required=(keyboardOptions durations)
         if [[ "$onscreen" == yes ]]; then
             required+=(monitors)
         else
             printf '       %s\n' "screens not measured: no Wayland session here, so Quickshell.screens is empty by definition, not by fault"
+        fi
+
+        # ⚠️⚠️ THE PROGRAM LISTS ARE ONLY REQUIRED WHERE THERE ARE PROGRAMS, and
+        # this is the same distinction the sounds block below makes, arrived at
+        # the same way. `allPrograms` and `appIds` are built from the freedesktop
+        # database with NoDisplay entries dropped — services/Apps.qml drops them
+        # deliberately, because they exist to own a MIME type rather than to be
+        # picked out of a menu. The Fedora WSL used for testing has exactly one
+        # .desktop file, `org.quickshell.desktop`, and it is NoDisplay; the CI
+        # container has none at all. On both, an empty program list is a fact
+        # about the machine and not a fault in the code.
+        #
+        # ⚠️ AND IT REMAINS A CHECK WHERE IT CAN BE ONE. On any machine with
+        # programs installed — every developer machine, the real session — both
+        # lists must be non-empty. What is dropped is the claim that a machine
+        # with no menu entries is broken.
+        app_files=0
+        for d in /usr/share/applications /usr/local/share/applications \
+                 "$HOME/.local/share/applications" \
+                 /var/lib/flatpak/exports/share/applications; do
+            [[ -d "$d" ]] || continue
+            n="$(grep -LiE '^NoDisplay[[:space:]]*=[[:space:]]*true' \
+                 "$d"/*.desktop 2>/dev/null | wc -l)"
+            app_files=$(( app_files + n ))
+        done
+        if [[ "$app_files" -gt 0 ]]; then
+            required+=(appIds allPrograms)
+        else
+            printf '       %s\n' "programs not measured: this machine has no visible .desktop entry at all (appCount=$(v appCount)), so an empty program list is a fact rather than a fault"
         fi
         # ⚠️⚠️ SOUNDS ARE ONLY REQUIRED WHERE THERE ARE SOUNDS, and that is not a
         # softened check — it is the same distinction the screens line above

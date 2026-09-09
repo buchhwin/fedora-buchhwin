@@ -26,9 +26,20 @@ Item {
     readonly property string out:
         Quickshell.env("BUCHHWIN_SUGGEST_OUT") || "/tmp/buchhwin-suggest-check.txt"
 
-    function report() {
+    function report(timedOut) {
         var s = Services.Suggest
         var lines = [
+            // ⚠️ WHO ANSWERED COMES FIRST, and it is measurement rather than
+            // decoration. Two services are waited on below; when the wait ran
+            // out this file used to write `timeout=yes` and nothing else, and
+            // the script turned that into "the services never answered —
+            // nothing could be measured". True, and useless: it named neither
+            // service, and it decided the verdict here, which is precisely the
+            // split this tool's own header says it must not make.
+            "timedOut=" + (timedOut ? "yes" : "no"),
+            "installed=" + (Services.Installed.available ? "yes" : "no"),
+            "apps=" + (Services.Apps.available ? "yes" : "no"),
+            "appCount=" + Services.Apps.apps.length,
             "monitors=" + s.monitors.length,
             "monitorsFirst=" + (s.monitors.length ? s.monitors[0].value : ""),
             "appIds=" + s.appIds.length,
@@ -63,10 +74,19 @@ Item {
         // `allPrograms` and call it a finding.
         condition: Services.Installed.available && Services.Apps.available
         timeoutMs: 20000
-        onReady: root.report()
-        onTimedOut: {
-            log.setText("timeout=yes\n")
-            Qt.callLater(Qt.quit)
-        }
+        onReady: root.report(false)
+
+        // ⚠️ A TIMEOUT STILL REPORTS, and that is the fix rather than a longer
+        // wait. `Apps.available` is `apps.length > 0` — deliberately, because
+        // the launcher must be able to say "nothing installed" — so on a machine
+        // whose only .desktop file is NoDisplay, which is exactly what a bare
+        // Fedora WSL and the CI container are, this condition is false forever.
+        // Waiting longer cannot help; the wait was measuring the machine.
+        //
+        // So the numbers are written either way and the script judges them
+        // against what this machine can supply, the same way it already does for
+        // sounds and for screens. A genuine hang is still loud: `installed=no`
+        // says so, and every list it feeds comes out empty and fails there.
+        onTimedOut: root.report(true)
     }
 }
