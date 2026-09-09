@@ -159,6 +159,10 @@ notch-frame|shell/ui/surface/OverlaySurface.qml|s/^        anchors.fill: parent$
 motion|shell/ui/surface/ShellSurface.qml|s/^    implicitHeight: Math.max(1, root.maxIslandHeight)$/    implicitHeight: Math.max(1,\n                            root.islandH)/|a surface following an animated size across TWO lines, which a line-by-line read cannot see
 no-fetch-animation|shell/tools/render.qml|s/+ Math.max(0, root.fetchTextLines - root.fetchLogoLines) + ", "/+ 6 + ", "/|the fastfetch logo padding typed as a number again, right on one machine at most
 notch-frame|shell/ui/surface/OverlaySurface.qml|s/^            anchors.top: parent.top$/            anchors.verticalCenter: parent.verticalCenter/|the page centred in the card again, so every height change slides it by half
+dry-run-truth|lib/common.sh|s#/etc/pam.d/buchhwin-lock  (only if it does not exist yet)#/etc/nowhere/buchhwin.conf#|the dry run promising a file the installer does not write
+dry-run-truth|bin/bhctl|s#/etc/systemd/logind.conf.d/50-buchhwin.conf#/etc/systemd/logind.conf.d/50-lid.conf#|a write that moved in the HELPER the installer runs, one file further out than the checker used to look
+dry-run-truth|install-hyprland.sh|s/writes four files/writes three files/|the printed help text drifting away from the plan it summarises
+config-shape|docs/CONFIG.md|s/^Targets: `gtk` /Targets: `gtk` `vesktop` /|a theming target documented after the setting behind it was removed
 picker|shell/ui/common/CarouselPicker.qml|s#^    function _moved() {}$#    function _moved() { root.applied(root.currentIndex) }#|a picker that applies on the way past, instead of on Enter
 calendar|shell/services/Calendar.qml|s/^            } else if (c === ",") {$/            } else if (false) {/|a CSV split that stops splitting, so every event becomes one field
 netpanel|shell/ui/quick/NetworkList.qml|s/^        model: Services.Net.*$/        model: []/|the network panel drawing no rows at all, which is what a Repeater over an empty model looks like

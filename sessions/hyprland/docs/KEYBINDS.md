@@ -21,7 +21,7 @@ There are 67 of them.
 | `SUPER + D` | App launcher |
 | `SUPER + B` | Web browser |
 | `SUPER + E` | Files |
-| `SUPER + C` | VS Code |
+| `SUPER + C` | Editor |
 | `SUPER + L` | Lock screen |
 
 ## Windows

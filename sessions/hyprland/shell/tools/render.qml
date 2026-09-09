@@ -1245,29 +1245,20 @@ Scope {
     FileView { id: f23; blockLoading: true; printErrors: false }
     FileView { id: f24; blockLoading: true; printErrors: false }
 
-    // ------------------------------------------------------------- VS Code
+    // -------------------------------------------------------- foreign JSON
     //
-    // ⚠️ AN EXTENSION, NOT A PILE OF colorCustomizations. VS Code has no
-    // include mechanism, so the only two ways in are its settings file — which
-    // belongs to the user and would then hold two hundred generated lines — or
-    // a colour theme of our own, which is a directory we own entirely with a
-    // ONE LINE pointer in the user's file. That is the same shape as kitty's
-    // include and btop's `color_theme`, and it is the shape this project uses
-    // everywhere for a reason: `off` has something to take back out.
-
-
-    // ⚠️ THE USER'S OWN FILE, TOUCHED WITH TWO KEYS AND A BACKUP.
+    // ⚠️⚠️ THE VS CODE SECTION STOOD HERE AND ITS CODE IS GONE. Its comments
+    // did not go with it: a heading, the argument for shipping a colour theme
+    // of our own rather than two hundred generated lines in somebody's
+    // settings.json, and the rule for stripping JSONC before JSON.parse — all
+    // of it describing a writer this file no longer has. The `vscode` theming
+    // key went at the same time (shell/config/Config.qml says where), so those
+    // paragraphs were the last thing in the tree still pointing at the feature,
+    // and the line below began "the same shape as vscodeSettings above".
     //
-    // settings.json is JSONC — VS Code allows comments in it — and JSON.parse
-    // does not. Whole-line comments are stripped, which cannot corrupt a `//`
-    // inside a string on a value line, and that is the only stripping done. If
-    // what is left still does not parse, NOTHING is written and the line to add
-    // by hand is printed instead. Destroying somebody's editor settings to set
-    // a colour scheme would be a poor trade.
-
-    // Brave's Preferences — the same shape as vscodeSettings above, and for the
-    // same two reasons: it is a JSON file somebody else owns, and one of the
-    // keys is not a colour.
+    // Brave's Preferences is the one foreign JSON file left, and it kept both
+    // reasons that section was written for: it is a file somebody else owns,
+    // and one of the two keys is not a colour.
     //
     // ⚠️⚠️ IF IT DOES NOT PARSE, NOTHING IS WRITTEN. Preferences holds his
     // profile — sessions, permissions, search engines. Overwriting it to set a
@@ -1666,9 +1657,8 @@ Scope {
             var batBefore = written
             var home = Quickshell.env("HOME") || "~"
 
-            // Brave. The same shape as vscode's settings.json above: a foreign
-            // JSON file, merged rather than replaced, and skipped entirely if it
-            // does not parse.
+            // Brave. A foreign JSON file: merged rather than replaced, and
+            // skipped entirely if it does not parse.
             //
             // ⚠️ CLEAR THE PATH FIRST — a FileView hands back what it already
             // holds for a path it already has. Fourth trap of its kind in this

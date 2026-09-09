@@ -80,10 +80,21 @@ dnf_install() {
 # ---------------------------------------------------------------- the plan
 #
 # ⚠️ THIS EXISTS BECAUSE THE INSTALLER IS MEANT TO RUN ON A MACHINE SOMEBODY
-# WORKS ON. It changes the login shell, moves ~/.zshrc aside, edits
-# /etc/dnf/dnf.conf, installs around 150 packages and removes three. Every one
-# of those is defensible on its own and none of them is something to discover
-# afterwards.
+# WORKS ON. It installs about seventy-five packages, may remove three, writes
+# four files outside your home directory and enables SDDM. Every one of those
+# is defensible on its own and none of them is something to discover afterwards.
+#
+# ⚠️⚠️ AND THIS PARAGRAPH WAS WRONG UNTIL 09.09.2026, WHICH IS WORSE THAN NO
+# PARAGRAPH. It said the installer "changes the login shell, moves ~/.zshrc
+# aside, edits /etc/dnf/dnf.conf" and installs "around 150 packages". Every one
+# of those had been removed when the profile was cut back, and the plan below
+# went on promising them. It overstated rather than understated — which is the
+# safe direction to be wrong in and still a document that lies, in the one place
+# somebody reads before deciding whether to trust it.
+#
+# So each line below was checked against the executable code, not against the
+# comments explaining why something was taken out. Five were stale and two real
+# changes were missing entirely.
 #
 # So: `--dry-run` prints exactly what would happen and touches nothing. It is
 # the same shape the dwl session has had from the start, and its absence here
@@ -140,18 +151,52 @@ print_plan() {
     done < <(read_list dnf-unwanted.txt)
 
     section "Files outside your home directory"
-    printf '      %s
-'         "/usr/local/bin/buchhwin-hyprland-session"         "/usr/share/wayland-sessions/buchhwin-hyprland.desktop"         "/usr/libexec/buchhwin-charge"         "/etc/pam.d/buchhwin-lock"         "/etc/polkit-1/rules.d/ (charge thresholds, VPN switch)"         "/etc/systemd/logind.conf.d/50-buchhwin.conf"         "/etc/dnf/dnf.conf (defaultyes, max_parallel_downloads)"         "/etc/dnf/dnf5-aliases.d/buchhwin.conf"
+    # ⚠️ FOUR, AND THEY WERE EIGHT ON PAPER. The four that went: a charge helper
+    # in /usr/libexec, two polkit rules, a dnf5 alias file and an in-place edit
+    # of /etc/dnf/dnf.conf. None of them is written any more — they went when the
+    # profile was cut back, and this list went on promising them for a month.
+    #
+    # ⚠️⚠️ THE LOGIND FILE WAS ALMOST DROPPED FROM THIS LIST TOO, on the reasoning
+    # that `bhctl power apply` writes it, "when you ask for it, not the
+    # installer". Phase 70 asks for it, on every run: lib/70-services.sh calls
+    # bin/bhctl itself, and bhctl's `sudo tee` writes the file. The write is one
+    # file further out than the other three and it is still this installer's
+    # write — which is exactly the shape of thing this list exists to name, and
+    # exactly the shape a checker misses. tests/dry-run-truth.sh reads bin/bhctl
+    # for that reason, and reported four green lines about this list before it
+    # did.
+    printf '      %s\n' \
+        "/usr/local/bin/buchhwin-hyprland-session" \
+        "/usr/share/wayland-sessions/buchhwin-hyprland.desktop" \
+        "/etc/pam.d/buchhwin-lock  (only if it does not exist yet)" \
+        "/etc/systemd/logind.conf.d/50-buchhwin.conf  (what closing the lid does)"
+
+    section "System settings that change"
+    # ⚠️ NAMED, BECAUSE THEY WERE NOT. Both are ordinarily no-ops on a Fedora
+    # KDE machine — SDDM is already the display manager and the marking only
+    # touches packages that are already installed — but "ordinarily a no-op" is
+    # not the same as "does nothing", and this is the list somebody reads to
+    # decide whether to run it on a machine they work on.
+    printf '      %s\n' \
+        "systemctl enable sddm.service  (already enabled on Fedora KDE)" \
+        "dnf mark user, on packages we ship that the removal below could sweep up"
 
     section "Changes to your account"
     # shellcheck disable=SC2088  # literal text for the reader, not a path
-    printf '      %s
-'         "login shell -> /usr/bin/zsh (chsh)"         "~/.zshrc moved to ~/.zshrc.before-buchhwin, replaced by a symlink"         "~/.config/buchhwin-sessions/hyprland/ created (the whole session lives here)"         "~/.local/bin/ gains bhctl and the buchhwin-* helpers"         "systemd user units: buchhwin-shell, -clipboard, -clipboard-image, -drive"
+    printf '      %s\n' \
+        "~/.config/buchhwin-sessions/hyprland/ created (the whole session lives here)" \
+        "~/.local/bin/ gains bhctl and the buchhwin-* helpers" \
+        "systemd user units: buchhwin-shell, -clipboard, -clipboard-image, -drive"
 
     section "What is NOT touched"
     # shellcheck disable=SC2088  # literal text for the reader, not a path
-    printf '      %s
-'         "Plasma stays installed and stays the fallback session in SDDM"         "~/.config is left alone — this session uses its own XDG root"         "no default application, MIME association or Plasma setting is changed"         "SDDM stays the only display manager; no greeter is installed"
+    printf '      %s\n' \
+        "your login shell — the session sets ZDOTDIR for itself; chsh is only suggested" \
+        "~/.zshrc and ~/.config — this session uses its own XDG root" \
+        "Plasma stays installed and stays the fallback session in SDDM" \
+        "the dwl session, if you have one: its files, its config and its packages" \
+        "no default application, MIME association or Plasma setting is changed" \
+        "SDDM stays the only display manager; no greeter is installed"
 
     section "To run it for real"
     step "drop --dry-run. To leave your shell and dnf alone:"
@@ -172,10 +217,26 @@ remove_unwanted() {
     # even warning about — the other desktop's own tools is the same overreach
     # as touching a package the user chose.
     #
-    # Empty unless the two are being installed together, so a plain
-    # `--session hyprland` sweeps exactly as it always did.
+    # ⚠️⚠️ AND IT IS DETECTED, NOT DECLARED. This used to fire only when
+    # `install.sh --session both` set BUCHHWIN_SIBLING_SESSION — which misses the
+    # case that actually happens: dwl is ALREADY installed, from a run last
+    # month, and you now install Hyprland on its own. The variable is unset,
+    # the guard never fires, and the sweep is aimed at the other desktop's lock
+    # screen.
+    #
+    # ⚠️ IT WAS NOT ACTUALLY REMOVING ANYTHING, and that is worth writing down
+    # rather than relying on: `dnf install swaylock`, which is how dwl gets it,
+    # marks the package User, and the loop above only WARNS about those. So the
+    # outcome was a sentence saying "swaylock is installed and marked as YOUR
+    # choice" about a package the other session put there on purpose. The
+    # protection was real and the sentence was wrong — which is the sort of
+    # thing that gets "fixed" by somebody who believes it.
+    #
+    # The marker is dwl's own session file, because that is what exists exactly
+    # when the other desktop is installed and nothing else writes it.
     local sibling=()
-    if [[ "${BUCHHWIN_SIBLING_SESSION:-}" == "dwl" ]]; then
+    if [[ "${BUCHHWIN_SIBLING_SESSION:-}" == "dwl" ]] \
+       || [[ -f /usr/share/wayland-sessions/buchhwin.desktop ]]; then
         sibling=(swaylock swaybg swayidle)
     fi
 

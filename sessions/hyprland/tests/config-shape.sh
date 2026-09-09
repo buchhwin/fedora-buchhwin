@@ -224,6 +224,44 @@ else
     exit 1
 fi
 
+# ⚠️⚠️ AND THE OTHER DIRECTION, WHICH NOTHING WAS ASKING. The check above is a
+# subset test: every group in the schema has to appear in docs/CONFIG.md. It
+# says nothing about a document that names a setting the schema no longer has,
+# and that is the half that had rotted — `vscode`, `vesktop` and `spicetify`
+# were documented as theming targets, one of them with its own table and two
+# paragraphs of measured detail, months after all three were removed with the
+# applications they coloured. Config.qml kept their comments too, and one of
+# them had lost its property and started a sentence mid-thought.
+#
+# A setting that is documented and does not exist is worse than one that exists
+# undocumented: the reader writes it into shell.json, the adapter drops it,
+# nothing happens and nothing says why.
+#
+# The theming block is the one place with a name per program, so it is the one
+# place where the two lists can be compared exactly rather than by heuristic.
+# docs/CONFIG.md carries the line "Targets: `gtk` `qt` …" for that purpose.
+printf '  %-38s ' "the theming targets match the document"
+schema_targets="$(sed -n '/property JsonObject theming:/,/^            }$/p' "$file" \
+                  | grep -oE '^ *property string [a-z]+:' | awk '{print $3}' | tr -d ':' \
+                  | grep -vxE 'mode' | sort)"
+doc_targets="$(grep -E '^Targets: ' -A2 docs/CONFIG.md \
+               | grep -oE '`[a-z]+`' | tr -d '`' | sort -u)"
+
+if [[ -z "$schema_targets" ]]; then
+    printf '\033[38;5;203mcould not read the theming block\033[0m\n'; exit 1
+elif [[ -z "$doc_targets" ]]; then
+    printf '\033[38;5;203mdocs/CONFIG.md has no "Targets:" line any more\033[0m\n'; exit 1
+elif [[ "$schema_targets" != "$doc_targets" ]]; then
+    printf '\033[38;5;203mthey differ\033[0m\n'
+    comm -23 <(printf '%s\n' "$schema_targets") <(printf '%s\n' "$doc_targets") \
+        | sed 's/^/      in the schema, not in the document: /'
+    comm -13 <(printf '%s\n' "$schema_targets") <(printf '%s\n' "$doc_targets") \
+        | sed 's/^/      documented, and not a setting: /'
+    exit 1
+else
+    printf '\033[38;5;114mok\033[0m  %s\n' "$(printf '%s\n' "$schema_targets" | wc -l | tr -d ' ') targets"
+fi
+
 printf '  %-34s ' "no list<int>/list<real>"
 
 numeric="$(grep -nE 'property list<(int|real|double|float)>' "$file" || true)"

@@ -43,7 +43,7 @@ QtObject {
         { key: "SUPER + D",            action: "spawn-sh", arg: "qs -c buchhwin ipc call launcher toggle", desc: "App launcher" },
         { key: "SUPER + B",            action: "spawn",    arg: "@browser",     desc: "Web browser" },
         { key: "SUPER + E",            action: "spawn",    arg: "@fileManager", desc: "Files" },
-        { key: "SUPER + C",            action: "spawn",    arg: "@editor",      desc: "VS Code" },
+        { key: "SUPER + C",            action: "spawn",    arg: "@editor",      desc: "Editor" },
 
         // ⚠️ THE LOCK SCREEN IS A SEPARATE PROCESS, NOT AN IPC CALL. There is
         // no "lock" target in ipc/Ipc.qml — a bind that called one sat here for

@@ -19,7 +19,7 @@ groups were settable and undocumented.
 |---|---|
 | `version` | migration marker; bumped only on a rename or removal |
 | `theme` | `palette`, `accent`, `lightPalette`, `customColor` |
-| `theming` | which programs we colour, and how — one state each, see below. `vscode` also sets `window.titleBarStyle: native`, which is what removes its title bar |
+| `theming` | which programs we colour, and how — one state each, see below. `brave` also sets `browser.custom_chrome_frame: false`, which is what removes its window buttons |
 | `look` | `uiScale` (one number for the size of everything), `rounding`, `borderWidth`, `gapsIn/Out`, opacities, `blur`, `blurPasses`, `shadows`, fonts, `fontSize`, `profile` |
 | `surfaces` | `notifications`, `osd`, `wallpaper` — each on its own |
 | `notifications` | `dnd` (silences toasts, never critical ones — the quick panel tile counts what it took), `corner` (`topRight`/`topLeft`/`bottomRight`/`bottomLeft`), `timeoutMs`, `maxVisible`, `monitors` |
@@ -58,37 +58,52 @@ The per-program keys are flat (`"kitty"`, not `"targets": {"kitty": …}`) — t
 levels of `JsonObject` do not come back from the file, so the block would parse
 and every switch would silently do nothing.
 
+Targets: `gtk` `qt` `kitty` `alacritty` `hypr` `btop` `bat` `fastfetch` `delta`
+`tmux` `starship` `lazygit` `brave`
+
+⚠️ That line is not prose. `tests/config-shape.sh` reads the same names out of
+`Config.qml` and compares the two sets **in both directions**, because the only
+check there used to be ran one way — every schema group had to appear in this
+document, and nothing asked whether this document named things the schema had
+dropped. It did: `vscode`, `vesktop` and `spicetify` were documented here, one
+of them with a table and two paragraphs, after all three had been removed. A
+reader following a document like that concludes the feature is broken.
+
 | State | What it means |
 |---|---|
 | `colour` | the system's colours, whatever `theme.palette` says |
 | `neutral` | a grey scheme: themed, but colourless. **Colourless, not unstyled** — transparency, fonts and corners stay, and red, green and yellow stay coloured, because an error has to read as an error in a grey scheme too |
 | `off` | we take our file back: it is left in place as a stub that overrides nothing, so the `include` that reads it does not point at nothing |
-| `inherit` | follow `mode` — the default, so switching everything at once is one edit rather than twelve |
+| `inherit` | follow `mode` — the default, so switching everything at once is one edit rather than thirteen |
 
 `enabled: false` is the master switch: every program behaves as `off`, files and
 all. Setting it back to `true` fills them again — `off` is not a one-way door.
 
-### ⚠️ Two of them can be undone by the program's own update
+### ⚠️ One of them can be undone by the program's own update
 
-Thirteen of the targets read a file we write and nothing else touches it.
-`vesktop` and `spicetify` colour a program whose files we do not own, and that
-costs something the other thirteen do not. It was chosen with that on the table,
-and it is written here rather than carried quietly.
+Twelve of the thirteen targets read a file we write and nothing else touches it.
+`brave` writes into a file Brave owns — its `Preferences` — and that costs
+something the other twelve do not: a Brave update can throw the two keys out
+again. It was chosen with that on the table, and it is written here rather than
+carried quietly.
 
 | | |
 |---|---|
-| **`vesktop`** (Discord) | The theme is a CSS file in `~/.var/app/dev.vencord.Vesktop/config/vesktop/themes/`. ⚠️ **It has to be ticked once** under Settings → Themes: Vencord is downloaded by Vesktop at first start, so the list of enabled themes does not exist until you have logged in. After that it sticks |
-| **`spicetify`** (Spotify) | The colours are `~/.config/spicetify/Themes/buchhwin/color.ini`, injected into Spotify's own bundle by the spicetify binary. ⚠️ **A Spotify update replaces the patched files and the theming is gone.** `bhctl theme spotify` renders and re-injects, in that order |
+| **`brave`** | Two keys in `Preferences`, and only one of them is a colour. `browser.custom_chrome_frame: false` takes the window buttons off and is set in **every** state including `off`, because it is decoration and not colour — with the compositor's `prefer-no-csd` there is then no frame at all. `browser.theme.user_color` is the colour, and only when we are colouring. ⚠️ **The tab strip stays**: it is browser content, not decoration — the same boundary that leaves libadwaita header bars alone in Nautilus |
 
-⚠️ **Discord is `dev.vencord.Vesktop`, not `com.discordapp.Discord`**, and that
-was measured rather than preferred: the Discord flatpak's `app.asar` is
-root-owned with a link count of 2, so it is hardlinked into OSTree's object
-store — patching it in place rewrites a shared object, and an update would throw
-the patch away anyway. Vesktop is Discord with Vencord already in it.
+⚠️ **Both key names were measured, not remembered** — `strings` over
+`/opt/brave.com/brave/brave` lists them. The name this project used before,
+`extensions.theme.system_theme`, came from an older Chromium, and Brave 151
+dropped it on every start.
 
-⚠️ **Spotify is installed as a `--user` flatpak** so spicetify can write without
-root. In a system install the directory it has to patch is root-owned, which
-would mean a theming step that only `sudo install.sh` could ever repeat.
+⚠️ **`vesktop` and `spicetify` used to be here and are gone.** They coloured
+Discord and Spotify, both of which went with the flatpak list — Spotify, Vesktop
+and Obsidian are applications somebody chooses, and installing them from a
+window manager is the overreach `packages/flatpak.txt` describes. This section
+went on documenting them, in a table, with two paragraphs of measured detail
+about a Discord flatpak nothing here installs. `tests/config-shape.sh` reads the
+targets out of `Config.qml` now and requires this document to name exactly
+those — the direction it was not checking, and the one this drifted through.
 
 ⚠️ **`off` for `gtk` is visible, and that is the point.** Theme name, icon theme,
 font and `gtk-decoration-layout=:` all come out of the same generated file, so a

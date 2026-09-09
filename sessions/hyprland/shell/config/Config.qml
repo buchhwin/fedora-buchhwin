@@ -746,10 +746,19 @@ Singleton {
                 property string tmux: "inherit"
                 property string starship: "inherit"
                 property string lazygit: "inherit"
-                // ⚠️ Also sets window.titleBarStyle to "native" in both states,
-                // which is not a colour: with the compositor's prefer-no-csd that is what
-                // removes VS Code's title bar and its buttons entirely.
-                // Brave, and it is the exact counterpart of the line above.
+
+                // ⚠️⚠️ THIS COMMENT LOST ITS PROPERTY AND KEPT ITS SENTENCES.
+                // `property string vscode` stood here, and its note said the
+                // target also sets window.titleBarStyle: "native" — the line
+                // that took VS Code's title bar off. The key went when the
+                // profile was cut back; three lines of the note stayed, and
+                // what followed began mid-thought — "Brave, and it is the exact
+                // counterpart of the line above" — with no line above it any
+                // more. A dangling comment is not harmless: it describes a
+                // feature the reader then goes looking for.
+                //
+                // Brave is that counterpart, and now it is the whole of it: the
+                // one target here that writes into a file the program owns.
                 //
                 // ⚠️ TWO SEPARATE THINGS, AND HE ASKED FOR BOTH IN ONE BREATH:
                 // "ich will das mein brave auch so aussieht also ohne close      // english-ok: his report, quoted
@@ -773,19 +782,19 @@ Singleton {
                 // bars in Nautilus. What goes is the window buttons.
                 property string brave: "inherit"
 
-                // ⚠️ THE TWO THAT COLOUR A FOREIGN PROGRAM WE DO NOT OWN THE
-                // FILES OF, and both carry a cost the other thirteen do not:
-                // an update of the program can throw the theming off. That is
-                // the price he accepted on 06.08. ("ja, beide"), and it is
-                // written down rather than carried quietly — docs/CONFIG.md
-                // says it and the rows in the settings window say it.
+                // ⚠️ `vesktop` AND `spicetify` STOOD HERE AND ARE GONE. They
+                // went with the flatpaks: Spotify, Vesktop and Obsidian are
+                // applications somebody chooses, and a window manager that
+                // installs them is the overreach packages/flatpak.txt describes.
+                // Colouring a program we no longer install would be a switch
+                // that does nothing on every machine this installs on.
                 //
-                // `vesktop` and not `discord`: measured on 10.08.2026, the
-                // Discord flatpak's app.asar is root-owned with a link count of
-                // 2, so it lives in the OSTree object store and patching it in
-                // place would rewrite a shared object. Vesktop is Discord with
-                // Vencord already in it, so there is nothing to patch — the
-                // theme is a CSS file in a directory we may write.
+                // Their note stayed behind for a while and said "the TWO that
+                // colour a foreign program", about a block that had one left.
+                // docs/CONFIG.md said the same, at more length, with a table.
+                // tests/config-shape.sh now reads the targets out of this block
+                // and requires that document to name exactly these — the
+                // direction it was missing, and the one this drifted through.
             }
 
 

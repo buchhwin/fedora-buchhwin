@@ -8,10 +8,18 @@
 #   ./install.sh --skip <phase>      all but one; repeatable
 #   ./install.sh --dry-run           print what would happen; change nothing
 #
-# ⚠️ RUN --dry-run FIRST ON A MACHINE YOU WORK ON. This installer changes the
-# login shell, moves ~/.zshrc aside, edits /etc/dnf/dnf.conf and removes three
-# packages. All of it is reversible with ./uninstall.sh, and all of it is
-# easier to agree to before it happens than after.
+# ⚠️ RUN --dry-run FIRST ON A MACHINE YOU WORK ON. This installer adds about
+# seventy-five packages, may remove three, writes four files outside your home
+# directory and enables SDDM. It does NOT change your login shell and does not
+# move ~/.zshrc: the session sets its own ZDOTDIR and its own XDG root. All of
+# it is reversible with ./uninstall.sh, and all of it is easier to agree to
+# before it happens than after.
+#
+# ⚠️⚠️ THIS PARAGRAPH IS PRINTED BY --help, and until 10.09.2026 it promised a
+# chsh, a moved ~/.zshrc and an edit to /etc/dnf/dnf.conf — three things this
+# installer stopped doing when the profile was cut back. A stale comment is a
+# comment; a stale HELP TEXT is an answer given to somebody who asked. Both
+# directions are checked by tests/dry-run-truth.sh now.
 #
 #
 set -uo pipefail
@@ -27,7 +35,11 @@ while [[ $# -gt 0 ]]; do
         --only)       ONLY+=("${2:?}"); shift ;;
         --skip)       SKIP+=("${2:?}"); shift ;;
         --dry-run)    DRY_RUN=1 ;;
-        -h|--help) sed -n '2,24p' "$0"; exit 0 ;;
+        # ⚠️ NOT A LINE RANGE. `sed -n '2,24p'` printed exactly the header until
+        # somebody added a line to it, and then it printed most of the header
+        # and half a sentence. The block is every comment line after the first;
+        # it ends where the code starts, which is a fact the file states itself.
+        -h|--help) sed -n '2,${/^#/!q;p;}' "$0"; exit 0 ;;
         *) die "unknown option: $1" ;;
     esac
     shift
