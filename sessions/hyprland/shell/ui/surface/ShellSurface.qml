@@ -93,7 +93,7 @@ PanelWindow {
     // ⚠️ AND IT IS SAFE HERE, for the reason the note below spells out: niri
     // draws blur and shadow behind the WHOLE surface, so spare room usually
     // comes out as a halo — but this is the one surface with both switched off
-    // (tools/niri.qml: `surface("buchhwin-notch", notchRadius, false, false)`).
+    // (tools/hypr.qml: `surface("buchhwin-notch", notchRadius, false, false)`).
     // The input region already follows the drawn shape rather than the window,
     // and Silhouette paints around `width / 2`, so a wider surface changes
     // nothing about what is painted or what answers a click.
@@ -132,7 +132,7 @@ PanelWindow {
     // a surface must be exactly as big as what it draws — exists because niri
     // draws blur and shadow behind the WHOLE surface, so spare room comes out
     // as a halo. The notch is the one surface with both switched off:
-    // tools/niri.qml calls `surface("buchhwin-notch", notchRadius, false, false)`
+    // tools/hypr.qml calls `surface("buchhwin-notch", notchRadius, false, false)`
     // and the signature is `(ns, radius, blur, shadow)`. No blur, no shadow, no
     // halo to mis-size. OverlaySurface.qml is translucent and blurred, so it
     // solves the same problem a different way — see the note there.

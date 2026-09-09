@@ -363,7 +363,7 @@ Singleton {
     readonly property int durFast: (animate && !reduceMotion)
                                    ? _ms(Config.motion ? Config.motion.durHover : 150, 150) : 0
 
-    // ⚠️ KEPT, because tools/niri.qml writes niri's `slowdown` from it and the
+    // ⚠️ KEPT, because tools/hypr.qml writes niri's `slowdown` from it and the
     // compositor has one number, not three. Derived from the movement duration
     // against its default rather than stored twice — the setting he sees is the
     // one that decides, and niri follows it.

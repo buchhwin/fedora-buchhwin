@@ -168,9 +168,9 @@ GTK in anything this project draws itself.
 
 | | |
 |---|---|
-| **M0** | The measurement gate — is Quickshell on niri viable at all |
+| **M0** | The measurement gate — is Quickshell on the compositor viable at all |
 | **M1** | Repository, installer phases, package lists, CI |
-| **M2** | `shell.json` to `config.kdl`, migrations, `niri validate` in CI |
+| **M2** | `shell.json` to `config.kdl`, migrations, `Hyprland --verify-config` in CI |
 | **M3** | Shell scaffold, compositor layer, `Theme.qml`, the bar |
 | **M4** | The notch: silhouette, flare, mask, blur |
 | **M5** | Notifications, OSD, session menu |

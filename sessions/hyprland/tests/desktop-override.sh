@@ -2,7 +2,7 @@
 #
 # The .desktop overrides must describe the program they are named after.
 #
-# ⚠️ THIS IS WRITTEN AGAINST A BUG THAT SHIPPED. shell/tools/niri.qml reuses one
+# ⚠️ THIS IS WRITTEN AGAINST A BUG THAT SHIPPED. shell/tools/hypr.qml reuses one
 # FileView for every entry in its override list, and a FileView hands back what
 # it already holds when you point it at a new path. So the second pass read
 # BRAVE's system file and wrote it out as code.desktop:
@@ -49,7 +49,7 @@ mkdir -p "$tmp/cfg/buchhwin" "$tmp/cfg/niri" "$tmp/cfg/environment.d" "$tmp/shar
 
 rm -f /tmp/buchhwin-niri.log
 XDG_CONFIG_HOME="$tmp/cfg" XDG_DATA_HOME="$tmp/share" \
-    BUCHHWIN_TOOL=niri QT_QPA_PLATFORM=offscreen \
+    BUCHHWIN_TOOL=hypr QT_QPA_PLATFORM=offscreen \
     timeout 60 qs -p shell >/dev/null 2>&1
 
 APPS="$tmp/share/applications"

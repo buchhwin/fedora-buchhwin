@@ -12,7 +12,7 @@ pragma ComponentBehavior: Bound
 // arrangement you drew, writes it, and niri quietly puts the monitor somewhere
 // else entirely. Overlap is therefore PREVENTED here rather than reported — a
 // dragged tile snaps to a free edge of its neighbours, and there is no state in
-// which this writes a position niri will refuse.
+// which this writes a position the compositor will refuse.
 //
 // ⚠️ AND THE UNITS ARE LOGICAL PIXELS, NOT MODE PIXELS. Same page of the wiki:
 // "a 3840x2160 output with scale 2.0 will have a logical size of 1920x1080, so

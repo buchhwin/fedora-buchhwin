@@ -33,17 +33,17 @@ groups were settable and undocumented.
 | `binds` `rebinds` | ⚠️ **TOP LEVEL, NOT UNDER `keys`**, and this table said otherwise until 10.08.2026. Both are `var` lists, and a `var` inside a nested `JsonObject` is what segfaulted quickshell twice — the note beside them in `Config.qml` spells it out. Rebuilding the schema from the old line would have reproduced that crash. `binds` is `{ key, action, arg, desc }`; `rebinds` is `{ from, to }` overrides, with `to: ""` meaning unbound |
 | `input` | `keyboard`, `touchpad`, `mouse`, `focusFollowsMouse`, `warpMouseToFocus` |
 | `windows` | `noCsd`, `floating`, `blockFromScreencast` |
-| `outputs` | per-monitor overrides; empty = let niri decide |
+| `outputs` | per-monitor overrides; empty = let the compositor decide |
 | `autostart` | extra programs — **not** the shell or the clipboard watcher |
 | `workspaces` | named workspaces |
 | `wallpaper` | `folder`, `current` image, `monitors`, and the slideshow: `slideshow`, `intervalMinutes`, `shuffle`, `slideshowRecolour`, `paletteFrom`. ⚠️ `slideshowRecolour` is OFF by default and that is deliberate — with the palette set to follow the wallpaper, every picture change recalculates all 26 colours and rewrites every foreign application's config (measured: a forest picture gives base `27201b`, a desert one `1b2027`), so a slideshow would repaint the whole desktop on every slide. `paletteFrom` is the pin that keeps the scheme still; choosing a wallpaper by hand clears it |
 | `session` | `restore` and `apps`. ⚠️ The PROGRAMS come back, not what was in them — Brave and VS Code restore their own tabs, kitty does not, and nothing outside a program can know what it had open. The list is kept while you work rather than written at shutdown, so it survives a machine that went down without asking, and it is applied once per SESSION rather than once per shell start (the marker lives in `$XDG_RUNTIME_DIR`) |
 | `location` | `name` (display only), `lat`, `lon` — set from the quick panel |
 | `cursor` | `theme` and `size`. ⚠️ TWO writers need it: niri draws the pointer over the desktop, GTK programs read `org.gnome.desktop.interface` and ignore the compositor. Setting one leaves the other wrong, which shows as a pointer that changes shape at a window edge |
-| `gpu` | `renderDevice` — which GPU niri draws with. Empty means niri chooses, which is right everywhere except a hybrid laptop with a monitor on the second card. ⚠️ `niri validate` accepts a device that does not exist; see docs/NIRI.md for the way back out |
+| `gpu` | `renderDevice` — which GPU niri draws with. Empty means niri chooses, which is right everywhere except a hybrid laptop with a monitor on the second card. ⚠️ `Hyprland --verify-config` accepts a device that does not exist; see docs/HYPRLAND.md for the way back out |
 | `brightness` | `external` (talk to monitors over DDC/CI at all), `externalLive` (send while dragging, or once on release), `step` |
 | `clock` | `format`, `seconds`, `dateFormat`, `weekStart`, `precision` — read by `shell/common/Clock.qml`, which is the single formatter four places used to each have their own copy of |
-| `motion` | `speed`, one multiplier over `Theme.durFast/durBase/durSlow` so the RATIO between them survives. It reaches niri's own window animations too |
+| `motion` | `speed`, one multiplier over `Theme.durFast/durBase/durSlow` so the RATIO between them survives. It reaches the compositor's own window animations too |
 | `media` | `preferred` player, and where the track is shown |
 | `lock` | what the lock screen shows: date, avatar, wallpaper |
 | `drive` | Google Drive through rclone: `remote` (the name of the rclone remote, default `gdrive`) and `mountPoint`. The mount is a user unit, `buchhwin-drive.service`, and the switch reads `systemctl --user is-active` rather than remembering its own position. `bhctl drive setup` opens the browser sign-in |

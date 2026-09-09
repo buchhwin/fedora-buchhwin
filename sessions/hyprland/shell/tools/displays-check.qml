@@ -15,7 +15,7 @@
 //
 // The fixture is the JSON `niri msg -j outputs` really returns — measured on
 // hardware, field for field — so the fixture and the real thing cannot drift
-// into different shapes. See services/Niri.qml for the seam.
+// into different shapes. See services/Hyprland.qml for the seam.
 //
 // ⚠️ WHAT THIS CHECKS IS ARITHMETIC AND WIRING, NOT LOOKS. Whether the page is
 // pleasant to use is a screenshot and a person. Whether a 4K screen at scale 2

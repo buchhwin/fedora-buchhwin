@@ -111,7 +111,7 @@ Singleton {
                 i.focusFollowsMouse, i.warpMouseToFocus].join("\u0000")
     }
 
-    // ⚠️ The six program references. niri.qml never names them — it resolves
+    // ⚠️ The six program references. hypr.qml never names them — it resolves
     // `@terminal` through Config.program(), a STRING lookup that no search for
     // the identifier can see. That is exactly why they were missed, and why
     // switching the terminal left Mod+Return starting the old one.
@@ -146,7 +146,7 @@ Singleton {
                 // and their absence is deliberate. Nothing under shell/tools/
                 // reads either — they colour OUR OWN surfaces, which follow the
                 // Theme singleton live and need no generator at all. Each cost a
-                // full render over thirteen foreign files plus a `niri validate`
+                // full render over thirteen foreign files plus a `Hyprland --verify-config`
                 // on every drag of a slider, for a result that was byte-identical
                 // by construction. On a laptop.
                 //
@@ -181,7 +181,7 @@ Singleton {
                 // watcher only ran the RENDERER, so every niri-side setting had
                 // no watcher at all: adding an app to `windows.blurred` wrote
                 // nothing, and the window rule appeared only when somebody
-                // happened to run `bhctl niri apply`. Measured — Nautilus got
+                // happened to run `bhctl hypr apply`. Measured — Nautilus got
                 // its translucent CSS and no blur rule, which is a worse look
                 // than leaving it opaque.
                 //
@@ -247,7 +247,7 @@ Singleton {
                 // three lines up, applied on the way in this time instead of
                 // after somebody noticed the pointer never changed.
                 Config.cursor.theme, Config.cursor.size,
-                // ⚠️ THE GPU niri DRAWS ON. tools/niri.qml reads it, so it
+                // ⚠️ THE GPU niri DRAWS ON. tools/hypr.qml reads it, so it
                 // belongs here — the same rule as the two lines above, applied
                 // on the way in for the sixth time. The `Config.gpu ?` guard is
                 // not decoration: `settled` goes true one event-loop step before
@@ -303,7 +303,7 @@ Singleton {
                 // contract as opacityApp above, which was missing for a week.
                 l.shadowOpacity,
                 l.opacityActive,
-                // `hoverCornerRadius` went with them: niri.qml:497 reads
+                // `hoverCornerRadius` went with them: hypr.qml:497 reads
                 // `notch.cornerRadius` and nothing else. It was picked up along
                 // with its neighbour rather than because anything wanted it.
                 l.opacityInactive, Config.notch.cornerRadius,

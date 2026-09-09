@@ -77,6 +77,90 @@ dnf_install() {
 # window: waybar was still drawing its bar, from a binary that no longer existed
 # on disk, and would have stayed until the next logout. "Installed" and "on
 # screen" are two different states and both have to be answered.
+# ---------------------------------------------------------------- the plan
+#
+# ⚠️ THIS EXISTS BECAUSE THE INSTALLER IS MEANT TO RUN ON A MACHINE SOMEBODY
+# WORKS ON. It changes the login shell, moves ~/.zshrc aside, edits
+# /etc/dnf/dnf.conf, installs around 150 packages and removes three. Every one
+# of those is defensible on its own and none of them is something to discover
+# afterwards.
+#
+# So: `--dry-run` prints exactly what would happen and touches nothing. It is
+# the same shape the dwl session has had from the start, and its absence here
+# was the difference between the two installers that mattered most.
+#
+# Nothing below runs dnf, sudo or any write. It reads the package lists and the
+# rpm database, which is what makes it safe to run on the machine in question
+# rather than on a copy of it.
+print_plan() {
+    local phases=("$@")
+
+    section "Dry run — nothing below will be changed"
+
+    step "Phases that would run:"
+    printf '      %s
+' "${phases[*]}"
+
+    section "Packages"
+    local list count total=0
+    for list in dnf-core dnf-desktop dnf-tools dnf-apps dnf-sysadmin dnf-codecs; do
+        [[ -f "$REPO_DIR/packages/$list.txt" ]] || continue
+        count="$(read_list "$list.txt" | grep -c .)"
+        total=$((total + count))
+        printf '      %-16s %3d packages
+' "$list" "$count"
+    done
+    printf '      %-16s %3d
+' "TOTAL" "$total"
+    step "Flatpaks:"
+    if [[ -f "$REPO_DIR/packages/flatpak.txt" ]]; then
+        read_list flatpak.txt | sed 's/^/      /'
+    fi
+
+    section "Packages that would be REMOVED"
+    # The honest version of this question: a package the user chose is kept,
+    # and only a dependency is swept. Saying which is which is the whole value
+    # of printing it at all.
+    local pkg reason
+    while read -r pkg; do
+        [[ -n "$pkg" ]] || continue
+        if ! rpm -q "$pkg" >/dev/null 2>&1; then
+            printf '      %-14s not installed, nothing to do
+' "$pkg"
+            continue
+        fi
+        reason="$(dnf repoquery --installed --qf '%{reason}' "$pkg" 2>/dev/null | head -1)"
+        if [[ "$reason" == "User" ]]; then
+            printf '      %-14s installed BY YOU — would be kept, with a warning
+' "$pkg"
+        else
+            printf '      %-14s would be removed (reason: %s)
+' "$pkg" "${reason:-unknown}"
+        fi
+    done < <(read_list dnf-unwanted.txt)
+
+    section "Files outside your home directory"
+    printf '      %s
+'         "/usr/local/bin/buchhwin-hyprland-session"         "/usr/share/wayland-sessions/buchhwin-hyprland.desktop"         "/usr/libexec/buchhwin-charge"         "/etc/pam.d/buchhwin-lock"         "/etc/polkit-1/rules.d/ (charge thresholds, VPN switch)"         "/etc/systemd/logind.conf.d/50-buchhwin.conf"         "/etc/dnf/dnf.conf (defaultyes, max_parallel_downloads)"         "/etc/dnf/dnf5-aliases.d/buchhwin.conf"
+
+    section "Changes to your account"
+    # shellcheck disable=SC2088  # literal text for the reader, not a path
+    printf '      %s
+'         "login shell -> /usr/bin/zsh (chsh)"         "~/.zshrc moved to ~/.zshrc.before-buchhwin, replaced by a symlink"         "~/.config/buchhwin-sessions/hyprland/ created (the whole session lives here)"         "~/.local/bin/ gains bhctl and the buchhwin-* helpers"         "systemd user units: buchhwin-shell, -clipboard, -clipboard-image, -drive"
+
+    section "What is NOT touched"
+    # shellcheck disable=SC2088  # literal text for the reader, not a path
+    printf '      %s
+'         "Plasma stays installed and stays the fallback session in SDDM"         "~/.config is left alone — this session uses its own XDG root"         "no default application, MIME association or Plasma setting is changed"         "SDDM stays the only display manager; no greeter is installed"
+
+    section "To run it for real"
+    step "drop --dry-run. To leave your shell and dnf alone:"
+    printf '      ./install.sh --session hyprland --skip shellenv --skip base
+'
+    printf '
+'
+}
+
 remove_unwanted() {
     local pkgs p reason weak=() mine=()
     mapfile -t pkgs < <(read_list dnf-unwanted.txt)

@@ -6,7 +6,7 @@
 // shape rather than after it. Three separate settings would invite breaking that
 // ratio; a multiplier cannot.
 //
-// It reaches niri's own window animations too, because tools/niri.qml generates
+// It reaches the compositor's own window animations too, because tools/hypr.qml generates
 // those from the same three numbers — so this is the tempo of the whole desktop,
 // not only of our surfaces. That half arrives on its own: services/Theming.qml
 // fingerprints these values and runs the generator, and niri watches its own
@@ -108,7 +108,7 @@ ColumnLayout {
         // shell.json changes, the theming watcher notices within about two
         // seconds, the generator rewrites config.kdl and niri reloads it. 200 ms
         // became 100 ms with nothing typed.
-        text: "niri's own window animations come from the same numbers, "
+        text: "the compositor's own window animations come from the same numbers, "
             + "and follow within a couple of seconds."
         font.pixelSize: Theme.fontSizeSm
         color: Theme.fgMuted

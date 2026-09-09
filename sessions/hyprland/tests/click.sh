@@ -84,7 +84,7 @@ fi
 CFG="${XDG_CONFIG_HOME:-$HOME/.config}/buchhwin/shell.json"
 [[ -f "$CFG" ]] || skip "no shell.json to watch"
 
-# ⚠️ DOES THE ENVIRONMENT EXPLAIN THE RESULT? niri's overview covers everything
+# ⚠️ DOES THE ENVIRONMENT EXPLAIN THE RESULT? the compositor's overview covers everything
 # and swallows every press, so a run started with it open would report every
 # control in this window as dead. Ask, close it, and say so — rather than
 # measuring through it.

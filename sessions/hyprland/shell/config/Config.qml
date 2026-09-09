@@ -5,7 +5,7 @@ pragma Singleton
 // One file, one writer. The settings window writes through this adapter and
 // nothing else touches the file, so there is no second format to keep in sync
 // and no daemon in the middle. niri's own config.kdl is GENERATED from these
-// values (see tools/niri.qml) — it is an output, never an input, and editing
+// values (see tools/hypr.qml) — it is an output, never an input, and editing
 // it by hand is editing something that will be overwritten.
 //
 // Every key has a default here. A missing file, a truncated file or a key that
@@ -894,14 +894,14 @@ Singleton {
                 // are offered by the settings row; the stable one is offered
                 // first.
                 //
-                // ⚠️⚠️ A PATH niri CANNOT OPEN IS NOT CAUGHT BY `niri validate`.
+                // ⚠️⚠️ A PATH niri CANNOT OPEN IS NOT CAUGHT BY `Hyprland --verify-config`.
                 // Measured on niri 26.04 with three controls: the block is
                 // accepted, an invented key inside it IS rejected (so the name
                 // is real and not silently ignored), and a device that does not
                 // exist validates perfectly happily. The safeguards are
                 // therefore elsewhere — the settings row is a CLOSED list built
                 // from the render nodes this machine really has, an empty value
-                // writes no block at all, and docs/NIRI.md carries the way out
+                // writes no block at all, and docs/HYPRLAND.md carries the way out
                 // from a TTY.
                 property string renderDevice: ""
             }
@@ -1556,7 +1556,7 @@ Singleton {
                 // anyone can decide for somebody else.
                 property int hotCornerDwellMs: 250
 
-                // ⚠️ A ROUNDED SCREEN CORNER IS OURS TO DRAW — niri has
+                // ⚠️ A ROUNDED SCREEN CORNER IS OURS TO DRAW — the compositor has
                 // `geometry-corner-radius` for windows and for layer surfaces
                 // and nothing at all for the output, asked in its own wiki
                 // rather than assumed. Four surfaces of this many pixels each,
@@ -1859,7 +1859,7 @@ Singleton {
             property JsonObject programs: JsonObject {
                 property list<string> terminal: ["kitty"]
                 // ⚠️ THE FLAG IS HERE BECAUSE Mod+B DOES NOT USE THE .desktop
-                // FILE. tools/niri.qml writes an override into
+                // FILE. tools/hypr.qml writes an override into
                 // ~/.local/share/applications with --ozone-platform=wayland, and
                 // that override is real — measured: the launcher resolves Brave
                 // to "/usr/bin/brave-browser-stable --ozone-platform=wayland".
@@ -1990,7 +1990,7 @@ Singleton {
                 // Measured with a control, both directions, on the lab VM:
                 //   forced false → `focus-follows-mouse` appears 0 times in the
                 //   generated config.kdl; forced true → 1 time, and
-                //   `niri validate` calls the result valid.
+                //   `Hyprland --verify-config` calls the result valid.
                 property bool focusFollowsMouse: true
                 property bool warpMouseToFocus: false
             }
@@ -2038,13 +2038,13 @@ Singleton {
                 // bar, the gaps and its border. Real fullscreen is Mod+Shift+F
                 // and draws a black backdrop over everything.
                 //
-                // ⚠️ 0 MEANS "the window decides", which is niri's other mode —
+                // ⚠️ 0 MEANS "the window decides", which is the compositor's other mode —
                 // `default-column-width {}` with nothing inside it. A dialog
                 // that knows it wants to be small then gets to be small.
                 property real defaultWidth: 1.0
             }
 
-            // Empty = let niri decide. Filled in per machine; the VM and the
+            // Empty = let the compositor decide. Filled in per machine; the VM and the
             // laptop are not the same and this file is not shared between them.
             // ⚠️ TOP LEVEL, AND THAT IS THE WHOLE FIX FOR THE STARTUP CRASH.
             //

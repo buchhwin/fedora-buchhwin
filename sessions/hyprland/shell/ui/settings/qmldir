@@ -30,7 +30,7 @@ Segmented 1.0 Segmented.qml
 # in a box you can type in. NOT common/LevelRow, which is the volume and
 # brightness bar and is right as it is where it lives.
 SettingSlider 1.0 SettingSlider.qml
-# Press a key, get the name niri calls it. Refuses what it cannot name.
+# Press a key, get the name the compositor calls it. Refuses what it cannot name.
 KeyCapture 1.0 KeyCapture.qml
 # The two settings that cannot be a row, each for a structural reason and each
 # named in the exemption list of tests/setting-rows.sh: `outputs` is one object

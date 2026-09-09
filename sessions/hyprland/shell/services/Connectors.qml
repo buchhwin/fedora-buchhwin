@@ -6,7 +6,7 @@ pragma Singleton
 // ⚠️ IT EXISTS FOR ONE REPORT, in his words: "HDMI Monitore werden nicht        // english-ok: his report, quoted
 // erkannt, DisplayPort schon".                                                  // english-ok: his report, quoted
 //
-// The obvious suspect was our config generator and it is innocent: tools/niri.qml
+// The obvious suspect was our config generator and it is innocent: tools/hypr.qml
 // cannot switch an output off, and `outputs` is empty on his machine anyway. The
 // next suspect was hybrid graphics, and that died too — the machine it happens
 // on has no discrete GPU at all.

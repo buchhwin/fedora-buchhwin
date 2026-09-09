@@ -15,7 +15,7 @@
 #
 # ⚠️ AND THE OTHER DIRECTION IS NOT COSMETIC. Three entries were in the
 # fingerprint that no generator reads. Each cost a full render over thirteen
-# foreign config files plus a `niri validate` on every drag of a slider, for a
+# foreign config files plus a `Hyprland --verify-config` on every drag of a slider, for a
 # result that was byte-identical by construction — on a laptop. Worse,
 # tests/key-readers.sh counts an occurrence in the fingerprint AS A READER, so
 # those three passed that check on its own blind spot.
@@ -28,7 +28,7 @@
 #   aliases    `var L = Config.look` and then `L.gapsOut` — the generators do
 #              this everywhere, and so does the fingerprint itself.
 #
-# Plus one string lookup: niri.qml resolves `@terminal` through
+# Plus one string lookup: hypr.qml resolves `@terminal` through
 # Config.program(), which no search for an identifier can see. The rule is
 # single-valued — if a generator calls Config.program(), it reads all of
 # `programs.*` — and it is the same convention key-readers.sh already uses.
@@ -168,7 +168,7 @@ SCHEME = singleton_map("shell/theme/Scheme.qml", "Scheme")
 
 def keys_in(src):
     found = paths_in(src)
-    # ⚠️ The one lookup no identifier search can see: niri.qml resolves
+    # ⚠️ The one lookup no identifier search can see: hypr.qml resolves
     # "@terminal" through Config.program(), whose argument is a variable.
     if "Config.program(" in src:
         found |= {p for p in VALID if p.startswith("programs.")}
@@ -177,7 +177,7 @@ def keys_in(src):
             found |= table.get(prop, set())
     return found
 
-readers = keys_in(read("shell/tools/niri.qml")) | keys_in(read("shell/tools/render.qml"))
+readers = keys_in(read("shell/tools/hypr.qml")) | keys_in(read("shell/tools/render.qml"))
 
 # ------------------------------------------------------------ the fingerprint
 fp_src = read("shell/services/Theming.qml")
@@ -255,7 +255,7 @@ if [[ -n "$extra" ]]; then
     cat <<'WHY'
 
   These are in the fingerprint and no generator reads them. Every one costs a
-  full render over thirteen foreign config files plus a `niri validate` on every
+  full render over thirteen foreign config files plus a `Hyprland --verify-config` on every
   change — for a result that is byte-identical by construction. On a laptop.
 
   They also hide from tests/key-readers.sh, which counts an occurrence in the

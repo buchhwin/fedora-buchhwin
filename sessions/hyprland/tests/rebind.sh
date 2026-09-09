@@ -3,7 +3,7 @@
 # Rebinding a key: the override resolves, and the clash check holds.
 #
 # ⚠️ THE SECOND HALF IS THE ONE THAT MATTERS. Two bindings on one key is a KDL
-# parse error, and niri does not start with a config it cannot parse — so this
+# parse error, and the compositor does not start with a config it cannot parse — so this
 # fault does not show up as a wrong colour or a dead button but as a machine
 # that boots to nothing, once, on the day somebody moved a shortcut.
 #

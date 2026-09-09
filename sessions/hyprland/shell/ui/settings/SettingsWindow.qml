@@ -14,9 +14,9 @@
 // ⚠️ `FloatingWindow` HAS NO `appId`. Checked in quickshell 0.2.1's own type
 // data rather than assumed: it carries `title`, `minimumSize`, `maximumSize`,
 // `minimized`, `maximized` and `fullscreen`, and the app-id is whatever Qt
-// gives the process. The niri window rule that rounds and floats this window
+// gives the process. The window rule that rounds and floats this window
 // therefore matches on the id READ OFF THE RUNNING MACHINE with
-// `niri msg -j windows`, not on a name invented here. See tools/niri.qml.
+// `niri msg -j windows`, not on a name invented here. See tools/hypr.qml.
 //
 // There is no title bar to remove: `prefer-no-csd` is already in the generated
 // config, so niri asks every client to draw none and draws none itself.
@@ -57,7 +57,7 @@ FloatingWindow {
     GlassPane {
         anchors.fill: parent
         // Matched by `geometry-corner-radius` in the generated window rule, so
-        // niri's clip and shadow follow the same shape this paints. Both come
+        // the compositor's clip and shadow follow the same shape this paints. Both come
         // from `look.rounding`, which is the one number.
         radius: Theme.radiusXl
         fill: Theme.panelBg

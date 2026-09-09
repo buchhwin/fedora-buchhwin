@@ -9,7 +9,7 @@
 # at all. They are niri's own actions, and nothing checked those.
 #
 # A name niri does not know is not an error anybody sees. niri drops the binding
-# while loading the config, `niri validate` still says "config is valid" for the
+# while loading the config, `Hyprland --verify-config` still says "config is valid" for the
 # rest of the file, and the key is simply dead. That is the exact shape of the
 # Super+F report — the key was bound, the action existed, and it did nothing
 # visible — and while the cause there turned out to be different, chasing it
@@ -54,7 +54,7 @@ done <<< "$unknown"
 cat <<'WHY'
 
   niri has no such action. It will drop the binding while loading the config and
-  say nothing — `niri validate` still calls the file valid, because the rest of
+  say nothing — `Hyprland --verify-config` still calls the file valid, because the rest of
   it is — so the key is simply dead and there is no message to search for.
 
   Check the spelling against `niri msg action --help`. Action names do change

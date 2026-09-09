@@ -46,7 +46,7 @@ ColumnLayout {
     property int wanted: 1
 
     // ⚠️ THE MONITOR LIST HAS TO BE ASKED FOR. niri has no event for outputs
-    // (measured — see Niri.qml), so `Compositor.outputs` stays EMPTY until
+    // (measured — see Hyprland.qml), so `Compositor.outputs` stays EMPTY until
     // somebody calls `refreshOutputs()`. Until today only the Displays page ever
     // did, which is why the workspace map falls back to 16:9 for anybody who has
     // never opened settings. A surface about monitors cannot afford that.

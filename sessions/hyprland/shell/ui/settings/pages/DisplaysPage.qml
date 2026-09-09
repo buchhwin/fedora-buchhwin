@@ -19,7 +19,7 @@ pragma ComponentBehavior: Bound
 // and hide the one it prefers.
 //
 // ⚠️ AND THE PAGE ASKS FOR IT. Compositor.outputs is empty until
-// `refreshOutputs()` has been called: services/Niri.qml deliberately runs no
+// `refreshOutputs()` has been called: services/Hyprland.qml deliberately runs no
 // query at startup, because this page is the only consumer and a process at
 // every boot for a page opened twice a year is what rule 8 is about.
 import QtQuick
@@ -160,7 +160,7 @@ ColumnLayout {
     // scaling nicht bei 2 bleiben sondern auf eins gehen".                       // english-ok: the request, quoted
     //
     // ⚠️ IT DELETES THE KEY RATHER THAN COMPUTING A NEW NUMBER, and that is the
-    // whole design decision. niri's own wiki: "If scale is unset, niri will
+    // whole design decision. niri's own wiki: "If scale is unset, the compositor will
     // guess an appropriate scale based on the physical dimensions and the
     // resolution." Writing our own heuristic would be a second automation
     // arguing with one that already exists and knows the physical size of the
@@ -290,7 +290,7 @@ ColumnLayout {
             // looks for it.
             //
             // ⚠️ AND THERE IS STILL NO AUTOMATIC MODE, which is the whole point.
-            // niri already guesses: "If scale is unset, niri will guess an
+            // niri already guesses: "If scale is unset, the compositor will guess an
             // appropriate scale based on the physical dimensions and the
             // resolution of the monitor". A heuristic of ours beside that would
             // be two automatic systems fighting, and the loser would be whichever

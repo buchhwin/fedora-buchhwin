@@ -6,7 +6,7 @@
 # ⚠️ WHY THIS IS A STATIC RULE AND NOT A COMMENT. It has been a comment since
 # config/Backup.qml:104 said it in capitals — and the trap sprang four more
 # times after that: Backup._read, Backup._replace, tools/reset-page-check.qml,
-# and tools/niri.qml, where it shipped. There it wrote Brave's desktop file out
+# and tools/hypr.qml, where it shipped. There it wrote Brave's desktop file out
 # as code.desktop (8650 bytes, `Name=Brave Web Browser`, byte for byte the same
 # file) and, because a user desktop file REPLACES the system one, deleted VS
 # Code from the launcher. The generator logged "wrote code.desktop" all along.

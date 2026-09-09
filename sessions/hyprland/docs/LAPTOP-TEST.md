@@ -174,5 +174,5 @@ Nothing below was started. Ordered by size.
 | **Scroll speed** | Ours reads shorter than Electron's for the same gesture. Foreign toolkits cannot be unified; our own Flickables can be matched |
 | **A4** | A folder picker in the window, without GTK |
 | **Calendar app** | Depends on the calendar syncing at all — see the two walls above |
-| **`switch-events`** | niri can handle the lid itself, which would beat the logind detour. Described in NIRI.md, not built |
+| **`switch-events`** | niri can handle the lid itself, which would beat the logind detour. Described in the compositor notes, not built |
 | **B4** | Graphics glitches — may well have been the full disk. Wait for a recurrence before hunting |

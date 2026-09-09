@@ -12,7 +12,7 @@
 # from a native one there.
 #
 # So the check is made one level down, where the answer is complete rather than
-# sampled: XWayland on niri is a SEPARATE PROCESS (xwayland-satellite). If it is
+# sampled: XWayland on Hyprland is a SEPARATE PROCESS (xwayland-satellite). If it is
 # not installed and not running, there is no X server, and no window can be an
 # X11 window. That is a proof about every window at once, including the ones
 # that are not open yet — which is stronger than walking the window list, not
@@ -42,9 +42,9 @@ fi
 
 printf '  %-38s ' "nothing spawns xwayland-satellite"
 # The generator is the only thing that writes spawn-at-startup lines.
-if grep -qi 'xwayland' shell/tools/niri.qml shell/config/Config.qml 2>/dev/null; then
+if grep -qi 'xwayland' shell/tools/hypr.qml shell/config/Config.qml 2>/dev/null; then
     printf '\033[38;5;203mfound\033[0m\n'
-    grep -in 'xwayland' shell/tools/niri.qml shell/config/Config.qml | sed 's/^/      /'
+    grep -in 'xwayland' shell/tools/hypr.qml shell/config/Config.qml | sed 's/^/      /'
     fail=1
 else
     printf '\033[38;5;114mok\033[0m\n'
@@ -77,7 +77,7 @@ effective() {
 }
 printf '  %-38s ' "the four borderless mechanisms exist"
 missing=""
-niri_eff="$(effective shell/tools/niri.qml)"
+niri_eff="$(effective shell/tools/hypr.qml)"
 render_eff="$(effective shell/tools/render.qml)"
 grep -q 'prefer-no-csd'   <<< "$niri_eff"   || missing+=" prefer-no-csd"
 grep -q 'gtk-decoration-layout' <<< "$render_eff" || missing+=" gtk-decoration-layout"

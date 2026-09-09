@@ -13,7 +13,7 @@ here — this repository is public. The working tree lives in `~/repo`.
 
 | | Evidence |
 |---|---|
-| `config.kdl` is generated and valid | `tests/niri-config.sh`, 10 cases, exit 0 |
+| `config.kdl` is generated and valid | `tests/hypr-config.sh`, 10 cases, exit 0 |
 | Settings really take effect | `gapsOut 24 → gaps 24`, `borderWidth 3 → border { on; width 3 }`, `profile minimal → blur { off }` |
 | A second run writes nothing | `0 written, 2 unchanged` |
 | A fresh machine with no `shell.json` | produces valid defaults |
@@ -27,7 +27,7 @@ here — this repository is public. The working tree lives in `~/repo`.
 
 ```
 ssh $USER@<test-vm>
-cd ~/repo && bash install.sh      # or just: bhctl niri apply
+cd ~/repo && bash install.sh      # or just: bhctl hypr apply
 ```
 
 - [ ] **niri starts and no waybar appears.** If a foreign bar shows up:
@@ -104,14 +104,14 @@ part is deliberately not measured until M11.
 
 ```
 bhctl doctor                       versions, unit, config, XWayland, start time
-bhctl niri diff                    what a regeneration would change
-niri validate -c ~/.config/niri/config.kdl
+bhctl hypr diff                    what a regeneration would change
+Hyprland --verify-config -c ~/.config/niri/config.kdl
 cat /tmp/buchhwin-niri.log         the generator's report
 cat /tmp/buchhwin-render.log       the theme renderer's report
 ```
 
 A broken `config.kdl` is not a disaster: the keys live in the compositor, and
-`bhctl niri apply` tells you with exit 1 rather than failing quietly.
+`bhctl hypr apply` tells you with exit 1 rather than failing quietly.
 
 ---
 
@@ -341,7 +341,7 @@ demonstrably right first — points 3 to 6 above.
 | The blur follows the island | no more blurred fifth of the screen |
 | Windows are bubbles | space all round, rounded corners, top edge visible |
 | All 21 icon names resolve | `tests/icons.sh` measures them in the real font |
-| No key bound twice | `tests/niri-config.sh` checks it now |
+| No key bound twice | `tests/hypr-config.sh` checks it now |
 
 ## What only you can check
 
@@ -390,12 +390,12 @@ demonstrably right first — points 3 to 6 above.
       decides how much of it is visible at all — more transparency shows more
       blur.
 - [ ] **The gear opens the settings window**, and so does `Mod+Shift+comma` and
-      the arrow in the quick panel. It is a real niri window: move it, push it to
+      the arrow in the quick panel. It is a real compositor window: move it, push it to
       another workspace, leave it open beside what you are changing.
       **All ten pages are there, and between them every one of the 135
       settings in shell.json has exactly one row** — `bash tests/setting-rows.sh`
       counts it, so "everything is settable" is a number rather than a belief.
-- [ ] ⚠️ **Two things need `bhctl niri apply` before they show**, and the rows
+- [ ] ⚠️ **Two things need `bhctl hypr apply` before they show**, and the rows
       say so: the screen scale, and the motion speed's effect on niri's OWN
       window animations. Everything else takes effect as you change it.
 - [ ] **Key bindings are a list you can read and search**, with "use the
@@ -489,7 +489,7 @@ and any monitor wired to the discrete card.
 | The branch skips, and can run | `--only gpu` on the VM says "no NVIDIA GPU — nothing to install"; the same code with a hybrid fixture reaches RPM Fusion. Without the second half, "installed nothing" and "does nothing" are the same output |
 | A failing GPU phase exits 0 | nothing in `phase_gpu` may `die` — an abort trades a working desktop for a card the desktop does not use |
 | `debug { render-drm-device }` | accepted by niri 26.04. An invented key inside the block **is** rejected, so the name is real |
-| ⚠️ A device that does not exist | **validates without a warning.** `niri validate` cannot tell a working device from a wrong one |
+| ⚠️ A device that does not exist | **validates without a warning.** `Hyprland --verify-config` cannot tell a working device from a wrong one |
 | An empty value | writes no `debug` block at all — measured, not assumed |
 | The device list | `/dev/dri/by-path/pci-0000:00:01.0-render` + `virtio-pci`, by-path form preferred |
 | The Secure Boot card | drawn under `BUCHHWIN_GPU_FAKE=needs-enrolment`, text read off the screenshot; **absent** without it, which is the control |

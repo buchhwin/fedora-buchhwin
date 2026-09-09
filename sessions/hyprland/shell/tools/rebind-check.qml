@@ -1,7 +1,7 @@
 // Rebinding: does the override resolve, and does the clash check hold?
 //
 // ⚠️ THE CLASH CHECK IS WHY THIS FILE EXISTS. Two bindings on one key is a KDL
-// parse error and niri does not start with a config it cannot parse — so a
+// parse error and the compositor does not start with a config it cannot parse — so a
 // clash check that quietly stopped working would not show up as a wrong colour
 // or a dead button. It would show up as a laptop that boots to nothing, once,
 // on the day somebody moved a shortcut.

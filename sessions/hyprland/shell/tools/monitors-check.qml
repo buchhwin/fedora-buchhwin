@@ -98,7 +98,7 @@ Scope {
 
         // ------------------------------------- 4 · an index a monitor lacks
         //
-        // Virtual-2 has no idx=2. niri creates workspaces on demand, so this is
+        // Virtual-2 has no idx=2. the compositor creates workspaces on demand, so this is
         // the normal state of a second screen rather than an edge case.
         var two = G.monitorColumns(root.outputs, root.spaces, root.wins, 2, null)
         root.ok("a monitor without that index still shows something",

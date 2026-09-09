@@ -121,7 +121,7 @@ phase_shellenv() {
     mkdir -p "$HOME/.local/bin" "$CONFIG_HOME/environment.d"
 
     # ⚠️ AND bhctl ITSELF, WHICH WAS ON NOBODY'S PATH. `doctor` recommends
-    # `bhctl binds reset` and `bhctl niri apply` in its own output, the README
+    # `bhctl binds reset` and `bhctl hypr apply` in its own output, the README
     # names it, the settings window's error banner points at it — and on his
     # laptop `command -v bhctl` answered nothing, because ~/.local/bin was
     # empty. A rescue you have to know the source tree to call is not a rescue.

@@ -343,7 +343,7 @@ phase_shell() {
     # a bash wrapper with ZERO occurrences of "flags.conf" — measured on the
     # laptop, written down in docs/LAPTOP-TEST.md. The Wayland flag that
     # actually reaches Brave comes from the .desktop replacement in
-    # shell/tools/niri.qml, which is also where the 43 s -> 1.4 s startup
+    # shell/tools/hypr.qml, which is also where the 43 s -> 1.4 s startup
     # measurement lives. A file nobody reads is worse than no file: the next
     # person to look finds a plausible-looking config and stops looking.
     #
@@ -355,7 +355,7 @@ phase_shell() {
     # flag at all. Both files are gone and both leftovers are removed.
     #
     # The flag now reaches both programs the two ways that were measured to
-    # work: a .desktop override written by shell/tools/niri.qml for the
+    # work: a .desktop override written by shell/tools/hypr.qml for the
     # launcher, and an explicit argument in Config.programs for the keybinding,
     # which never reads a desktop file.
     mkdir -p "$CONFIG_HOME"
@@ -420,7 +420,7 @@ phase_shell() {
     #             ~/.gitconfig. git reads BOTH global files; measured with two
     #             HOMEs, so a hand-written ~/.gitconfig stays untouched.
     #   lazygit   has no include at all — its pointer is LG_CONFIG_FILE, written
-    #             into environment.d by tools/niri.qml. The file below only has
+    #             into environment.d by tools/hypr.qml. The file below only has
     #             to EXIST so the list never names a missing file.
     seed_pointer() {   # file  marker  what-it-does  content
         local f="$1" marker="$2" what="$3" content="$4"

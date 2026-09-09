@@ -187,7 +187,7 @@ ColumnLayout {
                 // it means the row reflows every time a window opens.
                 //
                 // ⚠️ THE REAL OUTPUT'S RATIO, NOT A CONSTANT 16:9. `logical` is
-                // in niri's answer and services/Niri.qml already parses it; the
+                // in niri's answer and services/Hyprland.qml already parses it; the
                 // Displays page reads exactly the same field. On a 16:9 screen
                 // this is his number, and on the 16:10 laptop it is the more
                 // honest one. 16:9 is the fallback for the moment during startup

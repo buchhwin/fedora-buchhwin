@@ -3,7 +3,7 @@ pragma Singleton
 // The compositor, as the rest of the shell is allowed to see it.
 //
 // A thin layer on purpose. Everything above this file talks about workspaces
-// and windows; only services/Niri.qml knows that they arrive as JSON lines
+// and windows; only services/Hyprland.qml knows that they arrive as JSON lines
 // from `niri msg -j event-stream`. That boundary is the whole point: swapping
 // the compositor later is one file, not a search through the interface.
 //

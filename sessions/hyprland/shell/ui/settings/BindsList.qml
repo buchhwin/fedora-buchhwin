@@ -119,7 +119,7 @@ ColumnLayout {
         // which nothing rewrites on its own — they are kept out of the theming
         // fingerprint so a palette change cannot touch them. Without this line
         // the new key would sit in shell.json doing nothing until somebody
-        // typed `bhctl niri apply`.
+        // typed `bhctl hypr apply`.
         Services.Theming.applyHyprland()
     }
 
@@ -172,7 +172,7 @@ ColumnLayout {
             onClicked: {
                 Config.set("binds", [])
                 Config.flush()
-                // ⚠️ It used to say "then run `bhctl niri apply`" underneath,
+                // ⚠️ It used to say "then run `bhctl hypr apply`" underneath,
                 // and that sentence was the honest description of a button that
                 // only did half the job. Bindings live in the generated niri
                 // config, which is deliberately outside the theming fingerprint

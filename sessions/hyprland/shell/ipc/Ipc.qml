@@ -441,7 +441,7 @@ Singleton {
             var host = root.notchHost
             // ⚠️ TWO NUMBERS, NOT ONE, and calling either of them "the window"
             // is how a reading gets misread. `asked` is what settleSize()
-            // published; `window` is what the surface actually is once niri has
+            // published; `window` is what the surface actually is once the compositor has
             // acknowledged it. They differ for the length of that round trip,
             // which is the window in which the flash used to live.
             if (host) {
@@ -539,7 +539,7 @@ Singleton {
     // reasoning: `open` rather than `show`, because the command line cannot
     // reach a function of that name.
     // ⚠️ B64 · TILING TWO FULL WINDOWS SIDE BY SIDE, from outside. niri can only
-    // size the FOCUSED column, so the sequence lives in services/Niri.qml — this
+    // size the FOCUSED column, so the sequence lives in services/Hyprland.qml — this
     // is the way in, and it is what the key binding calls.
     //
     // ⚠️ IT ANSWERS. A key that silently does nothing when there are three

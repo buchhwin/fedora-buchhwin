@@ -96,7 +96,7 @@ setting-rows|shell/ui/settings/pages/DockPage.qml|s/key: "dock.enabled"/key: "do
 key-readers|shell/config/Config.qml|s/^                property bool noCsd: true$/                property bool noCsd: true\n                property bool nobodyReadsThis: true/|a key nothing reads
 fingerprint|shell/services/Theming.qml|s/Config.windows.defaultWidth,//|a generated key outside the fingerprint
 reset-page|shell/ui/settings/pages/DisplaysPage.qml|s/resetKeys: \["outputs"\]/resetKeys: []/|a page that writes settings its reset forgets
-displays|shell/services/Compositor.qml|s/toFixed(3)/toFixed(1)/|a refresh rate niri will not accept
+displays|shell/services/Compositor.qml|s/toFixed(3)/toFixed(1)/|a refresh rate the compositor will not accept
 english|shell/services/Connectors.qml|s/^pragma Singleton$/pragma Singleton\n\/\/ Das ist der Fehler und wird nicht uebersetzt/|German in the source  # english-ok: the fixture IS German, that is the fault being injected
 no-literals|shell/ui/common/WiredIcon.qml|s/color: root.colour/color: "#ff0000"/|a hard-coded colour outside theme\/
 theme-tokens|shell/ui/common/Pill.qml|s/Theme.radiusPill/Theme.radiusPillX/|a Theme token that does not exist
@@ -119,7 +119,7 @@ config-shape|shell/config/Config.qml|s/^                property bool noCsd: tru
 bhctl-usage|bin/bhctl|s/^bhctl backup .*$//|a subcommand that usage() no longer mentions
 switch-one-writer|shell/ui/common/Toggle.qml|s#^    HoverHandler {#    TapHandler { onTapped: root.toggled(!root.checked) }\n    HoverHandler {#|a switch that answers the press its row already answers
 greeter|shell/ui/greeter/GreeterFace.qml|s/uid >= 1000 /uid >= 0 /|a login screen offering system accounts as people
-no-secrets|docs/NIRI.md|$a Measured on a Ryzen 7 7840HS with an RTX 4060.|an exact device model in a published file  # secrets-ok: the fixture IS a model, that is the fault being injected
+no-secrets|docs/HYPRLAND.md|$a Measured on a Ryzen 7 7840HS with an RTX 4060.|an exact device model in a published file  # secrets-ok: the fixture IS a model, that is the fault being injected
 no-foreign-bar|lib/80-shellenv.sh|s/^    remove_unwanted$/    true/|nothing removes the bar this desktop replaces
 notch-keys|shell/ui/surface/OverlaySurface.qml|s@^        Keys.onEscapePressed:@        // Keys.onEscapePressed:@|Escape answered by nothing at all
 reset-page|shell/config/Config.qml|s/typeof v.length === "number"/false/|a QML list<string> that never reaches the schema

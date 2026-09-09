@@ -66,7 +66,7 @@ phase_base() {
     ok "dnf answers [Y/n] and downloads ten at a time"
 
     # ⚠️ WE READ THIS FILE AND NEVER CREATED IT. lib/60-shell.sh asks
-    # `xdg-user-dir PICTURES` and tools/niri.qml parses ~/.config/user-dirs.dirs
+    # `xdg-user-dir PICTURES` and tools/hypr.qml parses ~/.config/user-dirs.dirs
     # to decide where screenshots go — but nothing ever ran the updater, so on a
     # fresh machine the file does not exist and both fall back silently. The
     # package was installed (packages/dnf-core.txt); only the one command that

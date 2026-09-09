@@ -117,7 +117,7 @@ QtObject {
     // that index ON ITS OWN MONITOR, and a global sort by idx — which is what
     // `Niri.orderedWorkspaces` gives — mixes the two together.
     //
-    // ⚠️ A monitor may simply not have that index. niri creates workspaces on
+    // ⚠️ A monitor may simply not have that index. the compositor creates workspaces on
     // demand, so a monitor showing one workspace has no idx=3 at all. That
     // column falls back to the highest index it does have rather than going
     // blank: an empty column reads as "this monitor is empty", which is a

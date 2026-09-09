@@ -1,4 +1,4 @@
-// Press a key, get the name niri calls it.
+// Press a key, get the name the compositor calls it.
 //
 // ⚠️ IT REFUSES WHAT IT DOES NOT KNOW, and that is the whole design. niri takes
 // XKB key names, Qt hands out Qt key codes, and the two only line up through a

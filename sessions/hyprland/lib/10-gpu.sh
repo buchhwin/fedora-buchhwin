@@ -91,7 +91,7 @@ phase_gpu() {
     fi
 
     if (( others )); then
-        step "hybrid graphics: niri draws on the integrated GPU; the NVIDIA at $nvidia_addr is for offloading and the external outputs"
+        step "hybrid graphics: the compositor draws on the integrated GPU; the NVIDIA at $nvidia_addr is for offloading and the external outputs"
     else
         step "NVIDIA at $nvidia_addr, and it is the only GPU"
     fi
@@ -138,7 +138,7 @@ phase_gpu() {
     fi
     if ! modinfo -F version nvidia >/dev/null 2>&1; then
         warn "the nvidia module did not build — see /var/cache/akmods/nvidia/"
-        warn "  the desktop is unaffected: niri draws on the integrated GPU"
+        warn "  the desktop is unaffected: the compositor draws on the integrated GPU"
         # ⚠️ AND NO MOK IMPORT. A signing key enrolled for a module that does
         # not exist is a password typed for nothing, plus a reboot interruption
         # that buys nothing.
@@ -194,7 +194,7 @@ phase_gpu() {
 # with a short timeout. Miss it and the key is not enrolled.
 #
 # ⚠️ AND WHY THAT IS ACCEPTABLE HERE, which is the whole argument: the desktop
-# does not depend on it. niri draws on the integrated GPU. A missed enrolment
+# does not depend on it. the compositor draws on the integrated GPU. A missed enrolment
 # costs the dGPU and nothing else, it is repeatable at any time, and both
 # `bhctl doctor` and the settings window keep saying so until it is done.
 gpu_secureboot() {

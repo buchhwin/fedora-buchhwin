@@ -1,6 +1,6 @@
 // One layer surface holding exactly one toast.
 //
-// ⚠️ THE SURFACE IS EXACTLY AS BIG AS WHAT IT DRAWS. niri draws shadow and blur
+// ⚠️ THE SURFACE IS EXACTLY AS BIG AS WHAT IT DRAWS. the compositor draws shadow and blur
 // behind the whole layer surface, invisible margins included — see the note in
 // ToastSurface.qml for the band of shadow that appeared between two cards when
 // they shared one window.

@@ -353,7 +353,7 @@ Scope {
                 if (!handler || typeof handler[m[2]] !== "function")
                     orphans.push(binds[b].key + " → " + m[1] + " " + m[2])
             }
-            // ⚠️ THE DUPLICATE CHECK BELONGS HERE, NOT IN tests/niri-config.sh.
+            // ⚠️ THE DUPLICATE CHECK BELONGS HERE, NOT IN tests/hypr-config.sh.
             // That one reads the GENERATED config — and the generator drops a
             // duplicate key before writing, with a note in a log the test does
             // not read. So it could never go red: it was passing because the

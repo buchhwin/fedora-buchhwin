@@ -769,7 +769,7 @@ FocusScope {
             // ⚠️ AND THE FIRST LINE OF THE TEXT IS THAT IT DOES NOT MATTER MUCH.
             // A warning that reads like a broken machine, on a machine that is
             // working perfectly, is how people learn to click warnings away.
-            // niri draws on the integrated GPU; this costs the second card.
+            // the compositor draws on the integrated GPU; this costs the second card.
             //
             // Same shape as the banner above rather than a new one: same
             // rounded pill background, same `warning` glyph — which tests/

@@ -31,7 +31,7 @@ cd "$(dirname "$0")/.." || exit 2
 fail=0
 
 # ⚠️ ONLY WHERE IT IS BEING DISPLAYED. `focus-workspace scratch` passes the name
-# to niri and is exactly right; the fault is putting it on screen next to
+# to the compositor and is exactly right; the fault is putting it on screen next to
 # numbers. So the subject is an assignment to `text:`, not every mention of
 # `name` in the tree.
 while IFS=: read -r file line text; do

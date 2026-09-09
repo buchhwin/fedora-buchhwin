@@ -183,7 +183,7 @@ ColumnLayout {
         title: "Graphics"
 
         // ⚠️ A CLOSED LIST, NOT A FIELD WITH SUGGESTIONS — and it is the one row
-        // in the window where that is the right way round. `niri validate`
+        // in the window where that is the right way round. `Hyprland --verify-config`
         // accepts a device path that does not exist (measured on 26.04, with a
         // control: an invented KEY in the same block is rejected, a missing
         // DEVICE is not), and a config naming a device niri cannot open means
@@ -199,7 +199,7 @@ ColumnLayout {
         // a render node that exists here with a driver bound to it.
         //
         // The way out, if it is ever reached by editing shell.json by hand: a
-        // TTY, clear gpu.renderDevice, `bhctl niri apply`. Also in docs/NIRI.md.
+        // TTY, clear gpu.renderDevice, `bhctl hypr apply`. Also in docs/HYPRLAND.md.
         SettingRow {
             Layout.fillWidth: true
             key: "gpu.renderDevice"

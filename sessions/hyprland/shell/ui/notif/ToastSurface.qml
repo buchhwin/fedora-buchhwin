@@ -13,7 +13,7 @@
 //
 // ⚠️ ONE WINDOW PER CARD, not one window holding a column of cards. That was
 // the first attempt and it was wrong for a reason this project has now paid for
-// three times: niri draws shadow and blur behind the WHOLE layer surface,
+// three times: the compositor draws shadow and blur behind the WHOLE layer surface,
 // invisible parts included. A column of three cards with 8 px between them is
 // one surface, so the gaps between the cards were filled with blurred wallpaper
 // and shadow — a dark band hanging in mid-air between two floating cards.

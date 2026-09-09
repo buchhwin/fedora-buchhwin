@@ -352,7 +352,7 @@ Singleton {
         // `programs.browser` gains the Wayland flag.
         //
         // ⚠️ THE KEY AND THE LAUNCHER WERE STARTING TWO DIFFERENT BROWSERS.
-        // tools/niri.qml writes a .desktop override carrying
+        // tools/hypr.qml writes a .desktop override carrying
         // --ozone-platform=wayland, and the launcher honours it — measured on
         // his machine, the launcher resolves Brave to the flagged command. But
         // `spawn "brave-browser"` runs the binary and never looks at a desktop

@@ -175,7 +175,7 @@ Scope {
     // ⚠️ THE SETTINGS WINDOW IS OUTSIDE `Variants`, AND THAT IS THE POINT OF IT
     // BEING A WINDOW. Everything below is a layer surface and therefore belongs
     // to one screen, so it is built once per screen and each copy decides
-    // whether to draw. A window belongs to no screen: niri places it, you move
+    // whether to draw. A window belongs to no screen: the compositor places it, you move
     // it, and one per monitor would mean three settings windows opening at once
     // on a docked laptop.
     //
@@ -336,7 +336,7 @@ Scope {
             // ⚠️ `hotCorners` defaults to "right" and NOT "both", because niri
             // already owns the top-left corner and has it switched on — its own
             // docs say so. Choosing "left" or "both" also switches niri's off;
-            // that happens in tools/niri.qml, so the two can never both answer
+            // that happens in tools/hypr.qml, so the two can never both answer
             // the same corner.
             LazyLoader {
                 // Same null guard as the five above — see the note there.

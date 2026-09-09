@@ -74,14 +74,14 @@ Scope {
     // was simply not true. It matters beyond tidiness: a program watching its
     // own config reloads on every write, so an unchanged rewrite is a reload
     // for nothing, and `bhctl theme apply` on an unchanged palette touched
-    // seven files' mtimes. tools/niri.qml has done it this way from the start,
+    // seven files' mtimes. tools/hypr.qml has done it this way from the start,
     // because niri live-reloads and the cost was immediately visible there.
     //
     // `blockLoading` on the views is what makes reading and writing possible in
     // the same statement.
     function write(view, path, text, label) {
         // ⚠️ CLEAR FIRST — the same trap that shipped a broken code.desktop out
-        // of tools/niri.qml, whose write() is this function's twin. A FileView
+        // of tools/hypr.qml, whose write() is this function's twin. A FileView
         // hands back what it already holds, so a synchronous text() right after
         // pointing it at a new path reads the PREVIOUS file. Every caller here
         // happens to own its own view today, which is exactly why it never bit:
@@ -533,7 +533,7 @@ Scope {
     // ⚠️ Two rules, both from niri's own documentation and both easy to break:
     //
     //  * No `on`, no `off`, no `width`, no `gaps` here. Whether a border exists
-    //    is a look setting and belongs to tools/niri.qml. Worse, the meaning
+    //    is a look setting and belongs to tools/hypr.qml. Worse, the meaning
     //    differs by file: "writing layout { border {} } in an included config
     //    does nothing… the same in the main config will ENABLE the border".
     //    Deciding visibility from here would mean deciding it differently
@@ -1095,7 +1095,7 @@ Scope {
     // blockLoading so write() can compare against what is already on disk in
     // the same statement; printErrors off because "not there yet" is the normal
     // case on a first run and not a fault worth shouting about. Same shape as
-    // tools/niri.qml:520-521.
+    // tools/hypr.qml:520-521.
     FileView { id: f1; blockLoading: true; printErrors: false }
     FileView { id: f2; blockLoading: true; printErrors: false }
     FileView { id: f3; blockLoading: true; printErrors: false }
@@ -1505,7 +1505,7 @@ Scope {
              + "gsettings set " + iface + " gtk-theme '" + gtk + "'; "
              + "gsettings set " + iface + " color-scheme '" + scheme + "'; "
              + "gsettings set " + iface + " font-name '" + font + "'; "
-             // ⚠️ THE POINTER GOES HERE TOO, not only into niri's config. GTK
+             // ⚠️ THE POINTER GOES HERE TOO, not only into the compositor's config. GTK
              // reads it from gsettings and never asks the compositor, so
              // setting only one of the two gives a pointer that changes shape
              // when it crosses from the desktop onto a window.

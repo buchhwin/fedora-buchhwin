@@ -6,6 +6,12 @@
 #   ./install.sh --wallpapers <dir>  copy wallpapers from <dir> and use them
 #   ./install.sh --only <phase>      one phase; repeatable
 #   ./install.sh --skip <phase>      all but one; repeatable
+#   ./install.sh --dry-run           print what would happen; change nothing
+#
+# ⚠️ RUN --dry-run FIRST ON A MACHINE YOU WORK ON. This installer changes the
+# login shell, moves ~/.zshrc aside, edits /etc/dnf/dnf.conf and removes three
+# packages. All of it is reversible with ./uninstall.sh, and all of it is
+# easier to agree to before it happens than after.
 #
 # There is no `--with citrix`. Citrix cannot be automated — its RPM exists only
 # behind a link that is regenerated on every page load — and an option that only
@@ -17,19 +23,20 @@ REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=lib/common.sh
 source "$REPO_DIR/lib/common.sh"
 
-MINIMAL=0; WALLPAPERS=""; ONLY=(); SKIP=()
+MINIMAL=0; WALLPAPERS=""; ONLY=(); SKIP=(); DRY_RUN=0
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --minimal)    MINIMAL=1 ;;
         --wallpapers) WALLPAPERS="${2:?}"; shift ;;
         --only)       ONLY+=("${2:?}"); shift ;;
         --skip)       SKIP+=("${2:?}"); shift ;;
-        -h|--help) sed -n '2,17p' "$0"; exit 0 ;;
+        --dry-run)    DRY_RUN=1 ;;
+        -h|--help) sed -n '2,24p' "$0"; exit 0 ;;
         *) die "unknown option: $1" ;;
     esac
     shift
 done
-export MINIMAL WALLPAPERS
+export MINIMAL WALLPAPERS DRY_RUN
 
 should_run() {
     local p="$1" s
@@ -47,6 +54,18 @@ done
 run_phase() { should_run "$1" && "phase_$1"; return 0; }
 
 run_phase preflight
+
+# ⚠️ AFTER preflight, NOT BEFORE. The plan reports on the machine in front of
+# it — which of the unwanted packages are installed, and how they got there —
+# and preflight is what establishes this is a Fedora KDE machine at all.
+if (( DRY_RUN )); then
+    all_phases=()
+    for p in preflight gpu base desktop apps codecs fonts cursors spicetify              shell services greeter shellenv summary; do
+        should_run "$p" && all_phases+=("$p")
+    done
+    print_plan "${all_phases[@]}"
+    exit 0
+fi
 # ⚠️ SECOND, and the position is the point. The akmod build is the slowest and
 # most failure-prone step in the installer; discovering after forty minutes that
 # the running kernel has no headers is worse than discovering it after one. It
