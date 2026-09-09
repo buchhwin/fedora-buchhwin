@@ -88,7 +88,7 @@ jq '.theme.palette = "dracula"
   | .theme.accent  = "mauve"
   | .wallpaper.current = "file:///home/test/Pictures/mine.jpg"
   | .wallpaper.folder  = "/home/test/Pictures/Mine"
-  | .dock.enabled = true
+  | .bar.enabled = true
   | .notch.flare  = 21
   | .windows.blurred = ["kitty","nautilus"]' "$cfg" > "$tmp/chosen" \
     && cp "$tmp/chosen" "$cfg" \
@@ -127,7 +127,7 @@ check_key '.theme.palette'         'dracula'
 check_key '.theme.accent'          'mauve'
 check_key '.wallpaper.current'     'file:///home/test/Pictures/mine.jpg'
 check_key '.wallpaper.folder'      '/home/test/Pictures/Mine'
-check_key '.dock.enabled'          'true'
+check_key '.bar.enabled'           'true'
 check_key '.notch.flare'           '21'
 check_key '.windows.blurred | join(",")' 'kitty,nautilus'
 

@@ -113,21 +113,6 @@ Singleton {
 
     readonly property var allPrograms: root.programs([])
 
-    // ⚠️ DESKTOP IDS, WHICH IS A DIFFERENT LIST TO `allPrograms` ABOVE, and the
-    // difference matters rather than being a detail. `programs()` offers the
-    // BINARY — `kitty`, `nautilus` — because `programs.*` keys are spawned as a
-    // command. The dock pins ENTRIES, and an entry id is `org.gnome.Nautilus`:
-    // stable across languages, where the binary is not the thing a .desktop file
-    // is looked up by. Offering the binary there would produce pins that never
-    // resolve to an icon.
-    readonly property var desktopIds: {
-        var out = []
-        var a = Services.Apps.apps
-        for (var i = 0; i < a.length; i++)
-            out.push({ value: a[i].id, label: a[i].name })
-        return out
-    }
-
     // -------------------------------------------------------------- players
     //
     // ⚠️ THE RUNNING ONES, and only those. services/Media.qml matches this

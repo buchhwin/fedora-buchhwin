@@ -111,10 +111,16 @@ trap 'restore_now; exit 143' TERM HUP
 #                  a window actually is, so there is no slack to share by hand.
 #                  Re-pointed at the line that reads that position, which is
 #                  where "packed against the left edge" now comes from.
+#
+# ⚠️ AND A SIXTH WAS RE-POINTED DELIBERATELY, which is a different thing from
+# going stale. `setting-rows` mutated a row on the dock's settings page, and the
+# dock was removed on 09.09.2026 — surface, page, ipc verb and Config block. The
+# case now mutates `bar.enabled` on Bar & Island: the same shape of fault, on a
+# page that is going to stay.
 CASES=$(cat <<'TABLE'
 no-python|lib/70-services.sh|$a python3 -c "print(1)"|python in an installer phase
 no-fetch-animation|dotfiles/zsh/zshrc|s/^        fastfetch$/        buchhwin-fetch/|a call to the deleted player
-setting-rows|shell/ui/settings/pages/DockPage.qml|s/key: "dock.enabled"/key: "dock.enabledX"/|a row over a key that does not exist
+setting-rows|shell/ui/settings/pages/BarIslandPage.qml|s/key: "bar.enabled"/key: "bar.enabledX"/|a row over a key that does not exist
 key-readers|shell/config/Config.qml|s/^                property bool noCsd: true$/                property bool noCsd: true\n                property bool nobodyReadsThis: true/|a key nothing reads
 fingerprint|shell/services/Theming.qml|s/Config.keys.mod,//|a generated key outside the fingerprint
 reset-page|shell/ui/settings/pages/DisplaysPage.qml|s/resetKeys: \["outputs"\]/resetKeys: []/|a page that writes settings its reset forgets

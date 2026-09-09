@@ -11,8 +11,8 @@
 #
 # ⚠️ WHAT WAS ALREADY RULED OUT, so nobody starts where this started:
 #
-#   * The reader exists. ui/Shell.qml reads Config.dock.enabled.
-#   * The writer exists. pages/DockPage.qml declares key: "dock.enabled".
+#   * The reader exists. ui/Shell.qml reads Config.bar.enabled.
+#   * The writer exists. pages/BarIslandPage.qml declares key: "bar.enabled".
 #   * The row is honest by design — it shows Config.get(key) and never moves
 #     itself, so "springs back" means the write was REFUSED, not mis-drawn.
 #   * The journal has no `Config.set: no such section` and no `no such key` on

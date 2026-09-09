@@ -148,7 +148,7 @@ win_origin() {
 # says on stderr WHICH half failed.
 #
 # ⚠️ THE TWO HALVES REPORT SEPARATELY, and the first draft did not. It answered
-# "could not locate the dock.enabled row" when the truth was that `hyprctl` had
+# "could not locate the bar.enabled row" when the truth was that `hyprctl` had
 # no socket — sending the reader to look at a page that was perfectly fine. Rule
 # 4: a checker that reads the wrong place invents work, which is worse than one
 # that misses something.
@@ -318,13 +318,13 @@ settle() {
 }
 
 # ------------------------------------------------------- 1 · a switch is a write
-ipc settings dock >/dev/null; sleep 1.2
+ipc settings bar >/dev/null; sleep 1.2
 focus_settings
-before="$(val_of dock.enabled)"
-if xy="$(centre_of dock.enabled)"; then
+before="$(val_of bar.enabled)"
+if xy="$(centre_of bar.enabled)"; then
     click_at $xy || bad "a press on a switch reaches the write" "ydotool refused"
     settle
-    after="$(val_of dock.enabled)"
+    after="$(val_of bar.enabled)"
     if [[ "$before" != "$after" ]]; then
         ok "a press on a switch reaches the write" "$before -> $after"
         # ⚠️ AIM AGAIN RATHER THAN REUSING THE COORDINATE. Pressing a row can
@@ -332,9 +332,9 @@ if xy="$(centre_of dock.enabled)"; then
         # second press has to be aimed at where the row is NOW, or this reads as
         # "the press does nothing" for a reason that has nothing to do with the
         # press.
-        if xy2="$(centre_of dock.enabled)"; then
+        if xy2="$(centre_of bar.enabled)"; then
             click_at $xy2; settle
-            back="$(val_of dock.enabled)"
+            back="$(val_of bar.enabled)"
             [[ "$back" == "$before" ]] \
                 && ok  "and the second press puts it back" "$before" \
                 || bad "and the second press puts it back" "left at $back"
@@ -345,7 +345,7 @@ if xy="$(centre_of dock.enabled)"; then
         bad "a press on a switch reaches the write" "still $after after a real click"
     fi
 else
-    bad "a press on a switch reaches the write" "could not locate the dock.enabled row"
+    bad "a press on a switch reaches the write" "could not locate the bar.enabled row"
 fi
 
 # ------------------------------------------- 2 · the two-stage reset really resets

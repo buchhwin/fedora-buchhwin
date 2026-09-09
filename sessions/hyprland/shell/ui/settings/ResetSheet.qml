@@ -104,7 +104,7 @@ Item {
                     model: [
                         "Every setting on all pages goes back to the way it ships.",
                         "The wallpaper and the colour scheme go back to the ones that come with the desktop.",
-                        "Your keyboard shortcuts, dock, and window rules go with them.",
+                        "Your keyboard shortcuts and window rules go with them.",
                         "The file you have now is kept as shell.json.bak, so this is recoverable by hand."
                     ]
 

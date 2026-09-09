@@ -666,7 +666,6 @@ Singleton {
         function media(): void { root.showSettingsPage("media") }
         function lock(): void { root.showSettingsPage("lock") }
         function motion(): void { root.showSettingsPage("motion") }
-        function dock(): void { root.showSettingsPage("dock") }
         function keyboard(): void { root.showSettingsPage("keyboard") }
         function keys(): void { root.showSettingsPage("keys") }
         function pointing(): void { root.showSettingsPage("pointing") }

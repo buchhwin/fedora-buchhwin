@@ -1,8 +1,0 @@
-# The dock. See ../../common/qmldir for why this file must exist at all.
-#
-# ⚠️ The surface spans its whole edge and never changes size; the strip is
-# placed inside it. That is not a style choice — a PanelWindow sized by its
-# content is what "alles wackelt von links nach rechts" was, and tests/motion.sh
-# fails it.
-DockSurface 1.0 DockSurface.qml
-DockItem 1.0 DockItem.qml

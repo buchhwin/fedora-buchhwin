@@ -3,7 +3,7 @@ pragma Singleton
 // Writing to `outputs`, and nothing else.
 //
 // `outputs` is the one setting in this shell that is a LIST OF OBJECTS rather
-// than a value at a dotted path, so `Config.set("dock.enabled", …)` has no
+// than a value at a dotted path, so `Config.set("bar.enabled", …)` has no
 // equivalent for "the scale of DP-2". Four controls on the displays page all
 // need to reach into the same list, and four copies of the same loop is exactly
 // the drift rule 6 forbids — a list must not exist twice.

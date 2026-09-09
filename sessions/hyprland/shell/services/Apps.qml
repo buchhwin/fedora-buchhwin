@@ -154,7 +154,7 @@ Singleton {
     //
     // ⚠️⚠️ THE COMPOSITOR'S app_id IS NOT AN ICON NAME, and treating it as one
     // is what put a circle with a letter in it beside every window in the
-    // Super+Tab card, the dock and the task manager. `ui/common/AppIcon.qml`
+    // Super+Tab card and the task manager. `ui/common/AppIcon.qml`
     // asked `Quickshell.hasThemeIcon(app_id)` directly; that answers for a
     // minority of programs and silently falls back for the rest.
     //
@@ -171,7 +171,7 @@ Singleton {
     // the installed qmltypes, not guessed. It exists for exactly this question:
     // "which entry belongs to the window the compositor is showing me".
     //
-    // ⚠️ AN INDEX, NOT A SCAN PER ICON. Every dock tile, every switcher tile and
+    // ⚠️ AN INDEX, NOT A SCAN PER ICON. Every switcher tile, every task-manager row and
     // every task-manager row asks this; a linear walk per lookup is the shape
     // this project bans outright (see the note above `Calendar.dayIndex`, where
     // 42 cells × every event was the same mistake). Built once, as a binding.

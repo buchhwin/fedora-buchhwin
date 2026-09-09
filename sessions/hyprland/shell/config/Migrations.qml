@@ -43,7 +43,7 @@ Singleton {
     // joining three fields with it can never collide with their contents.
     readonly property string sep: "\u0000"
 
-   readonly property int current: 15
+   readonly property int current: 16
 
     // step[n] upgrades a config at version n to version n+1.
     // Each is a pure function: take the parsed object, return it changed.
@@ -450,6 +450,31 @@ Singleton {
             return cfg
         },
 
+        // ---------------------------------------------------------- 15 -> 16
+        //
+        // The dock is gone — the surface, the settings page, the IPC verb and
+        // the whole `dock` block in Config. His decision: the bar at the TOP
+        // stays, the strip at the bottom goes.
+        //
+        // ⚠️ THIS IS THE SECOND TIME THIS BLOCK HAS BEEN REMOVED, and the two
+        // removals mean opposite things. Migration 3 -> 4 took it out because
+        // nothing read a single key of it: a setting that does nothing is worse
+        // than a missing one. It came back on 09.08.2026 when the dock shipped,
+        // and every key did have a reader. It goes now because the SURFACE
+        // goes, so the keys have nothing left to be read by — and a key with no
+        // reader is exactly what tests/key-readers.sh refuses to let stand.
+        //
+        // ⚠️ AND A REMOVAL NEEDS A MIGRATION, unlike an addition. A config that
+        // never had `dock` simply takes the defaults; a config that HAS one
+        // keeps an object the schema no longer knows, and JsonAdapter carries
+        // unknown keys forward forever. Left alone it would sit in every
+        // shell.json on the machine, describing a surface that cannot be built.
+        function (cfg) {
+            delete cfg.dock
+            if (cfg.surfaces && typeof cfg.surfaces === "object")
+                delete cfg.surfaces.dock
+            return cfg
+        },
     ]
 
     function versionOf(cfg) {

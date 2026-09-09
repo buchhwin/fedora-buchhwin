@@ -22,7 +22,6 @@ SoundPage 1.0 SoundPage.qml
 ClockPage 1.0 ClockPage.qml
 MotionPage 1.0 MotionPage.qml
 LauncherPage 1.0 LauncherPage.qml
-DockPage 1.0 DockPage.qml
 NotifyPage 1.0 NotifyPage.qml
 ControlCenterPage 1.0 ControlCenterPage.qml
 LockPage 1.0 LockPage.qml

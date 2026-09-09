@@ -312,7 +312,7 @@ Item {
                   JSON.stringify(def))
             // A non-empty one, because empty and filled failed differently: the
             // empty list disappeared, the filled one arrived with the wrong shape.
-            var pinned = Config.defaultFor("dock.pinned")
+            var pinned = Config.defaultFor("windows.blurred")
             check("a filled list<string> keeps its shape",
                   pinned !== undefined && typeof pinned.length === "number"
                   && pinned.length > 0 && typeof pinned[0] === "string",

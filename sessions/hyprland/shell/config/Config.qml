@@ -47,7 +47,6 @@ Singleton {
     readonly property alias disks: adapter.disks
     readonly property alias notch: adapter.notch
     readonly property alias bar: adapter.bar
-    readonly property alias dock: adapter.dock
     readonly property alias launcher: adapter.launcher
     readonly property alias session: adapter.session
 
@@ -652,7 +651,7 @@ Singleton {
             // only the migration chain quietly papering over it. Both now write
             // no version at all: a file without one reads as 0 and is migrated
             // forward, which is exactly the path a genuinely old file takes.
-            property int version: 15
+            property int version: 16
 
             property JsonObject theme: JsonObject {
                 property string palette: "everforest-dark"
@@ -1372,7 +1371,7 @@ Singleton {
                 // 10.08.2026, and `black` is the default he asked for.
                 //
                 //   "black"   the notch, the quick settings, the settings
-                //             window, the launcher, the dock and the toasts are
+                //             window, the launcher and the toasts are
                 //             plain black and fully opaque
                 //   "scheme"  they take their tint from the palette and stay
                 //             slightly see-through, which is how it was before
@@ -1733,76 +1732,6 @@ Singleton {
                 property list<string> monitors: ["@primary"]
             }
 
-            // ⚠️⚠️ THE DOCK, AND THIS BLOCK EXISTED ONCE BEFORE AND WAS DELETED.
-            //
-            // Migration 3 → 4 removed it, with a note that is worth repeating
-            // rather than paraphrasing: it "described a dock that does not
-            // exist — iconSize, pinned, monitors, and a switch to turn the whole
-            // thing off — and not one key of it was ever read". A setting that
-            // does nothing is worse than a missing one, because it is a promise.
-            //
-            // It comes back with the dock, and every key below has a reader in
-            // ui/dock/DockSurface.qml. tests/key-readers.sh is what keeps that
-            // true; it found five dead keys the last time it was pointed at this
-            // file.
-            //
-            // ⚠️ NO MIGRATION, AND THAT IS CHECKED RATHER THAN ASSUMED. The note
-            // at the top of this file says adding a key needs none — a config
-            // written before today simply has no `dock` object and every value
-            // below is its default. Renaming or removing would be different.
-            //
-            // His brief, 05.08.: "floating an/aus, full sized über den ganzen    // english-ok: the brief, quoted
-            // bildschirm unten als taskbar an/aus, oder halt nur 'dock' wie      // english-ok: the brief, quoted
-            // jetzt — und viel zum einstellen". And 09.08., the default he       // english-ok: the brief, quoted
-            // wants: floating, centred at the bottom, autohide off.
-            property JsonObject dock: JsonObject {
-                // ⚠️ OFF BY DEFAULT SINCE 10.08.2026, HIS DECISION: "und bei      // english-ok: his decision, quoted
-                // default soll das dock aus sein". It was `true`, which is also   // english-ok: his decision, quoted
-                // how the startup fault next door stayed hidden — a surface that
-                // is supposed to be on cannot be seen failing to switch off.
-                property bool enabled: false
-
-                // ⚠️ TWO MODES, NOT THREE. His three descriptions are two
-                // questions: how WIDE is it, and is it detached from the edge.
-                //
-                //   dock     as wide as its contents, centred
-                //   taskbar  the full length of its edge, and it RESERVES that
-                //            space so windows do not sit under it
-                //
-                // Floating is the second question and applies to both, which is
-                // why it is its own key rather than a third mode: a full-width
-                // bar with a margin round it is a real thing people want, and
-                // three modes could not express it.
-                property string mode: "dock"
-                property bool floating: true
-
-                // The thickness of the strip: height at the bottom, width at
-                // the sides. One key rather than two, because it is the same
-                // measurement seen from a different edge.
-                property int size: 56
-                property int iconSize: 32
-
-                // ⚠️ WHICH EDGE, and left/right are not decoration: a wide
-                // screen has plenty of width and never enough height, which is
-                // exactly when a side dock earns itself.
-                property string position: "bottom"
-
-                // ⚠️ OFF BY DEFAULT, and he asked for that in as many words. A
-                // dock that hides is a dock you have to go looking for, and the
-                // pointer trip to find it costs more than the pixels it saves.
-                property bool autohide: false
-
-                // Desktop entry ids, in the order they are shown. Ids rather
-                // than names: `org.gnome.Nautilus` is stable, "Files" is a
-                // translation.
-                property list<string> pinned: ["kitty", "brave-browser", "org.kde.dolphin"]
-
-                // Windows that are open but not pinned, after the pinned ones.
-                property bool showRunning: true
-
-                property list<string> monitors: []
-            }
-
             // The launcher, which is the one surface that opens in the MIDDLE
             // of the screen rather than at the notch — so the notch stays where
             // it is while it is open.
@@ -1843,20 +1772,6 @@ Singleton {
                 // happens without asking.
                 property bool automount: false
             }
-
-            // ⚠️ THE `dock` BLOCK IS EIGHTY-NINE LINES ABOVE THIS COMMENT, and
-            // this comment said it did not exist until 10.08.2026. It was true
-            // when it was written: the block had been REMOVED (migration 3→4)
-            // because nothing read a single key of it, and the note explained
-            // that a setting which does nothing is worse than a missing one —
-            // "it is a promise, and the only way to find out it was empty is to
-            // try it".
-            //
-            // The dock shipped on 09.08.2026 and the block came back with it,
-            // meaning something. The comment did not follow. It is kept here
-            // rather than deleted because the rule it states is still the rule,
-            // and because a file that contradicts itself in two places ninety
-            // lines apart is exactly what a documentation check is for.
 
             // ---------------------------------------------------------------
             // Programs the key bindings point at.

@@ -62,9 +62,9 @@ check() {        # $1 = label, $2 = json, $3 = expect-match, $4 = must/mustnot
 
 # The fault: a null block. Named, and named SPECIFICALLY — "something is wrong"
 # would not tell him which switch to stop trusting.
-check "a null section is reported"          '{"dock": null}'                'BROKEN' must
-check "and the block is named"              '{"dock": null}'                'dock'   must
-check "several nulls are all named"         '{"dock": null, "bar": null}'   'bar'    must
+check "a null section is reported"          '{"notch": null}'                'BROKEN' must
+check "and the block is named"              '{"notch": null}'                'notch'  must
+check "several nulls are all named"         '{"notch": null, "bar": null}'   'bar'    must
 
 # The control. An absent block and a healthy one must both stay silent, or the
 # warning means nothing.
@@ -80,8 +80,8 @@ check "the word null in a value is not one" '{"theme": {"palette": "null"}}' 'BR
 # have. A diagnosis that ends in an invented command sends the reader off to
 # debug the tool instead of the fault.
 printf '  %-46s ' "the advice names no invented bhctl verb"
-doctor_null_dock="$(run_doctor '{"dock": null}')"
-if grep -qE 'bhctl (reset|settings|fix)' <<< "$doctor_null_dock"; then
+doctor_null_notch="$(run_doctor '{"notch": null}')"
+if grep -qE 'bhctl (reset|settings|fix)' <<< "$doctor_null_notch"; then
     printf '%sFAIL%s  it points at a verb bhctl does not have\n' "$red" "$off"; fail=1
 else
     printf '%sok%s\n' "$green" "$off"

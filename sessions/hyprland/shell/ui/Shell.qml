@@ -20,7 +20,6 @@ import "../theme"
 import "../ipc"
 import "../services" as Services
 import "surface"
-import "dock"
 import "launcher"
 import "wallpaper"
 import "notif"
@@ -219,7 +218,7 @@ Scope {
             // The guard is the pattern this project already uses at every other
             // Config read that can run during that window — ui/lock/
             // LockScreen.qml has had `Config.lock ? Config.lock.wallpaper : false`
-            // since it was written, for exactly this reason. These five never
+            // since it was written, for exactly this reason. These four never
             // got it because they were written before the window was understood,
             // and because a surface that is supposed to be ON hides the fault
             // completely: the notch, the bar and the launcher were all wrong in
@@ -229,6 +228,13 @@ Scope {
             // surface that flashes on and then leaves is worse than one that
             // arrives a frame late, and on this list "unknown" lasts about one
             // event-loop step.
+            //
+            // ⚠️ THE DOCK ITSELF IS GONE NOW — the surface, its settings page and
+            // its whole Config block — and this note is kept anyway, because it
+            // is the only written record of WHY these guards exist. The bug was
+            // measured on the dock; it was never about the dock. It was about
+            // reading a Config block during the load window, and the three
+            // surfaces below still do that on every start.
             readonly property bool barHere: Config.bar
                 ? Config.bar.enabled && root.wants(Config.bar.monitors, modelData)
                 : false
@@ -240,10 +246,6 @@ Scope {
             readonly property bool launcherHere: Config.launcher
                 ? Config.launcher.enabled
                   && root.wants(Config.launcher.monitors, modelData)
-                : false
-
-            readonly property bool dockHere: Config.dock
-                ? Config.dock.enabled && root.wants(Config.dock.monitors, modelData)
                 : false
 
             // Was this the screen the user opened something on?
@@ -304,20 +306,6 @@ Scope {
             LazyLoader {
                 activeAsync: perScreen.overlayHere && Ipc.expanded
                 component: OverlaySurface { modelData: perScreen.modelData }
-            }
-
-            // ⚠️ THE DOCK IS THE OPPOSITE CASE TO THE TWO ABOVE, and that is
-            // deliberate rather than inconsistent. Those two are exactly the
-            // size of what they draw, because the compositor blurs and shadows the whole
-            // surface. The dock spans its entire edge and switches blur off
-            // instead — because its contents change every time a program opens,
-            // and a surface that follows its contents is the horizontal wobble
-            // this shell already fixed once. The strip is drawn inside it and
-            // the input region follows the strip, so the empty half of the
-            // surface swallows nothing.
-            LazyLoader {
-                activeAsync: perScreen.dockHere
-                component: DockSurface { modelData: perScreen.modelData }
             }
 
             // ⚠️ THE PILL BESIDE THE NOTCH IS GONE, and so is its surface. It

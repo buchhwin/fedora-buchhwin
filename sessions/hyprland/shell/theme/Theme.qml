@@ -220,7 +220,7 @@ Singleton {
     // `pillBg` is `alpha(surfaceHigh, panelOpacity)`, and `panelOpacity` is 1
     // whenever "our own surfaces are black and opaque" is on — which is the
     // default and which he asked for. That rule is about the notch, the quick
-    // panel, the settings window, the launcher, the dock and the toasts; the
+    // panel, the settings window, the launcher and the toasts; the
     // lock screen and the greeter are deliberately NOT on that list, because
     // they stand on a photograph rather than on the desktop.
     //

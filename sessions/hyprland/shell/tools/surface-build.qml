@@ -51,7 +51,6 @@ Scope {
         "../ui/surface/OverlaySurface.qml",
         "../ui/surface/ShellSurface.qml",
         "../ui/bar/BarContent.qml",
-        "../ui/dock/DockSurface.qml",
         "../ui/launcher/LauncherSurface.qml",
         "../ui/notif/ToastSurface.qml",
         "../ui/wallpaper/WallpaperSurface.qml",

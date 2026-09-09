@@ -27,7 +27,6 @@ groups were settable and undocumented.
 | `timer` | `presets` in minutes, `sound`, `soundFile` — the work timer on Mod+Shift+Z (Mod+Shift+T opens the themes) |
 | `quick` | `showMore` — the quick panel keeps four tiles out and folds the other six away. Off by default: all ten on one surface was reported as cluttered and too much. The fold lives in the panel itself; the settings row is the same switch reached the long way round |
 | `bar` / `notch` / `launcher` | geometry, and a monitor list (empty = all) |
-| `dock` | `enabled`, `mode` (`dock`/`taskbar`), `floating`, `position` (`bottom`/`left`/`right`), `size`, `iconSize`, `pinned` (desktop entry ids), `showRunning`, `autohide`, `monitors` |
 | `programs` | argument **lists**: `terminal`, `browser`, `fileManager`, `editor`, `imageViewer`, `video` |
 | `keys` | `mod`, and **only** `mod` |
 | `binds` `rebinds` | ⚠️ **TOP LEVEL, NOT UNDER `keys`**, and this table said otherwise until 10.08.2026. Both are `var` lists, and a `var` inside a nested `JsonObject` is what segfaulted quickshell twice — the note beside them in `Config.qml` spells it out. Rebuilding the schema from the old line would have reproduced that crash. `binds` is `{ key, action, arg, desc }`; `rebinds` is `{ from, to }` overrides, with `to: ""` meaning unbound |
@@ -139,33 +138,18 @@ run.
 and `~/.gitconfig` belong to you; the pointer lines in them are seeded once by
 the installer and never edited afterwards, not even by `off`.
 
-## The dock, and why its surface is the whole edge
+## The dock is gone
 
-Three shapes out of two switches: `mode` says how long it is (`dock` = as long
-as its contents, `taskbar` = the full edge, and only the taskbar reserves space
-so windows tile up to it), `floating` says whether it is detached from the edge.
-`position` picks the edge. The default is a floating dock centred at the bottom
-with `autohide` off.
+It was removed on 09.09.2026, at his request: the bar at the **top** stays, the
+strip at the bottom goes. The surface, its settings page, the `settings dock`
+ipc verb and the whole `dock` block in `shell.json` went with it, and migration
+15 → 16 deletes the block out of a config that still carries one.
 
-⚠️ **The layer surface spans the entire edge and never changes size**, whatever
-mode it is in — the strip is drawn inside it. That is not tidiness. A
-`PanelWindow` sized by its contents re-measures the Wayland surface every time
-the contents change, and a dock's contents change every time a program opens;
-the notch was built that way once and it was reported as "everything wobbles
-from left to right". `tests/motion.sh` fails a surface whose size comes from a
-child.
-
-⚠️ **Therefore the dock asks the compositor for no blur and no shadow.** Both apply to the
-whole layer surface, so on a full-width surface they would band across the
-screen and cost a full-screen GPU read per frame. The strip paints its own
-opaque background instead, exactly as the notch does. The input region is masked
-to the strip, so the empty part of the surface swallows no clicks.
-
-`pinned` holds **desktop entry ids** (`org.gnome.Nautilus`), not binaries: an id
-is stable where a name is a translation. A pin for something that is not
-installed stays visible rather than disappearing, and window matching is done on
-the last dotted component, lower-cased, because an `app_id` and an entry id
-agree often enough to look identical and then do not.
+⚠️ **The block had been removed once before, and the two removals mean opposite
+things.** Migration 3 → 4 took it out because nothing read a single key of it —
+a setting that does nothing is worse than a missing one. It came back on
+09.08.2026 when the dock shipped, and then every key did have a reader. It goes
+now because the *surface* goes, so the keys have nothing left to read them.
 
 ## The launcher
 
@@ -237,11 +221,9 @@ repository is public. `install.sh --wallpapers <dir>` copies them to
 
 ## Defaults worth knowing
 
-**Only the notch is on by default.** `bar.enabled` is `false`, and `dock.enabled`
-is `false` too — ⚠️ the dock EXISTS (this same file describes it above); it is
-switched off, which is a different sentence and used to read "there is no dock at all
-yet. The notch is the surface, not an ornament — so anything the bar would have
-carried needs a key and an ipc verb as well, or it is unreachable.
+**Only the notch is on by default.** `bar.enabled` is `false`. The notch is the
+surface, not an ornament — so anything the bar would have carried needs a key
+and an ipc verb as well, or it is unreachable.
 
 **`look.profile: "minimal"`** is the one switch that turns the expensive things
 off everywhere: `blur { off }`, no shadows, shorter motion. It is the first

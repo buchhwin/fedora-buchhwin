@@ -111,11 +111,11 @@ fi
 
 # ---------------------------------------------------------------------------
 # ⚠️ EVERY SURFACE'S ENABLE CONDITION HAS TO SURVIVE A NULL BLOCK, and this is
-# the wire against the fault he reported as "the dock cannot be switched off".
+# the wire against the fault he reported as "the dock cannot be switched off" —
 #
 # Config.qml documents the window: while shell.json is being deserialised,
 # `adapter.<block>` is NULL rather than "still the defaults". A binding written
-# `Config.dock.enabled && …` throws on that null, and a binding that throws
+# `Config.bar.enabled && …` throws on that null, and a binding that throws
 # keeps its last value — the schema default — and is never re-evaluated. The
 # surface then comes up switched off and stays up.
 #
@@ -125,7 +125,7 @@ fi
 # condition in ui/Shell.qml without a guard on the block itself.
 printf '  %-38s ' "surface conditions guard the null window"
 # ⚠️ IT READS WHOLE BINDINGS, NOT LINES, AND THE FIRST VERSION DID NOT — so the
-# red probe stayed green. A binding written over two lines has `Config.dock.` on
+# red probe stayed green. A binding written over two lines has `Config.bar.` on
 # the SECOND one, and a per-line grep for the declaration never sees it. That is
 # a check that cannot fail at the exact fault it was written for, which is worse
 # than no check: this file would have gone on reporting "ok" for ever. Found by

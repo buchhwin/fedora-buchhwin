@@ -75,7 +75,7 @@ Scope {
     // ⚠️⚠️ `Array.isArray()` SAYS FALSE FOR A JsonAdapter LIST, and the first
     // version of this file believed it. Nineteen rows came back
     // "SKIP (type object)" — and they were exactly the list-valued ones:
-    // dock.monitors, windows.blurred, autostart, every programs.*. Those are
+    // windows.blurred, workspaces, autostart, every programs.*. Those are
     // the rows most likely to be broken, because assigning into a wrapper is
     // the one refusal Config.set does not even count. A sweep that skipped them
     // was blind in precisely the place it had been pointed at.
