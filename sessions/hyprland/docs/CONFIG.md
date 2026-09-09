@@ -1,6 +1,6 @@
 # shell.json — the one place settings live
 
-`~/.config/buchhwin/shell.json`. Everything else is generated from it: niri's
+`~/.config/buchhwin/shell.json`. Everything else is generated from it: the compositor's
 `config.kdl`, the GTK/Qt/kitty themes, `environment.d`. There is no second
 store and no intermediate format.
 
@@ -39,8 +39,8 @@ groups were settable and undocumented.
 | `wallpaper` | `folder`, `current` image, `monitors`, and the slideshow: `slideshow`, `intervalMinutes`, `shuffle`, `slideshowRecolour`, `paletteFrom`. ⚠️ `slideshowRecolour` is OFF by default and that is deliberate — with the palette set to follow the wallpaper, every picture change recalculates all 26 colours and rewrites every foreign application's config (measured: a forest picture gives base `27201b`, a desert one `1b2027`), so a slideshow would repaint the whole desktop on every slide. `paletteFrom` is the pin that keeps the scheme still; choosing a wallpaper by hand clears it |
 | `session` | `restore` and `apps`. ⚠️ The PROGRAMS come back, not what was in them — Brave and VS Code restore their own tabs, kitty does not, and nothing outside a program can know what it had open. The list is kept while you work rather than written at shutdown, so it survives a machine that went down without asking, and it is applied once per SESSION rather than once per shell start (the marker lives in `$XDG_RUNTIME_DIR`) |
 | `location` | `name` (display only), `lat`, `lon` — set from the quick panel |
-| `cursor` | `theme` and `size`. ⚠️ TWO writers need it: niri draws the pointer over the desktop, GTK programs read `org.gnome.desktop.interface` and ignore the compositor. Setting one leaves the other wrong, which shows as a pointer that changes shape at a window edge |
-| `gpu` | `renderDevice` — which GPU niri draws with. Empty means niri chooses, which is right everywhere except a hybrid laptop with a monitor on the second card. ⚠️ `Hyprland --verify-config` accepts a device that does not exist; see docs/HYPRLAND.md for the way back out |
+| `cursor` | `theme` and `size`. ⚠️ TWO writers need it: the compositor draws the pointer over the desktop, GTK programs read `org.gnome.desktop.interface` and ignore the compositor. Setting one leaves the other wrong, which shows as a pointer that changes shape at a window edge |
+| `gpu` | `renderDevice` — which GPU the compositor draws with. Empty means the compositor chooses, which is right everywhere except a hybrid laptop with a monitor on the second card. ⚠️ `Hyprland --verify-config` accepts a device that does not exist; see docs/HYPRLAND.md for the way back out |
 | `brightness` | `external` (talk to monitors over DDC/CI at all), `externalLive` (send while dragging, or once on release), `step` |
 | `clock` | `format`, `seconds`, `dateFormat`, `weekStart`, `precision` — read by `shell/common/Clock.qml`, which is the single formatter four places used to each have their own copy of |
 | `motion` | `speed`, one multiplier over `Theme.durFast/durBase/durSlow` so the RATIO between them survives. It reaches the compositor's own window animations too |
@@ -108,7 +108,7 @@ GTK window gets its three title-bar buttons back and turns light. That is what
 | `gtk` | `gtk-3.0/gtk.css`, `gtk-4.0/gtk.css` + both `settings.ini` | nothing — GTK reads them itself |
 | `qt` | `qt6ct/colors/buchhwin.conf` | `color_scheme_path` in `qt6ct.conf` |
 | `kitty` | `kitty/theme.conf` | `include theme.conf` in `kitty.conf` |
-| `niri` | `niri/colors.kdl` | `include optional=true` in the generated `config.kdl` |
+| `hypr` | `buchhwin/hyprland/generated/colors.lua` | `require`d by `hyprland.lua` after the shipped defaults |
 | `btop` | `btop/themes/buchhwin.theme` (37 keys) | `color_theme = "buchhwin"` in `btop.conf` |
 | `alacritty` | `alacritty/buchhwin.toml` | `[general] import` in `alacritty.toml` |
 | `tmux` | `tmux/buchhwin.conf` | `source-file` in `tmux.conf` |
@@ -155,7 +155,7 @@ the notch was built that way once and it was reported as "everything wobbles
 from left to right". `tests/motion.sh` fails a surface whose size comes from a
 child.
 
-⚠️ **Therefore the dock asks niri for no blur and no shadow.** Both apply to the
+⚠️ **Therefore the dock asks the compositor for no blur and no shadow.** Both apply to the
 whole layer surface, so on a full-width surface they would band across the
 screen and cost a full-screen GPU read per frame. The strip paints its own
 opaque background instead, exactly as the notch does. The input region is masked
@@ -256,7 +256,7 @@ every pass is another full-screen GPU read per frame.
 "programs": { "terminal": ["kitty", "-e", "fish"] }
 ```
 
-niri's `spawn` takes one string per argument. A single `"kitty -e fish"` makes
+the compositor's `spawn` takes one string per argument. A single `"kitty -e fish"` makes
 it look for a binary with spaces in its name. A binding refers to a program as
 `"@terminal"`, so changing your terminal is one edit rather than a hunt through
 the bindings. An **empty** list means the binding is dropped entirely — better
@@ -365,7 +365,7 @@ gets out of the way:
 
 Two things had to be measured for this, and both are worth knowing:
 
-- **niri does not report `is_fullscreen`.** The only signal is the size, and it
+- **the compositor does not report `is_fullscreen`.** The only signal is the size, and it
   arrives in the `WindowLayoutsChanged` event: a fullscreen window's
   `window_size` is exactly the output's logical size. The honest limit is that
   with `gaps 0` and no reserved strip an ordinary tiled window would measure the
@@ -377,9 +377,9 @@ Two things had to be measured for this, and both are worth knowing:
 
 ## Shadows, blur, and one rule that explains both
 
-From niri's own layer-rule documentation:
+From the compositor's own layer-rule documentation:
 
-> niri has no way of knowing about invisible margins, and will draw the shadow
+> the compositor has no way of knowing about invisible margins, and will draw the shadow
 > behind the **entire surface**.
 
 Blur behaves the same. So **every surface this shell creates is exactly the size
@@ -394,7 +394,7 @@ the pill.
   does not reach them.
 - `windows.blurred` lists the applications that get the wallpaper blurred behind
   them. ⚠️ Blur is only visible where a window is **translucent**; an opaque one
-  covers it completely and the GPU work is wasted. niri turns on *xray*
+  covers it completely and the GPU work is wasted. The compositor turns on *xray*
   alongside blur, which blurs the wallpaper once and reuses it rather than
   recomputing per window per frame — that is what makes this affordable on a
   battery.

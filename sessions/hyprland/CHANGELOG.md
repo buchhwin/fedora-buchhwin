@@ -154,10 +154,10 @@ bottom rather than left to be discovered, which is the point of an alpha.
 
 ### What this is
 
-A Fedora desktop built on niri and Quickshell, where one palette of 26 colours
+A Fedora desktop built on the compositor and Quickshell, where one palette of 26 colours
 drives everything: the shell draws itself from it, and one renderer writes the
 same tokens out to GTK 3, GTK 4/libadwaita, Qt, kitty, alacritty, btop, bat,
-tmux, lazygit, git-delta, fastfetch, VS Code and niri. Change the palette and
+tmux, lazygit, git-delta, fastfetch, VS Code and the compositor. Change the palette and
 the applications follow, with no second source of truth.
 
 Everything above the installer is QML. The installer is bash because it runs on
