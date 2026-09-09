@@ -15,12 +15,14 @@
 # own instruction, "es soll egal sein, wo man in dem Fenster hinklickt". What    # english-ok: the instruction, quoted
 # was missing is the inner one taking an exclusive grab.
 #
-# ⚠️ IT CHECKS THREE NAMED PLACES AND SAYS SO, RATHER THAN GUESSING AT ALL OF
+# ⚠️ IT CHECKS FIVE NAMED PLACES AND SAYS SO, RATHER THAN GUESSING AT ALL OF
 # THEM. Deciding "is this TapHandler nested inside another one" from text means
 # tracking braces through a QML file, and a checker that reads the wrong block
 # invents work — which rule 4 calls worse than missing something. These three
-# are the nestings this shell actually has; a fourth gets a line here the day
-# somebody writes it, and the note above tells them why.
+# are the nestings this shell actually has; a new one gets a line here the day
+# somebody writes it, and the note above tells them why. Two arrived that way on
+# 09.09.2026 with the network and Bluetooth panels: forgetting a network while
+# also disconnecting from it is the same fault in a new place.
 set -uo pipefail
 cd "$(dirname "$0")/.." || exit 2
 
@@ -32,6 +34,8 @@ CASES="
 shell/ui/quick/Tile.qml|the chevron on a tile|root.expandClicked()
 shell/ui/notch/NotchWide.qml|play in the island|Services.Media.toggle()
 shell/ui/common/LevelRow.qml|the icon on a level row|root.iconTapped()
+shell/ui/quick/NetworkList.qml|forget, on a network row|Services.Net.forget(entry.modelData)
+shell/ui/quick/BluetoothList.qml|forget, on a device row|Services.Bt.forget(dev.modelData)
 "
 
 while IFS='|' read -r file what marker; do

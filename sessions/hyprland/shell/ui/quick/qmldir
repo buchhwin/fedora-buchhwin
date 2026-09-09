@@ -9,6 +9,11 @@
 # apply. See common/qmldir.
 QuickSettings 1.0 QuickSettings.qml
 Tile 1.0 Tile.qml
+# The networks in range and the devices in reach. Both were forbidden by
+# tests/check-repo.sh until 09.09.2026, on a reading of "no duplication" that
+# had it exactly backwards — see the note at the top of NetworkList.qml.
+NetworkList 1.0 NetworkList.qml
+BluetoothList 1.0 BluetoothList.qml
 SoundList 1.0 SoundList.qml
 # Lock, suspend, log out, restart, shut down as five pills in the panel's own
 # right-hand corner. The list comes from services/Session.qml, which the notch's

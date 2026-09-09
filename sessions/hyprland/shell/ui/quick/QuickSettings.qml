@@ -94,7 +94,7 @@ ColumnLayout {
     // screen that is a panel that grew by a few pixels and shows an empty band
     // — indistinguishable from the fault being measured. tests/quick-drawers.sh
     // holds this list and the ternary to the same five names.
-    readonly property var drawers: ["sound", "mic", "disks"]
+    readonly property var drawers: ["wifi", "bt", "sound", "mic", "disks"]
 
     function show(which) {
         if (which.length > 0 && root.drawers.indexOf(which) < 0)
@@ -131,20 +131,50 @@ ColumnLayout {
         columnSpacing: Theme.space2
         rowSpacing: Theme.space2
 
+        // ⚠️⚠️ THESE TWO TILES OPENED KDE'S SYSTEM SETTINGS UNTIL 09.09.2026,
+        // and that was the duplication the whole profile is built against —
+        // "nirgends Doppelungen". Not because it started another program, but    // english-ok: the brief, quoted
+        // because services/Net.qml and services/Bt.qml were COMPLETE the whole
+        // time and had zero callers: connect, disconnect, forget, the password
+        // path, the adapter switch. A second interface for something this shell
+        // already knew how to do is the definition of the fault.
+        //
+        // ⚠️ THE SUBTITLE IS THE STATE, and that is the point of the change
+        // rather than a decoration. "KDE settings" told you where the tile went;
+        // the network's name tells you what you are on, which is the question
+        // anybody opening this panel actually has.
         Tile {
             Layout.fillWidth: true
-            icon: "wifi"
+            // ⚠️ NO `icon:` HERE, and that is not an omission. With
+            // `network: true` the tile draws common/NetIcon itself — the same
+            // symbol the island shows — and the `icon` string is not read at
+            // all. Setting one would be a value nothing looks at, which is the
+            // shape of half the faults this project keeps finding.
             title: "Network"
-            subtitle: "KDE settings"
-            onClicked: Quickshell.execDetached(["systemsettings", "kcm_networkmanagement"])
+            subtitle: Services.Net.kind === "wired" ? Services.Net.wiredName
+                    : Services.Net.ssid.length > 0 ? Services.Net.ssid
+                    : Services.Net.wifiEnabled ? "not connected"
+                    : "off"
+            active: Services.Net.online
+            network: true
+            expandable: true
+            expanded: root.open === "wifi"
+            onClicked: root.show("wifi")
+            onExpandClicked: root.show("wifi")
         }
 
         Tile {
             Layout.fillWidth: true
-            icon: "bluetooth"
+            icon: Services.Bt.icon
             title: "Bluetooth"
-            subtitle: "KDE settings"
-            onClicked: Quickshell.execDetached(["systemsettings", "kcm_bluetooth"])
+            subtitle: Services.Bt.connectedDevices.length > 0
+                    ? Services.Bt.connectedDevices[0].name
+                    : Services.Bt.enabled ? "on" : "off"
+            active: Services.Bt.enabled
+            expandable: true
+            expanded: root.open === "bt"
+            onClicked: root.show("bt")
+            onExpandClicked: root.show("bt")
         }
 
 
@@ -458,7 +488,9 @@ ColumnLayout {
         // grows while you look at it. It is one small view, not the twenty-one
         // settings pages whose synchronous build was a real freeze.
         asynchronous: false
-        sourceComponent: root.open === "sound" ? soundList
+        sourceComponent: root.open === "wifi" ? wifiList
+                       : root.open === "bt" ? btList
+                       : root.open === "sound" ? soundList
                        : root.open === "mic" ? micList
                        : root.open === "disks" ? diskList
                        : null
@@ -482,6 +514,8 @@ ColumnLayout {
         }
     }
 
+    Component { id: wifiList; NetworkList {} }
+    Component { id: btList; BluetoothList {} }
     Component { id: soundList; SoundList {} }
     // B73 · the same list, asked for the input side instead.
     Component { id: micList; SoundList { inputsOnly: true } }
