@@ -94,9 +94,26 @@ ColumnLayout {
                 // so the column can ask "how wide does the longest entry need to
                 // be" and stop being a number somebody guessed.
                 implicitWidth: line.implicitWidth + Theme.space2 + Theme.space3
+                // ⚠️ THE CURRENT ENTRY IS TALLER, and the size is the point
+                // rather than the colour. It is the same rule the carousel
+                // picker follows — his own words about the picker — and
+                // the reason is the same: a fill you have to compare against its
+                // neighbours is a detail you look for, where a difference in
+                // size is one you see. The accent confirms it.
+                //
+                // ⚠️ AND IT IS NOT ANIMATED, which tests/motion.sh insisted on
+                // and was right to. An animated `implicitHeight` is a LAYOUT
+                // size that moves every frame: the column re-lays-out on each
+                // one, and everything below the row it belongs to travels with
+                // it. The rule is the same one the notch already follows —
+                // "the growth is one step, not an animation" — and it is why
+                // the colour below has a Behavior and this does not.
                 implicitHeight: line.implicitHeight + Theme.space2
+                                + (row.current ? Theme.space2 : 0)
 
-                radius: Theme.radiusSm
+                // Cards, pills and now this: the same large radius everywhere,
+                // which is what makes the window read as one thing.
+                radius: row.current ? Theme.radiusMd : Theme.radiusSm
                 color: row.current ? Theme.accent
                      : hover.hovered ? Theme.pillHover
                      : "transparent"                 // literal-ok: absence of colour

@@ -125,57 +125,310 @@ ColumnLayout {
         Ipc.quickPanel = root
     }
 
+    // ⚠️⚠️ THE HEAD IS TWO COLUMNS, from his screenshot: the three things that
+    // have a STATE stacked on the left — what network, what Bluetooth, whether
+    // it is quiet — and what is PLAYING on the right, with the three one-press
+    // actions under it.
+    //
+    // The split is the reason it reads at a glance. A tile that says "Atlantis
+    // 5G" answers a question; a tile that toggles a light is an action. Mixing
+    // them in one grid meant scanning ten squares to find the one that told you
+    // something, which is what "aktuell ist alles unübersichtlich" was about.   // english-ok: the brief, quoted
+    //
+    // ⚠️ THE TILES THEMSELVES ARE UNCHANGED. This is a layout, not a rewrite:
+    // the same three Tile objects that were in the grid, in a column instead.
+    // Anything else would have been two places for one tile to drift.
+    RowLayout {
+        Layout.fillWidth: true
+        spacing: Theme.space2
+
+        ColumnLayout {
+            Layout.fillWidth: true
+            Layout.preferredWidth: 1
+            Layout.alignment: Qt.AlignTop
+            spacing: Theme.space2
+
+            // ⚠️⚠️ THESE TWO TILES OPENED KDE'S SYSTEM SETTINGS UNTIL 09.09.2026,
+            // and that was the duplication the whole profile is built against —
+            // "nirgends Doppelungen". Not because it started another program, but    // english-ok: the brief, quoted
+            // because services/Net.qml and services/Bt.qml were COMPLETE the whole
+            // time and had zero callers: connect, disconnect, forget, the password
+            // path, the adapter switch. A second interface for something this shell
+            // already knew how to do is the definition of the fault.
+            //
+            // ⚠️ THE SUBTITLE IS THE STATE, and that is the point of the change
+            // rather than a decoration. "KDE settings" told you where the tile went;
+            // the network's name tells you what you are on, which is the question
+            // anybody opening this panel actually has.
+            Tile {
+                Layout.fillWidth: true
+                // ⚠️ NO `icon:` HERE, and that is not an omission. With
+                // `network: true` the tile draws common/NetIcon itself — the same
+                // symbol the island shows — and the `icon` string is not read at
+                // all. Setting one would be a value nothing looks at, which is the
+                // shape of half the faults this project keeps finding.
+                title: "Network"
+                subtitle: Services.Net.kind === "wired" ? Services.Net.wiredName
+                        : Services.Net.ssid.length > 0 ? Services.Net.ssid
+                        : Services.Net.wifiEnabled ? "not connected"
+                        : "off"
+                active: Services.Net.online
+                network: true
+                expandable: true
+                expanded: root.open === "wifi"
+                onClicked: root.show("wifi")
+                onExpandClicked: root.show("wifi")
+            }
+
+            Tile {
+                Layout.fillWidth: true
+                icon: Services.Bt.icon
+                title: "Bluetooth"
+                subtitle: Services.Bt.connectedDevices.length > 0
+                        ? Services.Bt.connectedDevices[0].name
+                        : Services.Bt.enabled ? "on" : "off"
+                active: Services.Bt.enabled
+                expandable: true
+                expanded: root.open === "bt"
+                onClicked: root.show("bt")
+                onExpandClicked: root.show("bt")
+            }
+
+            Tile {
+                Layout.fillWidth: true
+                icon: Config.notifications.dnd ? "notifications_off" : "notifications"
+                title: "Do not disturb"
+                // ⚠️ THE NUMBER, not the word. "toasts silenced" is a claim; a
+                // count is the evidence, and it is what tells him the quiet screen
+                // is this switch and not a broken daemon.
+                subtitle: !Config.notifications.dnd ? "off"
+                        : Services.Notifications.silenced === 0 ? "silencing"
+                        : Services.Notifications.silenced + " silenced"
+                active: Config.notifications.dnd
+                onClicked: {
+                    Config.notifications.dnd = !Config.notifications.dnd
+                    Config.save()
+                }
+            }
+        }
+
+        ColumnLayout {
+            Layout.fillWidth: true
+            Layout.preferredWidth: 1
+            Layout.alignment: Qt.AlignTop
+            spacing: Theme.space2
+
+            // ---------------------------------------------------- the media card
+            //
+            // ⚠️ ONLY WHEN SOMETHING IS PLAYING. A permanent empty card in the
+            // corner of the panel is furniture — the same rule the sections in
+            // SoundList follow, and the reason the Drives tile is conditional.
+            Rectangle {
+                Layout.fillWidth: true
+                Layout.preferredHeight: mediaBody.implicitHeight + Theme.space3 * 2
+                visible: Services.Media.available
+                radius: Theme.radiusMd
+                color: Theme.surface
+                clip: true
+
+                // The album art as the background, darkened, from his
+                // screenshot. ⚠️ `sourceSize` for the same reason the wallpaper
+                // picker has one: cover art is routinely 1400x1400 and this box
+                // is a fraction of that.
+                Image {
+                    anchors.fill: parent
+                    source: Services.Media.artUrl
+                    visible: Services.Media.artUrl.length > 0
+                    fillMode: Image.PreserveAspectCrop
+                    sourceSize.width: Math.round(parent.width)
+                    sourceSize.height: Math.round(parent.height)
+                    asynchronous: true
+                    cache: true
+                    opacity: Theme.dimmed
+                }
+
+                ColumnLayout {
+                    id: mediaBody
+                    anchors.fill: parent
+                    anchors.margins: Theme.space3
+                    spacing: Theme.space1
+
+                    BarText {
+                        Layout.fillWidth: true
+                        text: Services.Media.title
+                        font.weight: Theme.weightMedium
+                        elide: Text.ElideRight
+                    }
+
+                    BarText {
+                        Layout.fillWidth: true
+                        text: Services.Media.artist
+                        font.pixelSize: Theme.fontSizeSm
+                        color: Theme.fgMuted
+                        elide: Text.ElideRight
+                    }
+
+                    // The transport, centred: previous, play, next.
+                    RowLayout {
+                        Layout.fillWidth: true
+                        Layout.topMargin: Theme.space1
+                        spacing: Theme.space3
+
+                        Item { Layout.fillWidth: true }
+
+                        Icon {
+                            text: "skip_previous"
+                            size: Theme.fontSize
+                            color: Services.Media.canPrevious ? Theme.fg : Theme.fgDisabled
+                            TapHandler {
+                                gesturePolicy: TapHandler.WithinBounds
+                                onTapped: Services.Media.previous()
+                            }
+                        }
+
+                        // ⚠️ THE FILLED CIRCLE IS THE ONE THAT MATTERS, which is
+                        // his screenshot and also the only control here anybody
+                        // presses without looking.
+                        Rectangle {
+                            implicitWidth: Theme.space5
+                            implicitHeight: Theme.space5
+                            radius: width / 2   // literal-ok: a circle is half its width
+                            color: Theme.fg
+                            Icon {
+                                anchors.centerIn: parent
+                                text: Services.Media.playing ? "pause" : "play_arrow"
+                                size: Theme.fontSizeSm
+                                color: Theme.bg
+                            }
+                            TapHandler {
+                                gesturePolicy: TapHandler.WithinBounds
+                                onTapped: Services.Media.toggle()
+                            }
+                        }
+
+                        Icon {
+                            text: "skip_next"
+                            size: Theme.fontSize
+                            color: Services.Media.canNext ? Theme.fg : Theme.fgDisabled
+                            TapHandler {
+                                gesturePolicy: TapHandler.WithinBounds
+                                onTapped: Services.Media.next()
+                            }
+                        }
+
+                        Item { Layout.fillWidth: true }
+                    }
+
+                    // The thin progress line at the foot of the card.
+                    Rectangle {
+                        Layout.fillWidth: true
+                        Layout.topMargin: Theme.space1
+                        visible: Services.Media.lengthSupported
+                        implicitHeight: 2     // literal-ok: a hairline, two pixels
+                        radius: Theme.radiusPill
+                        color: Theme.surfaceHigher
+
+                        Rectangle {
+                            width: parent.width * Math.max(0, Math.min(1, Services.Media.progress))
+                            height: parent.height
+                            radius: parent.radius
+                            color: Theme.accent
+                        }
+                    }
+                }
+            }
+
+            // -------------------------------------------------- the three actions
+            //
+            // ⚠️ ONE PRESS EACH, AND NO STATE TO READ. That is what separates
+            // them from the pills on the left: night light and the fold are on
+            // or off and say so by their colour, and locking has no state at
+            // all. A round button is the shape this project already uses for
+            // exactly that, in SessionButtons.
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: Theme.space2
+
+                RoundAction {
+                    symbol: "nights_stay"
+                    on: Services.Nightlight.on
+                    usable: Services.Nightlight.available
+                    onPressed: Services.Nightlight.setOn(!Services.Nightlight.on)
+                }
+
+                RoundAction {
+                    // The fold, which is the line in his picture: four tiles out
+                    // and the rest away. `quick.showMore` is the same switch the
+                    // settings row writes, reached the short way.
+                    symbol: root.showMore ? "expand_less" : "expand_more"
+                    on: root.showMore
+                    onPressed: {
+                        Config.quick.showMore = !Config.quick.showMore
+                        Config.save()
+                    }
+                }
+
+                RoundAction {
+                    symbol: "lock"
+                    // ⚠️ THROUGH Services.Session.run("lock"), not a command of
+                    // our own. That service owns the five session actions and
+                    // knows which ones need asking first; a second way to lock
+                    // would be the same list twice.
+                    onPressed: {
+                        Ipc.collapse()
+                        Services.Session.run("lock")
+                    }
+                }
+
+                Item { Layout.fillWidth: true }
+            }
+        }
+    }
+
+    // ⚠️ ONE COMPONENT FOR THE THREE, because there are three of them and a
+    // fourth is one line. Round, because a circle is what this shell already
+    // means by "an action with no state to read" — see ui/quick/SessionButtons.
+    component RoundAction: Rectangle {
+        id: act
+        property string symbol: ""
+        property bool on: false
+        property bool usable: true
+        signal pressed()
+
+        implicitWidth: Theme.space6
+        implicitHeight: Theme.space6
+        radius: width / 2         // literal-ok: a circle is half its width
+        visible: act.usable
+        color: act.on ? Theme.accent
+             : actHover.hovered ? Theme.pillHover
+             : Theme.surfaceHigh
+
+        Behavior on color {
+            enabled: Theme.animate
+            ColorAnimation { duration: Theme.durFast; easing.type: Theme.easing }
+        }
+
+        HoverHandler { id: actHover; cursorShape: Qt.PointingHandCursor }
+        TapHandler {
+            gesturePolicy: TapHandler.WithinBounds
+            onTapped: act.pressed()
+        }
+
+        Icon {
+            anchors.centerIn: parent
+            text: act.symbol
+            size: Theme.fontSize
+            color: act.on ? Theme.accentFg : Theme.fg
+        }
+    }
+
     GridLayout {
         Layout.fillWidth: true
         columns: 2
         columnSpacing: Theme.space2
         rowSpacing: Theme.space2
 
-        // ⚠️⚠️ THESE TWO TILES OPENED KDE'S SYSTEM SETTINGS UNTIL 09.09.2026,
-        // and that was the duplication the whole profile is built against —
-        // "nirgends Doppelungen". Not because it started another program, but    // english-ok: the brief, quoted
-        // because services/Net.qml and services/Bt.qml were COMPLETE the whole
-        // time and had zero callers: connect, disconnect, forget, the password
-        // path, the adapter switch. A second interface for something this shell
-        // already knew how to do is the definition of the fault.
-        //
-        // ⚠️ THE SUBTITLE IS THE STATE, and that is the point of the change
-        // rather than a decoration. "KDE settings" told you where the tile went;
-        // the network's name tells you what you are on, which is the question
-        // anybody opening this panel actually has.
-        Tile {
-            Layout.fillWidth: true
-            // ⚠️ NO `icon:` HERE, and that is not an omission. With
-            // `network: true` the tile draws common/NetIcon itself — the same
-            // symbol the island shows — and the `icon` string is not read at
-            // all. Setting one would be a value nothing looks at, which is the
-            // shape of half the faults this project keeps finding.
-            title: "Network"
-            subtitle: Services.Net.kind === "wired" ? Services.Net.wiredName
-                    : Services.Net.ssid.length > 0 ? Services.Net.ssid
-                    : Services.Net.wifiEnabled ? "not connected"
-                    : "off"
-            active: Services.Net.online
-            network: true
-            expandable: true
-            expanded: root.open === "wifi"
-            onClicked: root.show("wifi")
-            onExpandClicked: root.show("wifi")
-        }
 
-        Tile {
-            Layout.fillWidth: true
-            icon: Services.Bt.icon
-            title: "Bluetooth"
-            subtitle: Services.Bt.connectedDevices.length > 0
-                    ? Services.Bt.connectedDevices[0].name
-                    : Services.Bt.enabled ? "on" : "off"
-            active: Services.Bt.enabled
-            expandable: true
-            expanded: root.open === "bt"
-            onClicked: root.show("bt")
-            onExpandClicked: root.show("bt")
-        }
 
 
         // ⚠️ THE ONE PART OF M10 THAT PAYS OFF WITHOUT A SINGLE MEASUREMENT, and
@@ -320,22 +573,6 @@ ColumnLayout {
             onClicked: Services.Vpn.toggle()
         }
 
-        Tile {
-            Layout.fillWidth: true
-            icon: Config.notifications.dnd ? "notifications_off" : "notifications"
-            title: "Do not disturb"
-            // ⚠️ THE NUMBER, not the word. "toasts silenced" is a claim; a
-            // count is the evidence, and it is what tells him the quiet screen
-            // is this switch and not a broken daemon.
-            subtitle: !Config.notifications.dnd ? "off"
-                    : Services.Notifications.silenced === 0 ? "silencing"
-                    : Services.Notifications.silenced + " silenced"
-            active: Config.notifications.dnd
-            onClicked: {
-                Config.notifications.dnd = !Config.notifications.dnd
-                Config.save()
-            }
-        }
 
         Tile {
             // ⚠️ SECOND LEVEL — see `quick.showMore`. The mark is ON THE TILE,

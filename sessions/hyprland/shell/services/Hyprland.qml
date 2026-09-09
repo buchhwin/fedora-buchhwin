@@ -131,14 +131,49 @@ Singleton {
         action.command = ["hyprctl", "dispatch"].concat(args)
         action.running = true
     }
+
+    // ⚠️⚠️ SEVERAL DISPATCHES ARE ONE CALL, NOT SEVERAL. `run()` assigns
+    // `action.command` and starts it; calling it twice in a row overwrites the
+    // first command before the process has run it, so the first dispatch is
+    // simply lost. That is not theoretical — `moveWindowToMonitor` did exactly
+    // that, and the half that went missing was the half the user pressed for.
+    //
+    // `hyprctl --batch` takes them separated by ";" and runs them in order in
+    // one connection, which is both correct and one fork instead of two.
+    function runBatch(cmds) {
+        action.command = ["hyprctl", "--batch", cmds.join("; ")]
+        action.running = true
+    }
     function focusWorkspace(idx) { run(["workspace", String(idx)]) }
     function focusWindow(id) { run(["focuswindow", "address:" + String(id)]) }
     function moveWindowToWorkspace(id, idx) {
         run(["movetoworkspacesilent", String(idx) + ",address:" + String(id)])
     }
+    // B33 · move one window to a named monitor, and optionally onto a
+    // workspace index there.
+    //
+    // ⚠️⚠️ `movewindow` ACTS ON THE ACTIVE WINDOW AND TAKES NO WINDOW ARGUMENT.
+    // This used to send `movewindow mon:DP-1,address:0x…`, which reads like the
+    // syntax `movetoworkspacesilent` really has — that one does take a trailing
+    // window — and is not a form `movewindow` accepts. What it did instead was
+    // move whatever happened to be focused, so dragging a window between
+    // monitors in the Shift+Alt+Tab view moved somebody else's.
+    //
+    // So the window is FOCUSED first and then moved, which is the documented way
+    // to aim `movewindow` at something in particular. Three dispatches, one
+    // call: see the note on runBatch about what two calls in a row do.
+    //
+    // ⚠️ STILL UNVERIFIED AGAINST A RUNNING COMPOSITOR. `Hyprland
+    // --verify-config` cannot answer this — it checks a config file, not a
+    // dispatcher — and `hyprctl` needs a session. The form is documented and
+    // the previous one demonstrably was not; that is the whole of the claim.
     function moveWindowToMonitor(id, output, wsIdx) {
-        run(["movewindow", "mon:" + String(output) + ",address:" + String(id)])
-        if (wsIdx !== undefined) moveWindowToWorkspace(id, wsIdx)
+        var cmds = ["dispatch focuswindow address:" + String(id),
+                    "dispatch movewindow mon:" + String(output)]
+        if (wsIdx !== undefined)
+            cmds.push("dispatch movetoworkspacesilent " + String(wsIdx)
+                      + ",address:" + String(id))
+        runBatch(cmds)
     }
     function focusMonitor(output) { run(["focusmonitor", String(output)]) }
     function isFullscreen(win, screenW, screenH) {

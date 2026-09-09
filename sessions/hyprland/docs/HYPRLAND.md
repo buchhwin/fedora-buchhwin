@@ -26,6 +26,27 @@ printf 'hl.window_rule({ name="a", match={class="^x$"}, FIELD = true })\n' > /tm
 Hyprland --verify-config --config /tmp/p.lua
 ```
 
+An invented field there answers `hl.window_rule: unknown field 'FIELD'` and
+exits 1. Measured on 0.56.2, against a control that passes.
+
+⚠️⚠️ **There is one thing it does NOT check, and it is worth knowing before you
+trust a green run: the OPTION TABLE of `hl.bind`.**
+
+```
+hl.bind("SUPER + mouse:272", hl.dsp.window.drag(), { mouse = true })      config ok
+hl.bind("SUPER + mouse:272", hl.dsp.window.drag(), { invented = true })   config ok
+```
+
+Both pass. So `{ mouse = true }` — which the upstream example config uses and
+the typed stubs do not mention — being accepted proves only that the file
+parses. Whether Hyprland honours it can be answered by exactly one thing:
+holding Super and dragging a window on a real session.
+
+Everything else is caught: an unknown top-level function, an unknown dispatcher,
+an unknown config key and a Lua syntax error all exit 1 with the line number.
+That is why the generator's validate-and-roll-back is worth having — it just
+does not cover this one corner.
+
 ## What is a file, and what is generated
 
 ```
@@ -101,9 +122,12 @@ band across the top of the display and cost a full-screen GPU read per frame.
 
 - **No compositor-side keyboard-shortcut overlay of our own.** Hyprland has one
   and the descriptions in `binds` feed it.
-- **No screen-recording, no screenshot annotation, no clipboard manager in the
-  compositor.** The shell has the clipboard; screenshots go through
-  `buchhwin-screenshot`, which is the same wrapper the dwl session uses.
+- **No screen-recording and no clipboard manager in the compositor.** The shell
+  has the clipboard; screenshots go through `buchhwin-screenshot`, the same
+  wrapper the dwl session uses — `grim` and `slurp` take them, and `swappy`
+  annotates a region shot **if it is installed**, which the profile does install.
+  ⚠️ This paragraph said "no screenshot annotation" for a day, which was simply
+  untrue: the wrapper has called swappy since it was written.
 - **No second network, Bluetooth or account manager**, which is the rule the
   whole profile is built on. See `docs/CONFIG.md`.
 

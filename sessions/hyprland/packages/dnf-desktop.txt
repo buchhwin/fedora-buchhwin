@@ -6,7 +6,12 @@ hyprland
 xdg-desktop-portal-hyprland
 quickshell
 qt6-qtdeclarative
-qt6-qtdeclarative-devel
+# ⚠️ AND NOT `-devel`, WHICH THIS LIST CARRIED UNTIL 09.09.2026. That is a
+# build-time package — headers and cmake files — and nothing in a running
+# desktop opens either. Measured rather than reasoned about: the whole QML
+# suite, all seventy checks, runs on a machine that has qt6-qtdeclarative
+# and does NOT have the devel package. quickshell does not require it, and
+# the dwl session never listed it.
 kitty
 
 # Fonts and small Wayland helpers used only by the Buchhwin session.
