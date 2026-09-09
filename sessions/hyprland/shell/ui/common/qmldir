@@ -56,3 +56,10 @@ ColourPicker 1.0 ColourPicker.qml
 # smaller than a normal pill (his request), and it knows how to shake, which is
 # what a wrong password does instead of printing a sentence.
 PasswordField 1.0 PasswordField.qml
+
+# ⚠️ ONE PICKER, TWO USERS — themes and wallpapers. He sent the second
+# screenshot with the words "genau so für wallpaper switcher", which is the
+# brief: the SAME component with different tiles, not a second one that looks
+# similar. The tile is a Component handed in; this file knows about a row, a
+# size, a ring and a counter and nothing about palettes or pictures.
+CarouselPicker 1.0 CarouselPicker.qml

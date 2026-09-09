@@ -1,29 +1,34 @@
 pragma ComponentBehavior: Bound
 
-// The theme menu: every palette on offer, each card drawn in the palette it
-// offers.
+// The theme picker: every palette on offer, each tile drawn in its own colours.
 //
-// Reference: 2026-08-06/vorlage-theme-menue.png — three columns, a short bar in
-// that palette's accent across the top of each card, the name under it, the
-// active one ringed in the accent, the next row cut off so it reads as
-// scrollable, and a header that says only "Theme".
+// From his screenshot of 09.09.2026 — a search field and a counter on one line,
+// a horizontal row of tiles below it, each showing a handful of that palette's
+// colours as dots with the name under them, the selected one visibly larger and
+// ringed in the accent, and "Enter to apply" at the foot. The row wraps.
 //
-// ⚠️ THE COLOURS ARE READ OUT OF THE FILES. Eleven hex values typed into this
-// page would be exactly the mistake the menu is selling against: the palettes
-// would drift from their own preview, and the twelfth palette somebody drops
-// into theme/palettes/ would appear as a grey box. Each card owns a FileView on
-// its own JSON and paints itself from it.
+// ⚠️ THE ROW ITSELF IS common/CarouselPicker.qml, and that is the point rather
+// than a convenience. He sent the wallpaper picture with the words "genau so    // english-ok: the request, quoted
+// für wallpaper switcher", so the two are one component with different tiles —  // english-ok: same
+// a near-copy would drift the first time either was adjusted, which is rule 6.
+// This file owns the tile, the filtering and what "apply" means for a palette.
+//
+// ⚠️ THE COLOURS ARE READ OUT OF THE FILES. Hex values typed into this page
+// would be exactly the mistake the picker is selling against: the palettes
+// would drift from their own preview, and the next palette dropped into
+// theme/palettes/ would appear as a grey box. Each tile owns a FileView on its
+// own JSON and paints itself from it.
 //
 // ⚠️ AND THAT IS ALSO WHY THE LOADING LIVES HERE RATHER THAN IN THE SERVICE.
-// Services.Themes lists names; holding all eleven palettes' 26 colours would
-// keep eleven files' worth of state alive for the whole session so that a menu
-// could look right for the four seconds it is open. A card exists only while
-// the page does, and its FileView goes with it.
+// Services.Themes lists names; holding every palette's 26 colours would keep
+// that much state alive for the whole session so a menu could look right for
+// the four seconds it is open. A tile exists only while the page does, and its
+// FileView goes with it.
 //
-// ⚠️ A CARD IS NOT `Pill` OR `Tile`. Both of those paint themselves from the
-// ACTIVE theme's tokens, which is right everywhere else and wrong here: the
-// entire point is that a card does not look like the rest of the shell. This is
-// the one file in ui/ allowed to take colours from somewhere other than Theme,
+// ⚠️ A TILE IS NOT `Pill` OR `Tile`. Both paint themselves from the ACTIVE
+// theme's tokens, which is right everywhere else and wrong here: the entire
+// point is that a tile does not look like the rest of the shell. This is one of
+// the two files in ui/ allowed to take colours from somewhere other than Theme,
 // and tests/no-literals.sh is untroubled by it because there are still no
 // literals — the values come from a file at run time.
 import QtQuick
@@ -40,19 +45,24 @@ ColumnLayout {
     id: root
     spacing: Theme.space3
 
-    // Three columns, and the width follows from them rather than the other way
-    // round — the reference's grid is what sets the size of this page.
-    readonly property int columns: 3
-    readonly property int cardW: Theme.space6 * 5
-    readonly property int cardH: Theme.space6 * 3
-    implicitWidth: root.columns * root.cardW
-                   + (root.columns - 1) * Theme.space2
-
-    BarText {
-        Layout.fillWidth: true
-        text: "Theme"
-        font.pixelSize: Theme.fontSizeSm
-        color: Theme.fgMuted
+    // ⚠️ THE FILTER IS THIS FILE'S, NOT THE PICKER'S. What "matching" means is a
+    // question about palette names; the row only carries the text somebody
+    // typed. Matched on the display name as well as the file name, because
+    // "Tokyo" is what you would type and `tokyo-night` is what the file is
+    // called.
+    readonly property var shown: {
+        var all = Services.Themes.entries
+        var q = picker.query.trim().toLowerCase()
+        if (!q.length)
+            return all
+        var out = []
+        for (var i = 0; i < all.length; i++) {
+            var e = all[i]
+            var hay = (String(e.name) + " " + String(e.displayName || "")).toLowerCase()
+            if (hay.indexOf(q) >= 0)
+                out.push(e)
+        }
+        return out
     }
 
     BarText {
@@ -63,83 +73,69 @@ ColumnLayout {
         horizontalAlignment: Text.AlignHCenter
     }
 
-    GridView {
-        id: grid
-        visible: Services.Themes.available
+    // ⚠️ IT SAYS SO WHEN THE SEARCH MATCHED NOTHING, rather than showing an
+    // empty row. A picker with no tiles and no sentence reads as a picker that
+    // failed to load, which is the same fault the quick panel's sections were
+    // given words for.
+    BarText {
         Layout.fillWidth: true
-        // ⚠️ TWO AND A HALF ROWS, and the half is the point. The reference cuts
-        // the next row off, which is what tells you there is more without a
-        // scrollbar having to say so. A whole number of rows looks like the
-        // whole list.
-        Layout.preferredHeight: root.cardH * 2.5 + Theme.space2 * 2
-        cellWidth: root.cardW + Theme.space2
-        cellHeight: root.cardH + Theme.space2
-        clip: true
+        visible: Services.Themes.available && root.shown.length === 0
+        text: "Nothing matches what you typed"
+        color: Theme.fgMuted
+        horizontalAlignment: Text.AlignHCenter
+    }
+
+    CarouselPicker {
+        id: picker
+        Layout.fillWidth: true
+        Layout.preferredHeight: picker.implicitHeight
+        visible: root.shown.length > 0
         focus: true
-        // A plain array of { name, path, derived } — the menu shows more than
-        // the folder, so it cannot be the FolderListModel itself. See
-        // services/Themes.qml.
-        model: Services.Themes.entries
 
-        // Where the cursor starts: on the palette in force, not on the first
-        // one alphabetically. Arrow keys then move from where you already are.
-        //
-        // ⚠️ A `Binding` WITH `restoreMode: NotRestoreBinding`, not
-        // `Component.onCompleted`. It was onCompleted, and it ran before the
-        // FolderListModel had finished listing the directory — so the search
-        // walked an empty list, found nothing, and left the cursor on index 0
-        // while the shell was on a completely different palette. A one-shot at
-        // startup cannot wait for something asynchronous.
-        //
-        // NotRestoreBinding because this only ever SETS a starting point:
-        // without it the arrow keys would be fighting a binding that keeps
-        // pulling the cursor back to the current palette.
-        Binding on currentIndex {
-            value: Services.Themes.currentIndex
-            restoreMode: Binding.RestoreNone
-        }
+        model: root.shown
+        searchable: true
+        headRightText: root.shown.length > 0
+                       ? (picker.currentIndex + 1) + "/" + root.shown.length : ""
+        footRightText: "Enter to apply"
 
-        Keys.onEscapePressed: Ipc.collapse()
-        Keys.onReturnPressed: grid.pick(grid.currentIndex)
-        Keys.onEnterPressed: grid.pick(grid.currentIndex)
-
-        function pick(i) {
-            var e = Services.Themes.entries[i]
+        onDismissed: Ipc.collapse()
+        onApplied: function (i) {
+            var e = root.shown[i]
             if (!e) return
             Services.Themes.choose(e.name)
+            Ipc.collapse()
         }
 
-        delegate: Item {
+        tile: Rectangle {
             id: cell
-            required property int index
+            // Handed down by name from the picker's delegate — see the note
+            // there about `pragma ComponentBehavior: Bound`.
             required property var modelData
-
-            width: root.cardW
-            height: root.cardH
+            required property int index
+            required property bool chosen
 
             readonly property string paletteName: cell.modelData.name
             readonly property bool isCurrent:
                 cell.paletteName === Services.Themes.current
 
-            // The palette's own 26 colours, or an empty object until the file
-            // has been read. `printErrors: false` because a malformed JSON
-            // somebody dropped in the folder must not fill the journal — it
-            // shows as a card with no colours, which is the honest answer.
-            //
             // ⚠️ `hues`, NOT `palette`. `Item` already has a `palette` — it is
             // QQuickItem's, for Qt's own control colours — and shadowing it made
             // Qt warn on every single start: "Member palette of the object
             // QQuickItem_QML_132 overrides a member of the base object." The
             // same trap ui/quick/Tile.qml names about `enabled`, walked into
-            // from the other side a week later. Found by an audit axis whose
-            // whole rule is that a clean start prints nothing.
+            // from the other side a week later.
             property var hues: ({})
+
+            radius: Theme.radiusMd
+            // `base` is the palette's window background — the colour the desktop
+            // would actually be.
+            color: cell.hue("base", Theme.surface)
 
             FileView {
                 // ⚠️ A derived palette that has never been calculated has no
                 // file yet — choose "custom" for the first time and it is
                 // written on the way in. Until then this finds nothing, `hue()`
-                // falls back, and the card is drawn in the ACTIVE theme rather
+                // falls back, and the tile is drawn in the ACTIVE theme rather
                 // than in its own. That is the honest answer: there is no
                 // "custom" to preview until there is one.
                 path: cell.modelData.path
@@ -156,76 +152,67 @@ ColumnLayout {
 
             // ⚠️ Every read goes through here, and every one has a fallback. A
             // palette missing a name would otherwise paint `undefined`, which
-            // QML renders as transparent black — a card that looks like a hole.
+            // QML renders as transparent black — a tile that looks like a hole.
             function hue(name, fallback) {
                 var v = cell.hues[name]
                 return v ? "#" + v : fallback
             }
 
-            Rectangle {
+            // ⚠️ THE ONE MARK LEFT ON THE TILE ITSELF IS "IN USE", and it is not
+            // the same question as "selected". The picker's ring says where the
+            // cursor is; this says which palette the desktop is actually
+            // wearing, and a picker where those two cannot be told apart is one
+            // you have to apply something in to find out.
+            border.width: cell.isCurrent ? Math.max(1, Theme.borderWidth) : 0
+            border.color: cell.hue("green", Theme.accent)
+
+            ColumnLayout {
                 anchors.fill: parent
-                radius: Theme.radiusMd
-                // `base` is the palette's window background — the colour the
-                // desktop would actually be. `mantle` and `crust` are the two
-                // steps darker, used for panels and shadows.
-                color: cell.hue("base", Theme.surface)
+                anchors.margins: Theme.space2
+                spacing: Theme.space2
 
-                // The cursor and the choice are different marks, deliberately:
-                // "which one am I on" and "which one am I using" are different
-                // questions, and one border cannot answer both. The ring is the
-                // choice; the cursor is the lighter outline underneath it.
-                border.width: cell.isCurrent ? Theme.space1 / 2
-                            : cell.index === grid.currentIndex ? Theme.space1 / 4
-                            : 0
-                border.color: cell.isCurrent ? Theme.accent : Theme.outline
+                // The palette as a row of dots, from his screenshot. Seven of
+                // the fourteen accent names, spread across the spectrum rather
+                // than taken in file order — a preview of six neighbouring reds
+                // says nothing about a palette.
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: Theme.space1
 
-                ColumnLayout {
-                    anchors.fill: parent
-                    anchors.margins: Theme.space2
-                    spacing: Theme.space2
+                    Repeater {
+                        model: ["red", "peach", "yellow", "green",
+                                "teal", "blue", "mauve"]
 
-                    // The short bar of that palette's accent, from the
-                    // reference. It is drawn in the accent the USER has chosen
-                    // — `Config.theme.accent` is a colour NAME ("green"), and
-                    // every palette has all of them, so the same choice reads
-                    // across every card.
-                    Rectangle {
-                        Layout.fillWidth: true
-                        implicitHeight: Theme.space2
-                        radius: Theme.radiusPill
-                        color: cell.hue(Config.theme ? Config.theme.accent : "green",
-                                        Theme.accent)
+                        Rectangle {
+                            required property var modelData
+                            implicitWidth: Theme.space3
+                            implicitHeight: Theme.space3
+                            radius: width / 2   // literal-ok: a circle is half its width
+                            color: cell.hue(modelData, Theme.fgDim)
+                        }
                     }
 
-                    Item { Layout.fillHeight: true }
-
-                    Text {
-                        Layout.fillWidth: true
-                        text: cell.paletteName
-                        // ⚠️ `Text`, not `BarText`, and the palette's own `text`
-                        // colour rather than Theme.fg — this is the one place a
-                        // light palette has to look light. `e-ink` sitting pale
-                        // among ten dark cards is the reference's own example
-                        // of the menu working.
-                        color: cell.hue("text", Theme.fg)
-                        // `fontUi` — there is no `fontFamily` token, and QML
-                        // answers an unknown one with `undefined` rather than an
-                        // error, so this drew in whatever font Qt felt like and
-                        // logged "Unable to assign [undefined] to QString" once
-                        // per card. Same shape of mistake as `root.quickSettings`
-                        // in the IPC handler, one day earlier.
-                        font.family: Theme.fontUi
-                        font.pixelSize: Theme.fontSizeSm
-                        font.weight: Theme.weightMedium
-                        elide: Text.ElideRight
-                    }
+                    Item { Layout.fillWidth: true }
                 }
 
-                TapHandler {
-                    onTapped: {
-                        grid.currentIndex = cell.index
-                        grid.pick(cell.index)
-                    }
+                Item { Layout.fillHeight: true }
+
+                Text {
+                    Layout.fillWidth: true
+                    text: cell.modelData.displayName || cell.paletteName
+                    // ⚠️ `Text`, not `BarText`, and the palette's own `text`
+                    // colour rather than Theme.fg — this is the one place a
+                    // light palette has to look light. A pale tile sitting among
+                    // dark ones is the picker working.
+                    color: cell.hue("text", Theme.fg)
+                    // `fontUi` — there is no `fontFamily` token, and QML answers
+                    // an unknown one with `undefined` rather than an error, so
+                    // this drew in whatever font Qt felt like and logged "Unable
+                    // to assign [undefined] to QString" once per card.
+                    font.family: Theme.fontUi
+                    font.pixelSize: Theme.fontSizeSm
+                    font.weight: Theme.weightMedium
+                    elide: Text.ElideRight
                 }
             }
         }
