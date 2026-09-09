@@ -98,31 +98,20 @@ else
     bad "qt6ct.conf does not select colors/buchhwin.conf — Qt apps keep their own"
 fi
 
-# ⚠️ VS CODE, WHICH NO SUITE ASKED ABOUT AT ALL. render.qml writes THREE files
-# for it — a package.json manifest, the colour theme, and the pointer in
-# settings.json — and this is the same "written but nobody looks at it" shape
-# that left kitty and qt6ct at their own colours for months. The manifest and
-# the theme are inert on their own: what makes them apply is
-# `workbench.colorTheme` in settings.json naming them.
+# ⚠️ VS CODE WAS CHECKED HERE AND IS NOT ANY MORE, because the thing it checked
+# was removed on purpose. render.qml used to write three files for it — a
+# package.json manifest, the colour theme, and `workbench.colorTheme` in the
+# user's settings.json — and this block guarded the pointer, since the first two
+# are inert without it. Writing into ~/.vscode and into a program's own
+# settings.json reaches outside this session's XDG_CONFIG_HOME and edits a file
+# the user owns, which is exactly what the profile was cut back to stop doing;
+# the VS Code, Spicetify and Vesktop theming all went with it.
 #
-# ⚠️ THE EXTENSION LIVES UNDER $HOME, NOT $XDG_CONFIG_HOME. VS Code looks in
-# ~/.vscode/extensions regardless of the XDG variables, which is why the two
-# halves of this check read from different roots — that asymmetry is real, not
-# a mistake in this file.
-ext="$HOME/.vscode/extensions/buchhwin-theme"
-if [[ -s "$ext/package.json" && -s "$ext/themes/buchhwin-color-theme.json" ]]; then
-    pass "written: vscode extension"
-    if grep -q '"workbench.colorTheme"[[:space:]]*:[[:space:]]*"Buchhwin"' \
-            "$cfg/Code/User/settings.json" 2>/dev/null; then
-        pass "vscode settings.json selects the generated theme"
-    else
-        bad "vscode settings.json does not name Buchhwin — the theme is installed and unused"
-    fi
-elif [[ -d "$HOME/.vscode" ]]; then
-    bad "vscode is here but the generated extension is not ($ext)"
-else
-    skip "vscode is not installed"
-fi
+# ⚠️ AND LEAVING THE CHECK IN WAS WORSE THAN A RED LINE. Its first branch tests
+# for files under $HOME, and this suite RUNS the installer for real — so on any
+# machine where an older revision had run once, the leftover extension made the
+# branch true and demanded a settings.json that nothing writes any more. It
+# reported a fault in code that no longer exists, from a file no longer written.
 
 # And the terminal's transparency lands in the file kitty reads, rather than
 # being left to the compositor, which fades the text along with it.
@@ -178,15 +167,36 @@ do
     else bad "not written: $label ($path)"; why; fi
 done
 
-for pair in \
-    "btop|$cfg/btop/btop.conf|^color_theme *= *\"buchhwin\"" \
-    "alacritty|$cfg/alacritty/alacritty.toml|buchhwin\.toml" \
-    "tmux|$cfg/tmux/tmux.conf|buchhwin\.conf" \
-    "bat|$cfg/bat/config|buchhwin" \
-    "git-delta|$cfg/git/config|buchhwin-delta\.gitconfig"
+# ⚠️ ONLY WHERE THE PROGRAM IS, and that gate copies lib/60-shell.sh rather than
+# softening this check. `seed_pointer` there writes a program's OWN config file
+# only when the program is installed: the profile stopped installing btop, bat,
+# git-delta, tmux, lazygit and alacritty, because they are things a person
+# chooses rather than things the desktop needs. Their THEME files are still
+# generated unconditionally — that is the loop above, and it stays
+# unconditional — so the palette is already right the day one gets installed.
+# Only the pointer waits for the program.
+#
+# This loop demanded the pointer regardless, and turned five lines red over a
+# machine that was behaving exactly as the installer intends.
+#
+# ⚠️ AND IT IS STILL THE CHECK IT WAS, on any machine that has the program: a
+# theme written into a void is the fault this loop exists to catch, and nothing
+# else in the suite would see it. What is dropped is only the claim that not
+# having btop installed is a fault.
+#
+# The second field is the COMMAND, which is not always the label: git-delta's
+# binary is `delta`.
+for quad in \
+    "btop|btop|$cfg/btop/btop.conf|^color_theme *= *\"buchhwin\"" \
+    "alacritty|alacritty|$cfg/alacritty/alacritty.toml|buchhwin\.toml" \
+    "tmux|tmux|$cfg/tmux/tmux.conf|buchhwin\.conf" \
+    "bat|bat|$cfg/bat/config|buchhwin" \
+    "git-delta|delta|$cfg/git/config|buchhwin-delta\.gitconfig"
 do
-    IFS='|' read -r label path marker <<<"$pair"
-    if grep -qE "$marker" "$path" 2>/dev/null; then
+    IFS='|' read -r label prog path marker <<<"$quad"
+    if ! command -v "$prog" >/dev/null 2>&1; then
+        skip "$label is not installed — the installer seeds no pointer for it"
+    elif grep -qE "$marker" "$path" 2>/dev/null; then
         pass "$label points at the generated theme"
     else
         bad "$label has no pointer — its colours never arrive"
@@ -237,13 +247,24 @@ else
 fi
 
 if command -v git >/dev/null; then
-    got=$(XDG_CONFIG_HOME="$cfg" git config --get delta.file-style 2>/dev/null)
-    if [[ "$got" == *"#"* ]]; then
-        pass "git resolves the delta colours through the include ($got)"
+    # ⚠️ THE GATE IS `delta`, NOT `git`. What is being resolved here is the
+    # include line in $XDG_CONFIG_HOME/git/config, and lib/60-shell.sh writes
+    # that line only when git-delta is installed — git itself is always here and
+    # says nothing about whether there is anything to include. Asked of git
+    # alone, this failed on every machine without delta and blamed the include.
+    if command -v delta >/dev/null 2>&1; then
+        got=$(XDG_CONFIG_HOME="$cfg" git config --get delta.file-style 2>/dev/null)
+        if [[ "$got" == *"#"* ]]; then
+            pass "git resolves the delta colours through the include ($got)"
+        else
+            bad "git does not see the delta colours — the include did not take"
+        fi
     else
-        bad "git does not see the delta colours — the include did not take"
+        skip "git-delta is not installed — there is no include for git to resolve"
     fi
-    # The half that matters more than the colours: nothing of the user's moved.
+    # ⚠️ THE HALF THAT MATTERS MORE THAN THE COLOURS, and it is asked whether or
+    # not delta is here: nothing of the user's may have moved. This is the check
+    # standing guard over the rule the whole profile was cut back to obey.
     if [[ ! -f "$HOME/.gitconfig" ]] || ! grep -q buchhwin "$HOME/.gitconfig" 2>/dev/null; then
         pass "the global gitconfig in \$HOME was not touched"
     else
@@ -465,10 +486,26 @@ if set_states colour colour colour colour colour false && render_now; then
 fi
 
 # --- E: a target with its own pointer, switched off on its own.
+#
+# ⚠️ TWO CLAIMS, AND ONLY ONE OF THEM IS ALWAYS ASKABLE. The theme becoming a
+# stub is generated work and happens on every machine. That btop.conf is left
+# alone can only be asked where btop.conf EXISTS, and lib/60-shell.sh seeds it
+# only when btop is installed — so on a machine without btop this failed with a
+# grep error about a missing file and called it "not taken back cleanly", which
+# named the wrong thing entirely.
 if set_states colour inherit inherit inherit inherit && set_one btop off && render_now; then
+    btop_untouched=yes
+    if command -v btop >/dev/null 2>&1; then
+        grep -qE '^color_theme *= *"buchhwin"' "$cfg/btop/btop.conf" \
+            || btop_untouched=no
+    fi
     if grep -q 'theming is OFF' "$cfg/btop/themes/buchhwin.theme" &&
-       grep -qE '^color_theme *= *"buchhwin"' "$cfg/btop/btop.conf"; then
-        pass "off: btop's theme is a stub and its btop.conf is untouched"
+       [[ "$btop_untouched" == yes ]]; then
+        if command -v btop >/dev/null 2>&1; then
+            pass "off: btop's theme is a stub and its btop.conf is untouched"
+        else
+            pass "off: btop's theme is a stub (btop is not installed, so it has no btop.conf to leave alone)"
+        fi
     else
         bad "off: btop was not taken back cleanly"
     fi
