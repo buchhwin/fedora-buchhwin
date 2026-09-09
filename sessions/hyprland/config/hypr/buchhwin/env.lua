@@ -14,7 +14,10 @@ hl.env("XDG_SESSION_TYPE", "wayland")
 -- failing to start at all instead of merely running through XWayland.
 hl.env("QT_QPA_PLATFORM", "wayland;xcb")
 hl.env("QT_QPA_PLATFORMTHEME", "qt6ct")
-hl.env("QT_WAYLAND_DISABLE_WINDOWDECORATION", "1")
+-- QT_WAYLAND_DISABLE_WINDOWDECORATION is NOT set here on purpose: it is what
+-- the `windows.noCsd` setting does, and the generator writes it into
+-- generated/settings.lua. Setting it in both places would mean switching the
+-- setting off left the variable behind, which reads as the setting not working.
 
 -- Cursor: Breeze, the same one Plasma uses. The session deliberately reads
 -- KDE's choice instead of imposing its own, so a cursor changed in System

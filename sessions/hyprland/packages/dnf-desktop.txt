@@ -24,7 +24,6 @@ wtype
 gammastep
 pipewire-utils
 sound-theme-freedesktop
-wf-recorder
 grim
 slurp
 # Annotating a screenshot (Super+Ctrl+Print). The shell draws no editor of its
@@ -41,12 +40,10 @@ kwalletmanager
 signon-kwallet-extension
 kio-fuse
 kio-gdrive
-udisks2
 dolphin
 okular
 gwenview
 kate
-kcalc
 vlc
 merkuro
 akonadi
@@ -59,14 +56,23 @@ plasma-systemsettings
 
 # Fedora KDE owns these facilities. The Buchhwin session opens KDE's tools
 # instead of implementing a second Wi-Fi/Bluetooth UI.
-NetworkManager
 bluez
 plasma-nm
 bluedevil
-plasma-pa
-powerdevil
 
 # Foreign application theming; generated config remains session-scoped.
 breeze-gtk
 papirus-icon-theme
 qt6ct
+
+# Removed, and each for a stated reason rather than to shorten the list:
+#
+#   wf-recorder   named nowhere in the tree except a checklist. Never started.
+#   kcalc         services/Calculator.qml is the calculator; kcalc is unused.
+#   plasma-pa     the Plasma volume applet needs plasmashell, which never runs
+#                 in this session. Audio is services/Audio.qml over Pipewire.
+#   powerdevil    KDE's idle, dim, lid and brightness daemon. The shell does all
+#                 four itself, so this does not add a feature — it adds a second
+#                 daemon competing for the backlight and the idle timer.
+#   NetworkManager, udisks2
+#                 both were listed here AND in dnf-core.txt.

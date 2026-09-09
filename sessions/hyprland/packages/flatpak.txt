@@ -1,25 +1,12 @@
-# Flatpaks: used where no native package exists.
+# Flatpaks.
 #
-# ⚠️ SPOTIFY IS INSTALLED PER-USER, NOT SYSTEM-WIDE, and the reason is
-# spicetify. It writes into Spotify's own Apps directory to apply a theme, and
-# in a system flatpak that directory is root-owned — measured on 10.08.2026:
-#   /var/lib/flatpak/app/com.spotify.Client/.../spotify/Apps  drwxr-xr-x root root
-# As a --user install it lives under ~/.local/share/flatpak and belongs to him,
-# so `spicetify apply` needs no root at all. lib/40-apps.sh installs this one
-# with --user for that reason; changing it back silently breaks the theming.
-com.spotify.Client
-
-# ⚠️ VESKTOP, NOT com.discordapp.Discord, AND IT WAS MEASURED BEFORE IT WAS
-# DECIDED. Vencord themes a PATCHED Discord, and the Discord flatpak cannot be
-# patched honestly: app.asar is root-owned with a link count of 2, so it is
-# hardlinked into OSTree's object store and writing through it rewrites a shared
-# object — and `flatpak update` would throw the patch away regardless.
+# WARNING: FOUR BECAME ONE, matching the dwl session exactly. Spotify, Vesktop
+# and Obsidian are applications somebody chooses; a window manager installing
+# them is the same overreach that filled dnf-sysadmin.txt with nmap.
 #
-# Vesktop is Discord with Vencord already inside it: nothing to patch, the theme
-# is a CSS file in a directory the user owns, and an update keeps it.
-# ⚠️ It is a third-party client, which is the same question Vencord already
-# raised; he answered it on 06.08. ("ja, beide") and chose Vesktop on 10.08.
-dev.vencord.Vesktop
-
-md.obsidian.Obsidian
+# OnlyOffice stays for the reason it stays in the dwl session: Fedora KDE ships
+# no office suite at all, so its absence is a hole rather than a preference.
+#
+# Installed --user, not system-wide. A system Flatpak installed by one session
+# would collide with the same app installed by the other.
 org.onlyoffice.desktopeditors

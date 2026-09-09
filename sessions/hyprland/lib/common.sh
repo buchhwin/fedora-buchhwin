@@ -265,7 +265,7 @@ prune_instances() {
 
 # One helper for every tool, rather than one function per tool hardcoding its
 # own name — there were two copies of this, in common.sh and in bin/bhctl, and
-# adding the niri generator would have meant editing both.
+# adding the compositor generator would have meant editing both.
 run_tool() {
     local tool="$1"
     local log="/tmp/buchhwin-$tool.log"

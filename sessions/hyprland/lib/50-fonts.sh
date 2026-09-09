@@ -11,7 +11,10 @@ phase_fonts() {
     else
         step "fetching JetBrainsMono Nerd Font"
         mkdir -p "$dir"
-        local url=https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.tar.xz
+        # WARNING: A PINNED TAG, NOT `latest`. `latest` means the font can
+        # change under a machine between two installs of the same commit,
+        # which is the one thing a repository like this exists to prevent.
+        local url=https://github.com/ryanoasis/nerd-fonts/releases/download/v3.4.0/JetBrainsMono.tar.xz
         if curl -fsSL "$url" | tar -xJ -C "$dir" 2>/dev/null; then
             # The Windows-compatible variants are duplicates with different
             # metrics; keeping them makes fontconfig pick unpredictably.
@@ -58,52 +61,13 @@ phase_fonts() {
 # ⚠️ WHY NOT THE PACKAGE MANAGER: it is not in Fedora. Apple's own cursors are
 # not redistributable, so McMojave-cursors is a free rebuild (GPL-3). His choice,
 # by name, on 06.08.2026.
-readonly MCMOJAVE_COMMIT=7d0bfc1f91028191cdc220b87fd335a235ee4439
-readonly MCMOJAVE_SHA256=66150af26f6f6257c4b9160b47cb9569020482ef55ea05b819b14f0663621702
 
-phase_cursors() {
-    section "Cursors"
-    local dir="$DATA_HOME/icons/McMojave-cursors"
-    if [[ -d "$dir/cursors" ]] && compgen -G "$dir/cursors/*" >/dev/null; then
-        ok "McMojave-cursors already installed"
-        return 0
-    fi
-
-    step "fetching McMojave-cursors"
-    local tmp
-    tmp="$(mktemp -d)" || { warn "no temporary directory"; return 0; }
-    local url="https://github.com/vinceliuice/McMojave-cursors/archive/$MCMOJAVE_COMMIT.tar.gz"
-
-    if ! curl -fsSL -o "$tmp/mc.tar.gz" "$url"; then
-        warn "could not fetch McMojave-cursors; Breeze_Dark stays the pointer"
-        rm -rf "$tmp"; return 0
-    fi
-
-    # ⚠️ THE CHECK IS THE POINT, so a mismatch STOPS rather than warning and
-    # carrying on. A tarball that is not the one this was written against is not
-    # a slightly different cursor theme, it is an unknown archive being unpacked
-    # into the home directory.
-    local got
-    got="$(sha256sum "$tmp/mc.tar.gz" | cut -d" " -f1)"
-    if [[ "$got" != "$MCMOJAVE_SHA256" ]]; then
-        warn "McMojave-cursors checksum mismatch — refusing to unpack"
-        warn "  expected $MCMOJAVE_SHA256"
-        warn "  got      $got"
-        rm -rf "$tmp"; return 0
-    fi
-
-    # ⚠️ `dist/` IS COPIED, `install.sh` IS NOT RUN. The archive ships 60
-    # prebuilt cursors, so there is nothing to build — and running a downloaded
-    # script to move files we can move ourselves buys nothing and costs the one
-    # guarantee the checksum just gave us.
-    if tar xzf "$tmp/mc.tar.gz" -C "$tmp" \
-       && [[ -d "$tmp/McMojave-cursors-$MCMOJAVE_COMMIT/dist" ]]; then
-        mkdir -p "$DATA_HOME/icons"
-        rm -rf "$dir"
-        cp -r "$tmp/McMojave-cursors-$MCMOJAVE_COMMIT/dist" "$dir"
-        ok "McMojave-cursors"
-    else
-        warn "McMojave-cursors archive did not contain dist/"
-    fi
-    rm -rf "$tmp"
-}
+# WARNING: phase_cursors IS GONE, and with it a pinned tarball of the
+# McMojave cursor theme fetched from GitHub and verified by hand.
+#
+# The session sets XCURSOR_THEME=breeze_cursors in config/hypr/buchhwin/env.lua
+# and packages/dnf-desktop.txt installs breeze-cursor-theme, which is what the
+# Fedora KDE base uses anyway. So the cursor already matched Plasma's; the
+# tarball replaced it with a third-party rebuild of Apple's, downloaded at
+# install time, for a machine somebody works on. The dwl session reads KDE's
+# cursor choice and leaves it alone; this one now does the same.

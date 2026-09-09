@@ -86,8 +86,8 @@ phase_shell() {
     # the fallback copied zero files, reported success, and every fresh machine
     # came up green with no picture at all.
     #
-    # He asked for the opposite in as many words: "das wallpaper soll einfach     # english-ok: his words, quoted
-    # default werden das niriwallpaper mit passendem schema", explicitly         # english-ok: same quote, second line
+    # He asked for the opposite in as many words: the shipped picture should      # english-ok: paraphrase of a German request
+    # simply BE the default, with a palette derived from it, and explicitly
     # regardless of which machine he is on. Then, with eight more pictures in
     # the same folder: "bitte auch alle ins repo packen und als standart         # english-ok: his words, quoted
     # wallpaper für die shell mit shipen und ja ich habe alle rechte für die     # english-ok: same quote, second line
@@ -129,7 +129,7 @@ phase_shell() {
     # different hat.
     #
     # So the installer looks for a FOLDER by name instead. Put your pictures in
-    # one called BuchhwinWP (or the older NiriShellWP) anywhere under your home — Syncthing, a USB stick,
+    # one called BuchhwinWP anywhere under your home — Syncthing, a USB stick,
     # wherever — and the first of them becomes the seeded default and the source
     # of the derived palette. Nothing is named, nothing is shipped, and a
     # stranger who clones this gets the fallback below.
@@ -163,19 +163,18 @@ phase_shell() {
         if [[ -d "$REPO_DIR/wallpapers" ]]; then
             wp_srcs+=("$REPO_DIR/wallpapers")
         fi
-        # ⚠️ BOTH NAMES, NEW ONE FIRST, AND THE OLD ONE IS NOT DEAD WEIGHT.
-        # The folder is synced onto real machines already, under the name it had
-        # when this desktop ran on niri. Dropping that name would not remove a
-        # mention of niri so much as quietly stop finding the pictures on every
-        # machine that already has one. `-name` is ordered, so a BuchhwinWP
-        # folder wins wherever both exist.
+        # ⚠️ ONE NAME, AND THE OLD ONE IS GONE ON PURPOSE.
+        # This also looked for a folder named after the compositor this desktop
+        # used to run on, so machines that already had one kept working. That
+        # name is out of the repository now, so a machine still carrying a
+        # folder under the OLD name will not be found. Rename it to BuchhwinWP
+        # and it is picked up again — one `mv`, and Syncthing carries it.
+        #
+        # Written down here rather than left to be discovered, because the
+        # failure is silent: the install just falls back to the shipped nine.
         local wp_named
         wp_named="$(find "$HOME" -maxdepth 4 -type d -name 'BuchhwinWP' \
                     -not -path '*/.*' 2>/dev/null | head -1)"
-        if [[ -z "$wp_named" ]]; then
-            wp_named="$(find "$HOME" -maxdepth 4 -type d -name 'NiriShellWP' \
-                        -not -path '*/.*' 2>/dev/null | head -1)"
-        fi
         if [[ -n "$wp_named" ]]; then
             wp_srcs+=("$wp_named")
         fi
@@ -231,8 +230,8 @@ phase_shell() {
     # A named folder used to decide the default as well as add to it, and while
     # his picture could not be shipped that was the only way to have one. B5
     # ended that: the nine are in the tree now, and his instruction is about
-    # every machine — "is ja egal wo ich teste auf welchem pc das wallpaper     # english-ok: his words, quoted
-    # soll einfach default werden das niriwallpaper mit passendem schema".      # english-ok: same quote, second line
+    # every machine — it does not matter which computer he is testing on, the      # english-ok: paraphrase of a German request
+    # shipped wallpaper should become the default with a matching palette.
     #
     # ⚠️ MEASURED ON THE FRESH VM, which is what it was rebuilt for: with a
     # named folder holding one unrelated picture, a complete install came
@@ -333,7 +332,7 @@ phase_shell() {
     fi
 
     # Wayland, not XWayland — and stated as flags rather than hope.
-    # Measured on Fedora 44 + niri: `--ozone-platform-hint=auto` is NOT enough.
+    # Measured on Fedora 44: `--ozone-platform-hint=auto` is NOT enough.
     # Brave and Discord fell back to X11 with "Missing X server or $DISPLAY",
     # and VS Code does not even recognise the hint option.
     #
@@ -341,7 +340,7 @@ phase_shell() {
     # convention is Arch's: their packaging ships wrapper scripts that read
     # ~/.config/<app>-flags.conf. Fedora's /opt/brave.com/brave/brave-browser is
     # a bash wrapper with ZERO occurrences of "flags.conf" — measured on the
-    # laptop, written down in docs/LAPTOP-TEST.md. The Wayland flag that
+    # laptop. The Wayland flag that
     # actually reaches Brave comes from the .desktop replacement in
     # shell/tools/hypr.qml, which is also where the 43 s -> 1.4 s startup
     # measurement lives. A file nobody reads is worse than no file: the next
@@ -422,8 +421,22 @@ phase_shell() {
     #   lazygit   has no include at all — its pointer is LG_CONFIG_FILE, written
     #             into environment.d by tools/hypr.qml. The file below only has
     #             to EXIST so the list never names a missing file.
-    seed_pointer() {   # file  marker  what-it-does  content
-        local f="$1" marker="$2" what="$3" content="$4"
+    # ⚠️ ONLY FOR PROGRAMS THAT ARE ACTUALLY HERE, and that guard is new.
+    # btop, bat, git-delta, tmux, lazygit and alacritty are no longer installed
+    # by this profile — they are things a person chooses, and the lists were cut
+    # back to what the desktop itself needs. Their THEMING stayed, because
+    # writing a colour file costs nothing and means the palette is already right
+    # the day you install one.
+    #
+    # What must not stay is seeding a CONFIG FILE for a program that is not
+    # there: ~/.config/btop/btop.conf on a machine with no btop is a file
+    # nothing reads, which the next person has to work out the meaning of. The
+    # theme file is generated regardless; only the pointer waits for the program.
+    seed_pointer() {   # program  file  marker  what-it-does  content
+        local prog="$1" f="$2" marker="$3" what="$4" content="$5"
+        if [[ -n "$prog" ]] && ! command -v "$prog" >/dev/null 2>&1; then
+            return 0
+        fi
         if [[ ! -f "$f" ]]; then
             printf '%s' "$content" > "$f"
             ok "$(basename "$f") seeded ($what)"
@@ -432,13 +445,13 @@ phase_shell() {
         fi
     }
 
-    seed_pointer "$CONFIG_HOME/btop/btop.conf" '^color_theme *= *"buchhwin"' \
+    seed_pointer btop "$CONFIG_HOME/btop/btop.conf" '^color_theme *= *"buchhwin"' \
         'selects the generated theme' \
         '#? buchhwin: colours come from themes/buchhwin.theme, regenerated on
 #? every palette change. Your own settings go below.
 color_theme = "buchhwin"
 '
-    seed_pointer "$CONFIG_HOME/alacritty/alacritty.toml" 'buchhwin\.toml' \
+    seed_pointer alacritty "$CONFIG_HOME/alacritty/alacritty.toml" 'buchhwin\.toml' \
         'import the generated theme' \
         "# buchhwin: colours, font and transparency come from buchhwin.toml,
 # which is regenerated on every palette change. Yours go below — an import is
@@ -446,19 +459,19 @@ color_theme = "buchhwin"
 [general]
 import = [\"$CONFIG_HOME/alacritty/buchhwin.toml\"]
 "
-    seed_pointer "$CONFIG_HOME/tmux/tmux.conf" 'buchhwin\.conf' \
+    seed_pointer tmux "$CONFIG_HOME/tmux/tmux.conf" 'buchhwin\.conf' \
         'source the generated theme' \
         "# buchhwin: colours come from buchhwin.conf, regenerated on every
 # palette change. Your own settings go below.
 source-file \"$CONFIG_HOME/tmux/buchhwin.conf\"
 "
-    seed_pointer "$CONFIG_HOME/bat/config" '^--theme *= *"?buchhwin' \
+    seed_pointer bat "$CONFIG_HOME/bat/config" '^--theme *= *"?buchhwin' \
         'select the generated theme' \
         '# buchhwin: the theme is built into bat cache from
 # themes/buchhwin.tmTheme. Your own options go below.
 --theme="buchhwin"
 '
-    seed_pointer "$CONFIG_HOME/git/config" 'buchhwin-delta\.gitconfig' \
+    seed_pointer delta "$CONFIG_HOME/git/config" 'buchhwin-delta\.gitconfig' \
         'include the generated delta colours' \
         "# buchhwin: git-delta's colours are generated into
 # buchhwin-delta.gitconfig and included from here. Your own ~/.gitconfig is
@@ -466,7 +479,7 @@ source-file \"$CONFIG_HOME/tmux/buchhwin.conf\"
 [include]
 	path = $CONFIG_HOME/git/buchhwin-delta.gitconfig
 "
-    seed_pointer "$CONFIG_HOME/lazygit/config.yml" '.' \
+    seed_pointer lazygit "$CONFIG_HOME/lazygit/config.yml" '.' \
         'exist for LG_CONFIG_FILE' \
         '# buchhwin: your lazygit settings. The generated colours are in
 # buchhwin.yml, and LG_CONFIG_FILE names both files — yours first, so anything

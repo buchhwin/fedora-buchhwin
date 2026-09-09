@@ -9,6 +9,13 @@ export XDG_CONFIG_HOME="$config_home"
 config="$XDG_CONFIG_HOME/buchhwin/hyprland/hyprland.lua"
 [[ -r "$config" ]] || { echo "Missing Buchhwin Hyprland config: $config" >&2; exit 1; }
 
+# WARNING: THE SESSION HAS ITS OWN ZDOTDIR, AND YOUR ACCOUNT KEEPS ITS OWN.
+# The installer does not touch ~/.zshrc and does not run chsh — those are
+# account-wide, and this is a session. Pointing ZDOTDIR here is what makes the
+# desktop use the project's zsh configuration without deciding what happens
+# when you open a terminal in Plasma or log in over SSH.
+export ZDOTDIR="$XDG_CONFIG_HOME/zsh"
+
 export XDG_CURRENT_DESKTOP=Hyprland
 export XDG_SESSION_DESKTOP=Hyprland
 export XDG_SESSION_TYPE=wayland

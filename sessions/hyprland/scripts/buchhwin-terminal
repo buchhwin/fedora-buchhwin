@@ -11,9 +11,19 @@
 # started from the Plasma session still reads the user's own config.
 set -euo pipefail
 
+# ⚠️ ZDOTDIR IS SET HERE TOO, NOT ONLY IN THE SESSION SCRIPT.
+# The installer deliberately leaves ~/.zshrc and the login shell alone, so the
+# project's zsh configuration is reached through ZDOTDIR or not at all. The
+# session script exports it for everything the compositor starts, but a terminal
+# opened down some other path would otherwise fall back to the account's own
+# configuration — a different shell from the one the rest of the desktop has.
+config_home="${XDG_CONFIG_HOME:-$HOME/.config}"
+if [[ -f "$config_home/zsh/.zshrc" ]]; then
+  export ZDOTDIR="$config_home/zsh"
+fi
+
 # Terminal emulators otherwise start the account's login shell, which on Fedora
-# is Bash until 80-shellenv.sh has run. An explicit command from the caller
-# still wins.
+# is Bash. An explicit command from the caller still wins.
 if (( $# == 0 )); then
   set -- zsh -i
 fi

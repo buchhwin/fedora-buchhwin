@@ -13,10 +13,6 @@
 # packages. All of it is reversible with ./uninstall.sh, and all of it is
 # easier to agree to before it happens than after.
 #
-# There is no `--with citrix`. Citrix cannot be automated — its RPM exists only
-# behind a link that is regenerated on every page load — and an option that only
-# prints "not automated yet" is a promise the installer does not keep.
-# docs/CITRIX.md has the manual route, including why it needs `--nodeps`.
 #
 set -uo pipefail
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -60,30 +56,38 @@ run_phase preflight
 # and preflight is what establishes this is a Fedora KDE machine at all.
 if (( DRY_RUN )); then
     all_phases=()
-    for p in preflight gpu base desktop apps codecs fonts cursors spicetify              shell services greeter shellenv summary; do
+    for p in preflight base desktop apps fonts shell services greeter shellenv summary; do
         should_run "$p" && all_phases+=("$p")
     done
     print_plan "${all_phases[@]}"
     exit 0
 fi
-# ⚠️ SECOND, and the position is the point. The akmod build is the slowest and
-# most failure-prone step in the installer; discovering after forty minutes that
-# the running kernel has no headers is worse than discovering it after one. It
-# needs nothing from `base` because the detector reads sysfs rather than lspci.
-run_phase gpu
+# ⚠️ THERE IS NO GRAPHICS PHASE, AND THAT IS THE POINT.
+# lib/10-gpu.sh used to be the largest file in this directory: it enabled RPM
+# Fusion, detected GPUs from sysfs, built akmod-nvidia against the running
+# kernel, set up hybrid-graphics offload, walked you through Secure Boot MOK
+# enrolment, and swapped Fedora's mesa drivers for the RPM Fusion codec build.
+#
+# None of it is needed to have a working desktop. On a hybrid laptop the
+# compositor runs on the integrated GPU either way, and the dwl session — which
+# is the standard this profile is measured against — has never installed a
+# driver, a codec or a third-party repository.
+#
+# What it cost: it was the slowest and most failure-prone step in the installer,
+# it added a third-party repository to the system, and it made decisions about
+# the machine's graphics stack while somebody thought they were installing a
+# window manager.
+#
+# If you want NVIDIA drivers, install them the way Fedora documents. That is
+# your machine's graphics stack, not this repository's.
 run_phase base
 run_phase desktop
 run_phase apps
-# ⚠️ AFTER `apps`, and it has to be: `dnf swap mesa-va-drivers ...` requires
-# mesa to already be installed, and mesa arrives with niri in `desktop`.
-# Both phases live in lib/10-gpu.sh — they share rpmfusion_enable().
-run_phase codecs
 run_phase fonts
-run_phase cursors
-# ⚠️ AFTER `apps` (it needs the Spotify flatpak) and BEFORE `shell` (which runs
-# the renderer that writes the colour file it points at). Getting this the other
-# way round would configure a theme whose colours do not exist yet.
-run_phase spicetify
+# ⚠️ `cursors` AND `spicetify` ARE GONE, not skipped. The first fetched a
+# third-party cursor tarball to replace Breeze, which the KDE base already
+# provides and which config/hypr/buchhwin/env.lua points at. The second themed
+# Spotify, which is no longer installed.
 run_phase shell
 run_phase services
 # ⚠️ AFTER `shell`, and the order is load-bearing rather than tidy: the greeter

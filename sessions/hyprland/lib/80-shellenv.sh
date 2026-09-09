@@ -16,100 +16,67 @@
 phase_shellenv() {
     section "Shell and tools"
 
+    # WARNING: CONFIG_HOME WAS USED THREE TIMES IN THIS PHASE AND SET NOWHERE.
+    # lib/common.sh runs under `set -u`, so the first reference would have
+    # killed the phase outright — and everything after it, including bhctl
+    # landing on the PATH. It is derived here the same way lib/60-shell.sh
+    # derives it, including the unwrapping: running the installer from inside
+    # the session means XDG_CONFIG_HOME already points at the session root, and
+    # appending to it again gives .../hyprland/buchhwin-sessions/hyprland.
+    local kde_config_home="${XDG_CONFIG_HOME:-$HOME/.config}"
+    case "$kde_config_home" in
+        */buchhwin-sessions/hyprland) kde_config_home="${kde_config_home%/buchhwin-sessions/hyprland}" ;;
+    esac
+    local CONFIG_HOME="$kde_config_home/buchhwin-sessions/hyprland"
+
     mapfile -t pkgs < <(read_list dnf-sysadmin.txt)
     step "${#pkgs[@]} packages"
     # `weak` rather than `noweak`: several of these are metapackage-ish and
     # their recommendations are the parts people expect (bind-utils, sysstat).
     dnf_install weak "${pkgs[@]}" || warn "some tools failed — see above"
 
-    # ------------------------------------------------------------------ zshrc
+    # ------------------------------------------------------------------ zsh
     #
-    # ⚠️ A SYMLINK, like the shell configuration in lib/60-shell.sh. A copy
-    # would mean a `git pull` silently not reaching the file everybody is
-    # actually using, which is the whole class of fault this repository keeps
-    # finding in itself.
+    # WARNING: THIS USED TO TAKE OVER THE ACCOUNT, AND IT NO LONGER DOES.
+    # It moved ~/.zshrc to ~/.zshrc.before-buchhwin, put a symlink into this
+    # repository in its place, and ran `chsh` to make zsh the login shell. Both
+    # are account-wide: they change what happens when you open a terminal in
+    # Plasma, over SSH, in a cron job and in a container — in return for
+    # installing a window manager.
     #
-    # ⚠️ AND AN EXISTING ~/.zshrc IS NEVER OVERWRITTEN. It is somebody's file.
-    # It is moved aside once, with its name said out loud, so nothing is lost
-    # and nobody has to guess where it went.
-    if [[ -L "$HOME/.zshrc" ]]; then
-        ln -sfn "$REPO_DIR/dotfiles/zsh/zshrc" "$HOME/.zshrc"
-        ok ".zshrc linked"
-    elif [[ -e "$HOME/.zshrc" ]]; then
-        mv "$HOME/.zshrc" "$HOME/.zshrc.before-buchhwin"
-        ln -sfn "$REPO_DIR/dotfiles/zsh/zshrc" "$HOME/.zshrc"
-        warn "your .zshrc was kept as ~/.zshrc.before-buchhwin"
-        warn "  anything you want back goes in ~/.zshrc.local, which is sourced last"
-    else
-        ln -sfn "$REPO_DIR/dotfiles/zsh/zshrc" "$HOME/.zshrc"
-        ok ".zshrc linked"
-    fi
+    # The dwl session has never done either. It keeps its zsh configuration in
+    # its own ZDOTDIR and points the session at it, so the shell inside the
+    # desktop is the project's and the shell everywhere else is yours. That is
+    # what happens here now.
+    #
+    # WARNING: ZDOTDIR IS SET IN TWO PLACES AND BOTH ARE NEEDED.
+    # bin/buchhwin-hyprland-session covers everything the compositor starts;
+    # scripts/buchhwin-terminal covers a terminal opened from a keybinding,
+    # which does not inherit from the compositor on every path.
+    local zdotdir="$CONFIG_HOME/zsh"
+    mkdir -p "$zdotdir"
+    ln -sfn "$REPO_DIR/dotfiles/zsh/zshrc" "$zdotdir/.zshrc"
+    ok "zsh configuration linked into $zdotdir"
 
-    # ------------------------------------------------------- the login shell
-    #
-    # ⚠️ THE FILE ALONE DOES NOTHING. Without this, ~/.zshrc sits there and the
-    # account still logs into bash — which is exactly the state this machine was
-    # in, with zsh installed for four milestones.
-    #
-    # ⚠️ `sudo chsh -s <shell> <user>` FIRST, and a bare `chsh` only as the
-    # fallback. Plain `chsh` makes the account authenticate to itself, and on a
-    # machine where the password is managed elsewhere — or where PAM has just
-    # been changed, which lib/70-services.sh does — that prompt can fail with no
-    # useful message.
-    local want=/usr/bin/zsh
-
-    # ⚠️ `$USER` IS NOT ALWAYS SET, and under `set -u` an unset one is fatal —
-    # the installer would die here rather than warn. Found by tests/install-runs.sh
-    # running over SSH, where the shell is non-interactive and never sets it;
-    # the same is true of a systemd unit, a container and a cron job.
-    #
-    # Three sources, exactly as ui/lock/LockFace.qml already does for the same
-    # question: `id -un` asks the system rather than the environment and is the
-    # authoritative one, with the two environment spellings behind it.
-    local who
-    who="$(id -un 2>/dev/null || true)"
-    [[ -n "$who" ]] || who="${USER:-${LOGNAME:-}}"
-    if [[ -z "$who" ]]; then
-        warn "cannot tell which account this is — the login shell was left alone"
-        return 0
-    fi
-
-    if [[ ! -x "$want" ]]; then
-        warn "zsh is not installed — the login shell was left alone"
-    elif [[ "$(getent passwd "$who" | cut -d: -f7)" == "$want" ]]; then
-        ok "zsh is already the login shell"
-    elif sudo -n chsh -s "$want" "$who" 2>/dev/null \
-         || sudo chsh -s "$want" "$who" 2>/dev/null \
-         || chsh -s "$want" 2>/dev/null; then
-        ok "zsh is the login shell — it applies at the next login"
-    else
-        warn "could not change the login shell. Run it yourself:"
-        warn "  sudo chsh -s $want $who"
-    fi
-
-    # ⚠️⚠️ AND `chsh` ALONE IS NOT ENOUGH, WHICH IS WHY THIS EXISTS. He reported
-    # "no zsh as the default shell" on a machine where `getent passwd` already
-    # said zsh — and he was right. `chsh` changes the passwd entry; a session
-    # that was already running keeps the `SHELL` it was handed at login, and
-    # kitty starts `$SHELL`. Measured on the test machine:
-    #
-    #     getent passwd  →  /usr/bin/zsh      what is written down
-    #     niri's SHELL=  →  /bin/bash         what actually runs
-    #     running shells →  2 × bash
-    #
-    # Reading the passwd entry and reporting success is checking the form rather
-    # than the result. environment.d is read by `systemd --user`, so the next
-    # session gets the right value whatever the display manager inherited — and
-    # the FIRST login after the change is then already correct, instead of
-    # needing a second one nobody would connect to this.
-    mkdir -p "$CONFIG_HOME/environment.d"
-    if [[ -x "$want" ]]; then
-        printf 'SHELL=%s\n' "$want" \
-            > "$CONFIG_HOME/environment.d/15-buchhwin-shell.conf"
-        if [[ "${SHELL:-}" != "$want" ]]; then
-            warn "this session still runs ${SHELL:-unset} — log out once and it is zsh"
+    # A previous install may have taken the account over. Give it back rather
+    # than leaving a symlink into this repository behind on an upgrade.
+    if [[ -L "$HOME/.zshrc" ]] && [[ "$(readlink -f "$HOME/.zshrc")" == "$REPO_DIR"/* ]]; then
+        rm -f "$HOME/.zshrc"
+        if [[ -f "$HOME/.zshrc.before-buchhwin" ]]; then
+            mv "$HOME/.zshrc.before-buchhwin" "$HOME/.zshrc"
+            ok "your own ~/.zshrc was put back"
+        else
+            ok "the symlink into this repository was removed from ~/.zshrc"
         fi
     fi
+
+    # The login shell is deliberately NOT changed. `chsh` decides what runs when
+    # you log in anywhere, and that is not this installer's call to make.
+    if [[ "$(getent passwd "$(id -un 2>/dev/null || echo "${USER:-}")" 2>/dev/null | cut -d: -f7)" != */zsh ]]; then
+        step "your login shell is unchanged — the desktop uses zsh regardless"
+        step "  to make it yours everywhere:  chsh -s /usr/bin/zsh"
+    fi
+
 
     # ------------------------------------------------------------ the PATH
     #

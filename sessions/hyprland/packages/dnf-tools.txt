@@ -1,19 +1,19 @@
 # The themed toolbox.
 #
-# Chosen by name, not inherited: these are the programs the renderer generates
-# a colour scheme for, so installing them is part of the promise that changing
-# the palette changes everything. A theme written for a program that is not
-# there is not harmful, but it is not the deal either.
+# WARNING: SIX PACKAGES BECAME ONE, and the reason is the same one that emptied
+# dnf-sysadmin.txt: this list existed because render.qml can write a colour
+# scheme for these programs, which is a reason to THEME them, not a reason to
+# INSTALL them. btop, bat, git-delta and tmux are things a person chooses; the
+# desktop neither launches nor reads any of them.
 #
-# ⚠️ Installed WITHOUT weak dependencies, like the desktop list.
-btop                        # themes/*.theme, 37 keys, pointer color_theme
-bat                         # .tmTheme + `bat cache --build` — the file alone is invisible
-fastfetch                   # no include mechanism: follows the terminal's ANSI colours
-git-delta                   # included from ~/.config/git/config, never from ~/.gitconfig
-tmux                        # source-file
-alacritty                   # the second terminal, themed from the same tokens as kitty
-
-# ⚠️ starship and lazygit are NOT here: neither is packaged in Fedora
-# (`dnf repoquery` says so, checked again on 5 August 2026). They come from
-# COPR — see lib/30-desktop.sh, and `bhctl doctor` reports it when a COPR stops
-# resolving, which is the whole risk of taking one.
+# The theming stays. render.qml still writes their colours, so installing any
+# of them later picks the palette up with no extra step:
+#
+#     dnf install btop bat git-delta tmux
+#
+# alacritty is gone for a different reason — it was a second terminal next to
+# kitty, on a machine that already has Konsole from the KDE base. Three
+# terminals is not a fallback, it is three terminals.
+#
+# Installed WITHOUT weak dependencies, like the desktop list.
+fastfetch                   # the greeting in every new terminal (dotfiles/zsh/zshrc)

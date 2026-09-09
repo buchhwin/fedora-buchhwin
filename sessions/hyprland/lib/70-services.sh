@@ -14,15 +14,11 @@ phase_services() {
     #
     #   bluetooth  services/Bt.qml and ui/quick/BluetoothList.qml have shipped
     #              since M4. Fedora Workstation starts bluez; Server does not.
-    #   cups       costs nothing until the first print job, and its absence is
-    #              only discovered when you need to print.
     #   udisks2    mounting a USB stick without a password. ⚠️ NOT automount:
     #              that needs a client sitting in the session, and the two that
     #              exist are GTK or Python, both of which this project does not
     #              take. The file manager mounts on click, which is the honest
     #              half — said here rather than left to be discovered.
-    #   avahi      .local names. Without it `ssh nas.local` does not resolve on
-    #              a network where everything else finds it.
     #   oomd       kills the one runaway process instead of letting the machine
     #              swap itself to a standstill. On a laptop that is the
     #              difference between a lost tab and a lost session.
@@ -31,8 +27,12 @@ phase_services() {
     #              to that D-Bus name. Not tlp: the two collide, and which one
     #              wins is not decided here but measured on the laptop (M10).
     step "system services"
-    for unit in cups.socket udisks2.service avahi-daemon.service \
-                systemd-oomd.service tuned-ppd.service; do
+    # ⚠️ cups AND avahi WERE ENABLED HERE AND ARE NOT ANY MORE. Neither package
+    # is installed now — printing and .local name resolution are things a person
+    # adds, not things a window manager decides. The guard below would have
+    # skipped them silently, which is worse than removing them: a list naming
+    # units that can never exist reads as a promise the installer is keeping.
+    for unit in udisks2.service systemd-oomd.service tuned-ppd.service; do
         if systemctl list-unit-files "$unit" >/dev/null 2>&1 \
            && ! systemctl is-enabled --quiet "$unit" 2>/dev/null; then
             sudo systemctl enable --now "$unit" >/dev/null 2>&1 \
@@ -40,128 +40,54 @@ phase_services() {
         fi
     done
 
-    # ⚠️ THE KEYRING IS NOT UNLOCKED AT LOGIN WITHOUT THIS, and the symptom is a
-    # second password prompt after every single login — plus network and cloud
-    # mounts that stay disconnected. gnome-keyring is installed
-    # (packages/dnf-desktop.txt) and was never wired into PAM; the predecessor
-    # did exactly this and the rewrite left it behind.
+    # ⚠️ THERE IS EXACTLY ONE KEYRING ON THIS MACHINE AND IT IS KWallet.
     #
-    # Idempotent, and it takes a backup: editing a PAM file badly is how a
-    # machine stops accepting logins at all.
-    # Fedora KDE owns SDDM's PAM stack and KWallet. Do not patch PAM or start a
-    # parallel GNOME secret service from the Buchhwin session.
-
-    # ------------------------------------------------------- privileges, twice
+    # The comment that stood here said gnome-keyring was installed and needed
+    # wiring into PAM. It is not installed, it is forbidden by the repository
+    # checks, and wiring a second secret service into PAM next to KWallet is how
+    # you get two password prompts at login and half your credentials in each.
     #
-    # ⚠️ TWO THINGS ON THIS DESKTOP NEED ROOT AND BOTH ARE SWITCHES, which is
-    # the worst combination: a switch that silently waits on an invisible
-    # password prompt is a switch that appears broken. He was asked and chose a
-    # narrow polkit rule for the group `wheel` without a password, so both act
-    # immediately.
+    # Fedora KDE owns SDDM's PAM stack and KWallet unlocks with the login
+    # password through it. This session adds nothing: no PAM file is patched, no
+    # second secret service is started. KeePassXC, if you install it, must have
+    # its own Secret Service integration left switched OFF for the same reason.
+
+    # ------------------------------------------------------ privileges, none
     #
-    # ⚠️ THE VPN NEEDS NOTHING OF OURS. NetworkManager already ships the action
-    # org.freedesktop.NetworkManager.network-control — checked in its own policy
-    # file rather than assumed — and a WireGuard tunnel is just a connection to
-    # NM 1.56. One privilege that already exists beats one we invent, so all we
-    # do is stop it asking. The handover that said this needs `wg-quick` and a
-    # helper of our own was out of date.
+    # WARNING: THIS SECTION USED TO INSTALL A ROOT BINARY AND TWO POLKIT FILES,
+    # AND ALL THREE ARE GONE.
     #
-    # ⚠️ THE CHARGE THRESHOLDS DO NEED A HELPER, and it is deliberately the
-    # smallest one that can work: two integers, validated, written to the two
-    # sysfs files and nowhere else. `pkexec` with a shell one-liner would have
-    # been shorter and is how privilege escalation goes wrong — the rule below
-    # names a program, and the program cannot be talked into writing anywhere
-    # but where it was built to write.
-    sudo install -m 0755 /dev/stdin /usr/libexec/buchhwin-charge <<'HELPER'
-#!/usr/bin/env bash
-# Battery charge thresholds. Installed by buchhwin; called through polkit.
-#
-#   buchhwin-charge <start 0-100> <end 0-100>
-#
-# ⚠️ IT VALIDATES BEFORE IT WRITES, AND IT WRITES ONLY THESE TWO PATHS. This
-# runs as root on behalf of a desktop user, so its whole job is to be
-# uninteresting: two integers, a range check, an order check, and a glob that
-# cannot leave /sys/class/power_supply.
-set -euo pipefail
-[[ $# -eq 2 ]] || { echo "usage: buchhwin-charge <start> <end>" >&2; exit 2; }
-[[ $1 =~ ^[0-9]{1,3}$ && $2 =~ ^[0-9]{1,3}$ ]] || { echo "not two integers" >&2; exit 2; }
-(( $1 <= 100 && $2 <= 100 )) || { echo "out of range" >&2; exit 2; }
-(( $1 < $2 )) || { echo "start must be below end" >&2; exit 2; }
+    #   /usr/libexec/buchhwin-charge         a setuid-adjacent helper that wrote
+    #                                        battery charge thresholds into sysfs
+    #   /etc/polkit-1/rules.d/49-buchhwin.rules
+    #   /usr/share/polkit-1/actions/org.buchhwin.policy
+    #                                        the rule that let it run without a
+    #                                        password prompt
+    #
+    # They existed for one feature: setting a laptop's charge start/stop
+    # thresholds from the settings window. That is a nice feature. It is not
+    # worth a root-owned executable and a password-free polkit rule on a machine
+    # somebody works on, installed by a window manager, and the dwl session has
+    # never had anything like it.
+    #
+    # The thresholds are still reachable, by the route that does not need any of
+    # this — three files in sysfs, written with sudo when you actually want them:
+    #
+    #     echo 75 | sudo tee /sys/class/power_supply/BAT*/charge_control_start_threshold
+    #     echo 80 | sudo tee /sys/class/power_supply/BAT*/charge_control_end_threshold
+    #
+    # The VPN switch shared the same polkit rule. It does not need it either:
+    # NetworkManager already lets an active local session bring a connection up
+    # and down, which is what services/Vpn.qml calls.
 
-wrote=0
-for bat in /sys/class/power_supply/BAT*; do
-    [[ -d "$bat" ]] || continue
-    # ⚠️ THE END THRESHOLD FIRST. Some firmware rejects a start value that would
-    # sit above the current end, so writing start first fails on exactly the
-    # machines where the change matters most.
-    [[ -w "$bat/charge_control_end_threshold"   ]] && { echo "$2" > "$bat/charge_control_end_threshold";   wrote=1; }
-    [[ -w "$bat/charge_control_start_threshold" ]] && { echo "$1" > "$bat/charge_control_start_threshold"; wrote=1; }
-done
-# ⚠️ NOT SILENT WHEN THERE IS NOTHING TO WRITE. Plenty of laptops have no
-# thresholds at all, and "nothing happened" has to be distinguishable from
-# "it worked" by whatever called this.
-(( wrote )) || { echo "this machine exposes no charge thresholds" >&2; exit 3; }
-HELPER
+    # WARNING: THE JOURNAL CAP WENT WITH THEM. Capping the journal at 500M is a
+    # sensible default and it is also a machine-wide decision about every log on
+    # the system, taken while installing a desktop. If you want it:
+    #
+    #     sudo mkdir -p /etc/systemd/journald.conf.d
+    #     sudoedit /etc/systemd/journald.conf.d/00-cap.conf
+    #     ... containing a [Journal] section with SystemMaxUse=500M
 
-    sudo mkdir -p /etc/polkit-1/rules.d
-    sudo tee /etc/polkit-1/rules.d/49-buchhwin.rules >/dev/null <<'RULES'
-// Written by the buchhwin installer.
-//
-// Two narrow permissions for members of `wheel`, and nothing else:
-//
-//   * NetworkManager's own network-control, so the VPN switch acts at once
-//     instead of waiting on a password prompt the desktop cannot show.
-//   * org.buchhwin.charge-threshold, which runs /usr/libexec/buchhwin-charge
-//     and can write two integers to two sysfs files.
-//
-// ⚠️ 49-, so it sorts BEFORE Fedora's own 50-default.rules. A rule that sorts
-// after the default never gets asked.
-polkit.addRule(function (action, subject) {
-    if (!subject.isInGroup("wheel"))
-        return polkit.Result.NOT_HANDLED;
-    if (action.id == "org.freedesktop.NetworkManager.network-control" ||
-        action.id == "org.buchhwin.charge-threshold")
-        return polkit.Result.YES;
-    return polkit.Result.NOT_HANDLED;
-});
-RULES
-
-    sudo mkdir -p /usr/share/polkit-1/actions
-    sudo tee /usr/share/polkit-1/actions/org.buchhwin.policy >/dev/null <<'ACTION'
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE policyconfig PUBLIC "-//freedesktop//DTD polkit Policy Configuration 1.0//EN"
- "http://www.freedesktop.org/software/polkit/policyconfig-1.dtd">
-<policyconfig>
-  <vendor>buchhwin</vendor>
-  <action id="org.buchhwin.charge-threshold">
-    <description>Set the battery charge thresholds</description>
-    <message>Authentication is required to change the battery charge thresholds</message>
-    <defaults>
-      <allow_any>no</allow_any>
-      <allow_inactive>no</allow_inactive>
-      <allow_active>auth_admin_keep</allow_active>
-    </defaults>
-    <annotate key="org.freedesktop.policykit.exec.path">/usr/libexec/buchhwin-charge</annotate>
-    <annotate key="org.freedesktop.policykit.exec.allow_gui">true</annotate>
-  </action>
-</policyconfig>
-ACTION
-    ok "polkit: the VPN switch and the charge thresholds act without a prompt"
-
-    # ⚠️ THE JOURNAL GROWS TO 10 % OF THE PARTITION BY DEFAULT. The predecessor
-    # capped it after measuring 3.9 GB on one machine; the rewrite did not carry
-    # the file across. A laptop with a small root filesystem notices.
-    if [[ ! -f /etc/systemd/journald.conf.d/buchhwin.conf ]]; then
-        sudo mkdir -p /etc/systemd/journald.conf.d
-        sudo tee /etc/systemd/journald.conf.d/buchhwin.conf >/dev/null <<'JOURNAL'
-# Generated by buchhwin. Without a cap the journal takes 10% of the partition.
-[Journal]
-SystemMaxUse=500M
-SystemMaxFileSize=50M
-MaxRetentionSec=1month
-JOURNAL
-        ok "journal capped at 500M"
-    fi
 
     # ⚠️ THE LID IS THE ONE POWER SETTING THE SHELL CANNOT CARRY OUT. Idle,
     # locking and suspend are the shell's own, over ext-idle-notify — but the lid
@@ -182,8 +108,8 @@ JOURNAL
         fi
     fi
 
-    # ⚠️ THE KEYBOARD LAYOUT REACHES niri AND NOTHING ELSE. `input.keyboard.layout`
-    # goes into the generated niri config, which is the session — but the LOGIN
+    # ⚠️ THE KEYBOARD LAYOUT REACHES THE COMPOSITOR AND NOTHING ELSE. `input.keyboard.layout`
+    # goes into the generated compositor config, which is the session — but the LOGIN
     # SCREEN and the TTY are not the session, and the login screen is where you
     # type your password FIRST. A German user on a US-layout greeter types the
     # password wrong before the desktop has started.
@@ -210,7 +136,17 @@ OnFailure=buchhwin-shell-failed.service
 
 [Service]
 Type=simple
-ExecCondition=/bin/sh -c '[ "$XDG_CURRENT_DESKTOP" = Hyprland ]'
+# The backslash on the next line is load-bearing. This heredoc is unquoted,
+# because ExecStartPre below needs REPO_DIR expanded — so an unescaped variable
+# here is expanded by the INSTALLER, and two things go wrong at once: under
+# `set -u` an unset one aborts the whole phase, and a set one bakes the
+# installer's value into the unit so the condition can never change. The name
+# has to reach the file literally and be evaluated when the unit starts.
+#
+# And this comment is inside the heredoc too, which is why it does not spell the
+# variable out: writing it here unescaped reproduces the exact fault it warns
+# about, and did.
+ExecCondition=/bin/sh -c '[ "\$XDG_CURRENT_DESKTOP" = Hyprland ]'
 # Quickshell never removes the instance directory a run leaves behind, and they
 # live in a tmpfs. 407 of them, 15 MB of RAM, had accumulated on the test
 # machine. Pruning here rather than on shutdown is deliberate: at this moment
@@ -299,7 +235,7 @@ UNIT
     #
     # He asked for "kann man das auch so machen das man wenn man einen           # english-ok: the request, quoted
     # screenshot macht den direkt kopiert das wäre super", and the surprising    # english-ok: the request, quoted
-    # half of the answer is that niri ALREADY DOES: its own wiki, in
+    # half of the answer is that the compositor ALREADY DOES: its own wiki, in
     # Configuration:-Key-Bindings.md, says "The screenshot is both stored to the
     # clipboard and saved to disk". Pasting straight after Mod+S works today.
     #
