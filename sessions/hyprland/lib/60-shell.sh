@@ -286,27 +286,31 @@ phase_shell() {
                 fi
             fi
 
-            # ⚠️⚠️ AND THE EMERGENCY STATE COULD NEVER BE UNDONE. The branch
-            # below seeds `theme.palette` and `wallpaper.current` exactly once —
-            # the first time this file does not exist. A machine that came up
-            # with no pictures got everforest-dark and an empty current, and
-            # then EVERY later run took this path and touched neither key. He
-            # could add pictures, reinstall, and still get green with no image:
-            # reported as "die wallpaper sind nicht als standard gesetzt".      # english-ok: his report, quoted
+            # ⚠️⚠️ AND THE EMERGENCY STATE COULD NEVER BE UNDONE. This branch
+            # exists because the seeding below happens exactly once — the first
+            # time this file does not exist. A machine that came up with no
+            # pictures got a palette and an empty `wallpaper.current`, and then
+            # EVERY later run took this path and touched neither key. He could
+            # add pictures, reinstall, and still get no image: reported as
+            # "die wallpaper sind nicht als standard gesetzt".                  # english-ok: his report, quoted
             #
-            # ⚠️ DELIBERATELY NARROW. It fires only on the exact fingerprint the
-            # no-pictures branch leaves behind — everforest-dark AND an empty
-            # `wallpaper.current`. Somebody who chose Everforest on purpose has
-            # a wallpaper set, so their state does not match and nothing here
-            # touches a decision they made.
-            local cur_pal cur_wp
-            cur_pal="$(jq -r '.theme.palette // ""'      "$f" 2>/dev/null)"
-            cur_wp="$( jq -r '.wallpaper.current // ""'  "$f" 2>/dev/null)"
-            if [[ "$cur_pal" == "everforest-dark" && -z "$cur_wp" && -n "$wp_first" ]]; then
+            # ⚠️ IT ONLY FILLS IN THE WALLPAPER NOW, and no longer changes the
+            # palette with it. Until 09.09.2026 it also set `theme.palette` to
+            # "wallpaper", because the scheme used to be derived from the
+            # picture; the shipped default is `black` and staying black is the
+            # point of it. If the accent should follow the picture there is a
+            # setting for exactly that — `theme.accentSource` — and it changes
+            # one colour rather than twenty-six.
+            #
+            # ⚠️ DELIBERATELY NARROW. It fires only on the fingerprint the
+            # no-pictures branch leaves behind: an empty `wallpaper.current`.
+            local cur_wp
+            cur_wp="$(jq -r '.wallpaper.current // ""'  "$f" 2>/dev/null)"
+            if [[ -z "$cur_wp" && -n "$wp_first" ]]; then
                 local tmp2
                 tmp2="$(mktemp)"
                 if jq --arg u "file://$wp_first" \
-                      '.theme.palette = "wallpaper" | .wallpaper.current = $u' \
+                      '.wallpaper.current = $u' \
                       "$f" > "$tmp2" 2>/dev/null; then
                     mv "$tmp2" "$f"
                     ok "picked up where the empty fallback left off ($(basename "$wp_first"))"
@@ -316,19 +320,24 @@ phase_shell() {
             fi
         fi
     elif [[ -n "$wp_first" ]]; then
-        # The default scheme is derived from the wallpaper, not shipped. Which
-        # image it is does not matter — any of them produces a palette, and the
-        # picker changes it in one keystroke.
+        # ⚠️ THE SCHEME IS SHIPPED NOW, NOT DERIVED. Until 09.09.2026 this wrote
+        # `"palette": "wallpaper"` and the desktop took all 26 of its colours
+        # from whichever picture happened to be first. His decision replaced
+        # that with one palette: "das default theme soll schwarz plain wie auf   # english-ok: his decision, quoted
+        # den screenshots sein". The wallpaper is still set, and the accent can  # english-ok: same
+        # be told to follow it — `theme.accentSource` — but the scheme is a file
+        # like every other palette, and the picker changes it in one keystroke.
         # No "version": the code owns that number, see bin/bhctl and Config.qml.
-        printf '{\n  "theme": { "palette": "wallpaper", "accent": "blue" },\n  "wallpaper": { "folder": "%s", "current": "file://%s" }\n}\n' \
+        printf '{\n  "theme": { "palette": "black", "accent": "green" },\n  "wallpaper": { "folder": "%s", "current": "file://%s" }\n}\n' \
             "$wp_dir" "$wp_first" > "$CONFIG_HOME/buchhwin/shell.json"
-        ok "settings seeded — scheme derived from $(basename "$wp_first")"
+        ok "settings seeded — black scheme, wallpaper $(basename "$wp_first")"
     else
-        # No pictures anywhere. Everforest is the raft, not the destination:
-        # a desktop with no colours at all is worse than a green one.
-        printf '{\n  "theme": { "palette": "everforest-dark", "accent": "green" }\n}\n' \
+        # No pictures anywhere, which changes nothing about the colours: the
+        # scheme does not come from a picture any more. Only the wallpaper keys
+        # are left out, so the first one found on a later run fills them in.
+        printf '{\n  "theme": { "palette": "black", "accent": "green" }\n}\n' \
             > "$CONFIG_HOME/buchhwin/shell.json"
-        warn "no wallpapers found — seeded with Everforest Dark instead"
+        warn "no wallpapers found — settings seeded without one"
     fi
 
     # Wayland, not XWayland — and stated as flags rather than hope.

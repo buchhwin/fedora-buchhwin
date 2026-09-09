@@ -43,7 +43,7 @@ Singleton {
     // joining three fields with it can never collide with their contents.
     readonly property string sep: "\u0000"
 
-   readonly property int current: 17
+   readonly property int current: 18
 
     // step[n] upgrades a config at version n to version n+1.
     // Each is a pure function: take the parsed object, return it changed.
@@ -506,6 +506,30 @@ Singleton {
                 delete cfg.motion.durHover
                 delete cfg.motion.bounce
             }
+            return cfg
+        },
+        // ---------------------------------------------------------- 17 -> 18
+        //
+        // Black becomes the shipped default, and `theme.accentSource` arrives.
+        //
+        // ⚠️ NOTHING THE USER CHOSE IS TOUCHED, and that is the whole of this
+        // step. A config that names a palette named it on purpose — the
+        // installer seeds one on a fresh machine, and choosing another is one
+        // keystroke. What is repaired is the ONE state that was never a choice:
+        // the emergency fallback the installer wrote when it found no pictures
+        // at all, which is "everforest-dark" with no wallpaper set. That machine
+        // got green because a desktop with no colours is worse than a green
+        // one, not because anybody wanted Everforest.
+        //
+        // ⚠️ AND `accentSource` NEEDS NO MIGRATION — an added key takes its
+        // default from the schema. It is named here only so the next person
+        // reading this chain knows which version it arrived in.
+        function (cfg) {
+            if (cfg.theme && typeof cfg.theme === "object"
+                && cfg.theme.palette === "everforest-dark"
+                && (!cfg.wallpaper || !cfg.wallpaper.current
+                    || String(cfg.wallpaper.current).length === 0))
+                cfg.theme.palette = "black"
             return cfg
         },
     ]

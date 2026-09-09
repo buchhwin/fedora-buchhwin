@@ -118,7 +118,21 @@ Singleton {
     // sentinel and paint it for a frame, so the fallback is the same key the
     // config declares as its default rather than nothing.
     readonly property string accentName: Config.theme ? Config.theme.accent : "green"
-    readonly property color accent:       p(accentName)
+
+    // ⚠️ ONE COLOUR MAY COME FROM THE PICTURE, and only one. `theme.accentSource`
+    // decides: "static" is the name above looked up in the palette, "wallpaper"
+    // is the colour Scheme took out of the image on screen. Everything else
+    // stays the palette's, which is what separates this from
+    // `theme.palette: "wallpaper"` — that derives all 26.
+    //
+    // ⚠️ AND IT FALLS BACK RATHER THAN GOING BLANK. Scheme hands back an empty
+    // string until the image has been read, and a surface painted with "" is
+    // the magenta sentinel on screen for as long as that takes.
+    readonly property color accent:
+        (Config.theme && Config.theme.accentSource === "wallpaper"
+         && Scheme.imageAccent.length > 0)
+            ? Scheme.imageAccent
+            : p(accentName)
     readonly property color accentFg:     on(accent)
     readonly property color accentHover:  lighten(accent, 0.06)
     readonly property color accentActive: darken(accent, 0.06)

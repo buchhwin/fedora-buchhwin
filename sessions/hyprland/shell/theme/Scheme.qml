@@ -317,6 +317,100 @@ Singleton {
     onWantedSourceChanged: _maybeDerive()
     onDerivedChanged: _maybeDerive()
 
+    // ------------------------------------------------- one colour from the image
+    //
+    // ⚠️⚠️ A SECOND QUANTISER, AND IT IS NOT A COPY OF THE ONE ABOVE. That one
+    // answers "what are all 26 colours of this picture" and only runs when the
+    // PALETTE is derived from an image. This answers "what is the one colour to
+    // accent with", and it runs whenever `theme.accentSource` is "wallpaper" —
+    // which is the case the black default was made for: the scheme stays black
+    // and plain, and the accent follows the picture.
+    //
+    // Sharing one instance was tried on paper and refused: the two want
+    // different sources at different moments (`paletteFrom` pins the palette's
+    // image so a slideshow does not repaint the desktop, while the accent is
+    // meant to follow the picture actually on screen), and a quantiser that
+    // serves two masters needs a mode flag whose two states are exactly these
+    // two blocks. Two small blocks that each say what they are beat one that
+    // asks which mode it is in.
+    //
+    // ⚠️ IT COSTS NOTHING WHILE THE SETTING IS OFF. `accentWanted` is false, no
+    // source is ever assigned, and ColorQuantizer with no source does no work.
+    readonly property bool accentFromImage:
+        !!Config.theme && String(Config.theme.accentSource) === "wallpaper"
+
+    readonly property string accentSourceImage:
+        (root.accentFromImage && Config.wallpaper)
+            ? String(Config.wallpaper.current) : ""
+
+    // The accent, as "#rrggbb". Empty until an image has been read — Theme.qml
+    // falls back to the palette's own accent while it is, because a surface
+    // painted with "" shows the magenta sentinel.
+    property string imageAccent: ""
+    property string _accentFrom: ""
+
+    onAccentSourceImageChanged: root._maybeAccent()
+    onAccentFromImageChanged: root._maybeAccent()
+
+    function _maybeAccent() {
+        if (!Config.settled)
+            return
+        if (!root.accentFromImage) {
+            root.imageAccent = ""
+            root._accentFrom = ""
+            return
+        }
+        var src = root.accentSourceImage
+        if (!src.length || src === root._accentFrom)
+            return
+        root._accentFrom = src
+        accentQuant.source = src
+        accentSettle.restart()
+    }
+
+    ColorQuantizer {
+        id: accentQuant
+        rescaleSize: 64
+        depth: 4
+    }
+
+    Timer {
+        id: accentSettle
+        // ⚠️ THE SAME 1800 ms AND THE SAME REASON, written out because the two
+        // blocks are read separately: the quantiser emits once with the
+        // PREVIOUS image's colours when a new source is set. Reading on
+        // `colorsChanged` looked like twelve wallpapers producing six schemes.
+        interval: 1800
+        onTriggered: {
+            if (!root.accentFromImage)
+                return
+            var cols = accentQuant.colors
+            if (!cols || cols.length === 0) {
+                // No complaint and no change: the palette's own accent is
+                // already on screen and is a perfectly good answer. A failure
+                // message for a decoration would be noise.
+                root.imageAccent = ""
+                return
+            }
+            // The same seed the palette derivation uses — most saturated at a
+            // middling lightness, rather than the single brightest pixel — so
+            // "the accent from this picture" means one thing in both places.
+            var seed = FromImage.seedOf(cols)
+            // ⚠️ THE IMAGE'S HUE, OUR OWN LIGHTNESS. A photograph's own
+            // saturation and lightness are whatever the photograph is: a dark
+            // forest gives an accent that cannot be seen on a black surface,
+            // and a snow scene gives one that cannot be read against white
+            // text. The hue is what the picture has to say; the rest is what
+            // makes it usable, and it is the same pastel range black.json
+            // ships with.
+            // ⚠️ THROUGH `_hex`, because `_tone` hands back a colour OBJECT
+            // and this property is a string. Assigning the object coerces it to
+            // something Qt.color cannot read back, which paints the sentinel.
+            root.imageAccent =
+                FromImage._hex(FromImage._tone(seed.h, 0.45, root.dark ? 0.72 : 0.42))
+        }
+    }
+
     ColorQuantizer {
         id: quant
         // 64 is plenty: the seed is a hue, and a hue does not get truer with

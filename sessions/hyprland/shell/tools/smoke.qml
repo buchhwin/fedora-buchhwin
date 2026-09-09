@@ -283,7 +283,20 @@ Scope {
                 // The other direction: in scheme mode NOTHING may differ, and in
                 // black mode the surface roles MUST differ — a black mode that
                 // quietly did nothing would pass a one-sided check.
-                if (same && mayDiffer)
+                //
+                // ⚠️ UNLESS THE PALETTE IS ITSELF THAT BLACK, and that exception
+                // arrived with theme/palettes/black.json on 09.09.2026. Its
+                // `crust` IS #000000, which is the value black mode writes, so
+                // the two agree and no comparison of colours can tell "black
+                // mode is working" from "black mode did nothing". Demanding a
+                // difference here would be demanding that the black palette not
+                // be black — the check would be enforcing the opposite of the
+                // requirement, which is rule 4's worst shape.
+                //
+                // What is still checked everywhere else: the seven other
+                // surface roles, whose palette values are NOT the black-mode
+                // values, so a black mode that stopped applying still fails.
+                if (same && mayDiffer && Theme.hex(roles[r][0]) !== "#000000")   // literal-ok: the value black mode writes, not a style
                     wrongly.push(key)
             }
             root.ok("every Theme role is the palette key the renderer writes"

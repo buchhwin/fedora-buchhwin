@@ -56,6 +56,30 @@ ColumnLayout {
             // have to try one at a time. The colour is the label.
             swatch: true
         }
+
+        // ⚠️ HIS REQUEST, AND IT IS ONE COLOUR RATHER THAN TWENTY-SIX: "man
+        // soll einstellen können ob dabei eine statische farbe als akzent       // english-ok: the request, quoted
+        // übernommen wird oder die vom wallpaper basiert". Choosing            // english-ok: same
+        // "From the wallpaper" here leaves the scheme exactly as it is and
+        // takes only the accent from the picture — which is what makes it
+        // different from setting the PALETTE to "From the wallpaper" above,
+        // where all 26 colours come from the image and the desktop stops being
+        // black.
+        //
+        // The row above stays usable either way: it is what the accent falls
+        // back to while the picture is being read, and what returns the moment
+        // this goes back to "A fixed colour".
+        SettingRow {
+            Layout.fillWidth: true
+            key: "theme.accentSource"
+            label: "Where the accent comes from"
+            hint: "Only the hue comes from the picture; the rest stays ours, or a dark photo gives an unreadable accent."
+            kind: "choice"
+            choices: [
+                { value: "static",    label: "A fixed colour" },
+                { value: "wallpaper", label: "From the wallpaper" }
+            ]
+        }
         SettingRow {
             Layout.fillWidth: true
             key: "theme.customColor"

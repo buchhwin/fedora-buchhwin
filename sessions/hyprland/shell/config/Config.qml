@@ -645,11 +645,38 @@ Singleton {
             // only the migration chain quietly papering over it. Both now write
             // no version at all: a file without one reads as 0 and is migrated
             // forward, which is exactly the path a genuinely old file takes.
-            property int version: 17
+            property int version: 18
 
             property JsonObject theme: JsonObject {
-                property string palette: "everforest-dark"
+                // ⚠️ BLACK IS THE SHIPPED DEFAULT SINCE 09.09.2026, his
+                // decision: "das default theme soll schwarz plain wie auf den   // english-ok: his decision, quoted
+                // screenshots sein". The palette file is theme/palettes/       // english-ok: same
+                // black.json — neutral greys from #000000 up, with the colours
+                // present but desaturated, and a pastel green accent. It is a
+                // file like every other palette rather than a special case, so
+                // it can be left for another one in a keystroke.
+                //
+                // ⚠️ NOT `look.surfaceStyle` INSTEAD. That draws OUR OWN
+                // surfaces black over whatever palette is loaded, which leaves
+                // the text, the accent and every foreign program's colours
+                // belonging to a scheme nobody chose. Both are on: the palette
+                // makes the desktop black, the style keeps our surfaces opaque.
+                property string palette: "black"
                 property string accent: "green"
+
+                // Where the accent comes from — his request: "man soll          // english-ok: the request, quoted
+                // einstellen können ob dabei eine statische farbe als akzent    // english-ok: same
+                // übernommen wird oder die vom wallpaper basiert".              // english-ok: same
+                //
+                //   "static"     the colour named by `accent` above
+                //   "wallpaper"  one colour taken from the picture on screen
+                //
+                // ⚠️ THIS IS NOT `palette: "wallpaper"`, and the difference is
+                // the whole point of the setting. That derives all 26 colours
+                // from the image and repaints the desktop with it. This changes
+                // ONE colour and leaves the black scheme alone, which is what
+                // "schwarz plain, aber der Akzent darf mitgehen" means.   // english-ok: his words, quoted
+                property string accentSource: "static"
                 // The light half of the pair. `palette` is the one in force by
                 // day-or-night default; this is what `autoLight` swaps to.
                 property string lightPalette: "everforest-light"
