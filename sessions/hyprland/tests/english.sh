@@ -82,13 +82,31 @@ words+='|weitere|weiteren|Meldung|Meldungen|Mitteilung|Mitteilungen'
 # all four as having none: the advice it printed was "delete the key", which
 # would have deleted four working settings. Untracked-but-not-ignored is the
 # corpus that matches what is actually on disk.
+# ⚠️ install-hyprland.sh, NOT install.sh — THE SAME RENAME, A FIFTH TIME. Both
+# lists below named `install.sh`, which after the monorepo merge is a dispatcher
+# at the repository ROOT and does not exist beside this test at all. So the
+# glob matched nothing, the installer's prose was never read, and this suite
+# reported green over a file it had not opened. It is the quietest shape of the
+# fault: a corpus that silently shrinks says nothing, and every check that runs
+# over it still passes.
+#
+# ⚠️ AND `uninstall.sh` WAS NEVER ON EITHER LIST, from the day it was written.
 files=$(git ls-files --cached --others --exclude-standard \
                'shell/*.qml' 'shell/**/*.qml' 'docs/*.md' 'README.md' \
-               'lib/*.sh' 'bin/*' 'install.sh' 'tests/*.sh' 2>/dev/null)
+               'lib/*.sh' 'bin/*' 'install-hyprland.sh' 'uninstall.sh' \
+               'tests/*.sh' 2>/dev/null)
 if [[ -z "$files" ]]; then
     files=$(find shell docs lib bin tests -type f \
                  \( -name '*.qml' -o -name '*.md' -o -name '*.sh' -o -path 'bin/*' \) \
-                 2>/dev/null; ls README.md install.sh 2>/dev/null)
+                 2>/dev/null; ls README.md install-hyprland.sh uninstall.sh 2>/dev/null)
+fi
+
+# ⚠️ THE INSTALLER HAS TO BE IN THERE, and it is asserted rather than assumed.
+# That is the whole lesson of the rename: a corpus is only a corpus if you can
+# name something you know is in it.
+if ! grep -q 'install-hyprland.sh' <<< "$files"; then
+    echo "  the installer is not in the corpus — the glob no longer matches it" >&2
+    exit 1
 fi
 
 # ⚠️ AN EMPTY LIST IS A BROKEN CHECK, NOT A CLEAN REPOSITORY — and this one

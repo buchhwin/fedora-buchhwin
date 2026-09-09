@@ -36,9 +36,22 @@ bad() { printf '  %sFAIL%s %s\n' "$red" "$off" "$1"; fail=1; }
 # new that is not ignored. ⚠️ `git ls-files` answers with NOTHING outside a
 # checkout — and tests/english.sh was silently checking zero files for exactly
 # that reason — so `find` is the fallback and the count is asserted below.
+#
+# ⚠️⚠️ `--others --exclude-standard` IS THE HALF THE COMMENT ABOVE ALREADY
+# CLAIMED. Plain `git ls-files` lists TRACKED files only, so a brand-new file was
+# invisible to this check — and the run that matters is the one before the
+# commit, which is exactly when a new file is untracked. A secret would have
+# been caught the day AFTER it was added, by which point it is in the history
+# and taking it out means rewriting one. This repository has already had its
+# history rewritten once to get a password out of it; that is what
+# tests/update-diverged.sh is about.
+#
+# Found by tests/tripwires.sh: the mutation put an address into a new document
+# and this file reported the repository clean. Two years of "everything git
+# tracks, plus anything new" sitting above code that did the first half.
 mapfile -t files < <(
     if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
-        git ls-files
+        git ls-files --cached --others --exclude-standard
     else
         find . -type f -not -path './.git/*' -not -path './node_modules/*' | sed 's|^\./||'
     fi

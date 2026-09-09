@@ -166,8 +166,25 @@ remove_unwanted() {
     mapfile -t pkgs < <(read_list dnf-unwanted.txt)
     (( ${#pkgs[@]} )) || return 0
 
+    # ⚠️ WHAT THE OTHER SESSION NEEDS IS NOT OURS TO SWEEP. `install.sh
+    # --session both` runs the dwl installer and then this one, and these are
+    # the names dwl installs that this profile lists as replaced. Removing — or
+    # even warning about — the other desktop's own tools is the same overreach
+    # as touching a package the user chose.
+    #
+    # Empty unless the two are being installed together, so a plain
+    # `--session hyprland` sweeps exactly as it always did.
+    local sibling=()
+    if [[ "${BUCHHWIN_SIBLING_SESSION:-}" == "dwl" ]]; then
+        sibling=(swaylock swaybg swayidle)
+    fi
+
     for p in "${pkgs[@]}"; do
         rpm -q "$p" >/dev/null 2>&1 || continue
+        if [[ " ${sibling[*]} " == *" $p "* ]]; then
+            ok "$p stays — the dwl session installed for its own use"
+            continue
+        fi
         # ⚠️ ONE LINE, and `head -1` rather than trusting there to be one: a
         # package installed for more than one architecture answers twice, and
         # the comparison below would then match neither word.
@@ -185,23 +202,53 @@ remove_unwanted() {
 
     (( ${#weak[@]} )) || return 0
 
-    # ⚠️ CLAIM OURS FIRST. Every name on every list of ours that is installed
-    # right now is marked User, so dnf's sweep of "no longer needed" leaves it
-    # alone. Without this, removing waybar takes `playerctl` — see the note
-    # above, and the twenty-package dry run behind it.
+    # ⚠️ CLAIM WHAT IS AT RISK, AND ONLY THAT. Removing a weak package lets
+    # dnf sweep up whatever was only there for it, and that sweep has taken
+    # things of ours before — removing waybar took `playerctl`, measured in a
+    # twenty-package dry run. Marking a package User stops the sweep.
     #
-    # ⚠️ `--skip-unavailable`, because the lists name packages that a particular
-    # machine may not have (the GPU list is one of three, flatpaks are not rpms)
-    # and one absent name must not abort the marking of the rest.
+    # ⚠️⚠️ IT USED TO CLAIM EVERY NAME ON EVERY LIST, and that was too much by
+    # about twenty-five packages. Our lists include what Fedora KDE already
+    # installed — plasma-desktop, sddm, dolphin, the KDE PIM set — and marking
+    # those User rewrites the reason the USER's own base packages are on their
+    # machine. It is invisible, it is not undone by uninstall.sh, and it is
+    # exactly the class of change the profile was cut back to stop making:
+    # nothing outside what this desktop actually brought.
+    #
+    # So the set is computed rather than assumed: what the packages being
+    # removed depend on, intersected with what we ship. On a machine where the
+    # weak set is `waybar`, that is a handful of names instead of seventy-eight.
     local ours=() f
     for f in "$REPO_DIR"/packages/dnf-*.txt; do
         [[ "$(basename "$f")" == "dnf-unwanted.txt" ]] && continue
         mapfile -t -O "${#ours[@]}" ours < <(read_list "$(basename "$f")")
     done
-    local claim=()
+
+    # What the weak packages pull in, resolved to package names. A failure here
+    # is not fatal: the fallback is the old behaviour, said out loud, because
+    # protecting too much is a smaller harm than a sweep taking our files.
+    local atrisk=() wide=0
+    if ! mapfile -t atrisk < <(
+            dnf repoquery --installed --requires --resolve --qf '%{name}' \
+                "${weak[@]}" 2>/dev/null | sort -u); then
+        wide=1
+    fi
+    (( ${#atrisk[@]} )) || wide=1
+    if (( wide )); then
+        warn "could not work out what the removal endangers — claiming every package we ship instead"
+        atrisk=("${ours[@]}")
+    fi
+
+    # ⚠️ `--skip-unavailable`, because the lists name packages that a particular
+    # machine may not have (flatpaks are not rpms) and one absent name must not
+    # abort the marking of the rest.
+    local claim=() p2
     for p in "${ours[@]}"; do
         [[ -n "$p" ]] || continue
-        rpm -q "$p" >/dev/null 2>&1 && claim+=("$p")
+        rpm -q "$p" >/dev/null 2>&1 || continue
+        for p2 in "${atrisk[@]}"; do
+            if [[ "$p" == "$p2" ]]; then claim+=("$p"); break; fi
+        done
     done
     if (( ${#claim[@]} )); then
         sudo dnf mark user -y --skip-unavailable "${claim[@]}" >/dev/null 2>&1 \

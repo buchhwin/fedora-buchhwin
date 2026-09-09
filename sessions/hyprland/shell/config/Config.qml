@@ -1984,12 +1984,30 @@ Singleton {
             // ⚠️ The polkit agent IS here, and it has to be. It ships an XDG
             // autostart file (/etc/xdg/autostart/), and the compositor does not process
             // those — so on this desktop nothing would ever start it and the
-            // wifi radio switch would keep being refused. The path is the
-            // package's own, checked with `dnf repoquery -l` rather than
-            // guessed; see packages/dnf-desktop.txt for why a foreign program
-            // is here at all.
+            // wifi radio switch would keep being refused. See
+            // packages/dnf-desktop.txt for why a foreign program is here at all.
+            //
+            // ⚠️⚠️ IT IS FOUND, NOT NAMED, AND THAT IS THE FIX FOR A REAL FAULT.
+            // The path used to be written out as
+            // /usr/libexec/polkit-kde-authentication-agent-1. KDE Frameworks 6
+            // moved it into a `kf6` subdirectory, and the two locations have
+            // both been true on Fedora at different points — so a typed path is
+            // right on one release and silently wrong on the next. Wrong how:
+            // the agent does not start, nothing says so, and every action
+            // needing authentication is refused with no prompt. That is the
+            // worst shape of failure this project keeps finding, and it cannot
+            // be spotted by reading the line.
+            //
+            // The shell picks whichever exists, in one short command that runs
+            // once at session start. A machine with neither gets nothing
+            // started, which is what it would have got anyway.
             property list<string> autostart: [
-                "/usr/libexec/polkit-kde-authentication-agent-1"
+                // ⚠️ NO NESTED `sh -c`: `hl.exec_cmd` already runs what it is
+                // given through a shell, so this is a shell command as it
+                // stands. Wrapping it again would mean quoting quotes inside a
+                // Lua string inside a QML string, which is three chances to get
+                // one backslash wrong for no gain.
+                "for a in /usr/libexec/kf6/polkit-kde-authentication-agent-1 /usr/libexec/polkit-kde-authentication-agent-1; do [ -x $a ] && exec $a; done"
             ]
 
             // ⚠️ WHAT WAS OPEN LAST TIME, and the honest limit belongs with the

@@ -51,7 +51,23 @@ case "$session" in
     dwl) exec "$ROOT/sessions/dwl/install-fedora.sh" "${forward[@]}" ;;
     hyprland) exec "$ROOT/sessions/hyprland/install-hyprland.sh" "${forward[@]}" ;;
     both)
-        "$ROOT/sessions/dwl/install-fedora.sh" "${forward[@]}"
-        "$ROOT/sessions/hyprland/install-hyprland.sh" "${forward[@]}"
+        # ⚠️ THE SECOND INSTALLER IS TOLD THE FIRST ONE RAN, and it is not a
+        # convenience. The Hyprland profile sweeps up packages it considers
+        # replaced — swaylock among them, because it ships its own lock screen —
+        # and swaylock is one the dwl session INSTALLS. Run one after the other
+        # with neither knowing about the other, and the second one's tidying is
+        # aimed at the first one's desktop.
+        #
+        # ⚠️ IT DID NOT ACTUALLY REMOVE ANYTHING, and that is worth writing down
+        # rather than relying on. `dnf install swaylock` marks it User, and the
+        # sweep leaves anything marked User alone — so the outcome was a warning
+        # saying "swaylock is installed and marked as YOUR choice", about a
+        # package the installer two lines up had just put there. The protection
+        # was real and the sentence was wrong, which is the sort of thing that
+        # gets "fixed" by somebody who believes it.
+        BUCHHWIN_SIBLING_SESSION=hyprland \
+            "$ROOT/sessions/dwl/install-fedora.sh" "${forward[@]}"
+        BUCHHWIN_SIBLING_SESSION=dwl \
+            "$ROOT/sessions/hyprland/install-hyprland.sh" "${forward[@]}"
         ;;
 esac

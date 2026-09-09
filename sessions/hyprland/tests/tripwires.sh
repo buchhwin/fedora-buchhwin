@@ -99,9 +99,11 @@ trap 'restore_now; exit 143' TERM HUP
 #                  gone; the login screen is SDDM's now. A row naming two files
 #                  that do not exist is not a stale case, it is a case about
 #                  nothing, and there is nothing to re-point it at.
-#   no-secrets     docs/HYPRLAND.md has not been written yet — it is still on
-#                  the to-do list. Re-pointed at docs/CONFIG.md, which exists
-#                  and is published, so the check has a real file again.
+#   no-secrets     docs/HYPRLAND.md had not been written yet, so both of its
+#                  cases pointed at docs/CONFIG.md for a day. The file exists
+#                  now and they are one each — which is better coverage than
+#                  they had before, since the check reads a corpus and two cases
+#                  on one file prove less about it than two files do.
 #   fingerprint    `Config.windows.defaultWidth` was removed from the shell.
 #                  Re-pointed at `Config.keys.mod`, which the config generator
 #                  reads and which therefore has to be in the fingerprint.
@@ -141,7 +143,7 @@ pipefail-grep|tests/no-python.sh|$a printf x \x7c grep -q x \x7c\x7c true|a chec
 motion|shell/ui/common/StagedFace.qml|s/^        Behavior on scale {$/        Behavior on implicitHeight {/|an animation driving a layout size
 ui-imports|shell/ui/common/Toggle.qml|s/^import QtQuick$/import QtQuick\nimport Quickshell.Services.Pam/|a surface importing Quickshell.Services directly
 tap-targets|shell/ui/common/IconRail.qml|s/^                onClicked: root.activated(railPill.index)$/                TapHandler { onTapped: root.activated(railPill.index) }/|a TapHandler hidden inside a Pill
-no-secrets|docs/CONFIG.md|$a A machine at 192.168.178.42 answers on port 8080.|an address in a published file  # secrets-ok: the fixture IS an address, that is the fault being injected
+no-secrets|docs/HYPRLAND.md|$a A machine at 192.168.178.42 answers on port 8080.|an address in a published file  # secrets-ok: the fixture IS an address, that is the fault being injected
 workspace-labels|shell/ui/notch/pages/WorkspacesPage.qml|s/box.modelData.ws.idx/box.modelData.ws.name/|a workspace label reading the name instead of the index
 config-shape|shell/config/Config.qml|s/^                property bool noCsd: true$/                property bool noCsd: true\n                property var crashesQuickshell: []/|a nested property var, which segfaults quickshell
 bhctl-usage|bin/bhctl|s/^  prune .*$//|a subcommand that usage() no longer mentions

@@ -1,5 +1,96 @@
 # Changelog
 
+## v0.3.0-alpha — 09.09.2026
+
+The Hyprland session finished the move off its previous compositor and then had
+the things nobody uses taken out of it. Everything below was measured or is named as unmeasured.
+
+### The suite went from lying to green
+
+Six checks were red and none of them was what it looked like. Two of the six
+were hiding software that was simply broken: `DisplaysPage.qml` had not compiled
+since the migration — a blanket rename of the old compositor's name turned an
+identifier into two words — and `bhctl update` did not exist, having been lost
+when that file was cut from 1615 lines to 116. Its only caller is a button, so
+"Update and reinstall" in Settings opened a terminal that printed the usage text
+and exited.
+
+⚠️ **A stale fixture does not fail, it hangs.** `monitors-check` described
+windows the way the old compositor did, so every box measured zero, the
+arithmetic threw on an empty list, `Qt.quit()` was never reached and the tool
+ran into its timeout. The previous session read that exit code as "skipped".
+
+`tests/run.sh` is new, because there was no runner in the repository at all and
+the results were being counted by hand. It tells 0, 1 and 2 apart and prints the
+skips by name.
+
+### Six settings pages were reachable by nothing
+
+A `.filter()` at the end of the page list removed Displays, Keyboard,
+**Shortcuts**, Mouse & Touchpad, Windows and This Machine, "until a Hyprland
+writer exists for them". The writer had existed for a week. The keybinding
+editor — the whole point of rebuilding the config generator — was behind it.
+
+Visible in exactly one number: `tests/pages.sh` reported 152 built rows against
+185 declared, and the difference was the filter.
+
+### What was taken out
+
+- **The dock**, entire: the surface, the settings page, the IPC verb and the
+  config block. The bar at the top stays.
+- **Eight settings pages**, twenty-five down to seventeen. Motion, Control
+  Center, Launcher, Clock & Date and Media are gone and their defaults are the
+  behaviour now; Size & Shape, Effects and Type & Pointer became one page called
+  Appearance. ⚠️ Removing a page means removing its keys — one row per setting
+  is checked in both directions — so twenty-one keys went with them and every
+  reader holds the number that key defaulted to.
+- **`services/Ical.qml`**, 548 lines of iCalendar and recurrence rules.
+- **The CalDAV transport**, and with it the question of keeping a bearer token
+  off a command line. There is no token any more.
+
+### What came in
+
+- **The shell's own network and Bluetooth panels.** `Net.qml` and `Bt.qml` had
+  been complete and uncalled for months while the quick panel opened KDE's
+  System Settings — the duplication the whole profile is built against, in the
+  one place nobody looked. ⚠️ Two repository rules said the opposite and were
+  turned around: they banned the two files and required the jump.
+- **The calendar reads Akonadi** through `konsolekalendar`. The old path needed
+  GNOME Online Accounts, which this profile does not install, so on a fresh
+  machine it said "No account set up" and there was no way from there.
+- **A black scheme, shipped as the default**, and `theme.accentSource`: the
+  accent can follow the wallpaper while the desktop stays black. Only the hue
+  comes from the picture — a dark photograph would otherwise give an accent
+  nothing can be read against.
+- **One carousel picker for themes and wallpapers.** ⚠️ Browsing changes
+  nothing; `Enter` applies. Applying is a full render over thirteen foreign
+  files plus a `Hyprland --verify-config`, so a live preview would queue one per
+  keypress.
+- **`kdeglobals`**, session-local. qt6ct colours a button and a window frame;
+  KDE's own applications read `kdeglobals` for Dolphin's view and Kate's editor
+  scheme, so a themed desktop had Breeze-white contents inside themed chrome.
+- **A pill instead of a notch**, switchable, and a picture instead of the
+  fastfetch logo.
+
+### Six checks were corrected rather than satisfied
+
+Each was asking the wrong question, and each is written up where it lives:
+`smoke.qml` proved black mode worked by requiring the surface roles to DIFFER
+from the palette, which a black palette cannot do; `no-fetch-animation.sh`
+grepped for the exact text of a call that no longer exists;
+`no-secrets.sh` said it scanned "everything git tracks, plus anything new" and
+scanned only the first half, so a secret in a new file was invisible until the
+commit after the one that added it. That last one was found by
+`tests/tripwires.sh`, which is what it is for.
+
+### Still open
+
+**Nothing here has run on real hardware.** WSL has no session: SDDM showing the
+entry, the bar and notch appearing, the keybindings, a network actually
+connecting, the lock screen, a palette change reaching the compositor, and
+Plasma staying intact as the fallback are all unverified. See the checklist at
+the end of `docs/HYPRLAND.md`.
+
 ## v0.2.0-alpha — 10.08.2026
 
 The alpha named five things as unfinished. Four are done, one is his to do. On
