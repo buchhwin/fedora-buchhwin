@@ -55,13 +55,27 @@ Scope {
         { id: 3, idx: 1, output: "Virtual-2", is_active: true,  is_focused: false }
     ]
 
+    // ⚠️ `at` AND `size`, IN GLOBAL COORDINATES — the shape `hyprctl -j clients`
+    // really returns. This fixture used to carry `layout.pos_in_scrolling_layout`
+    // and `layout.tile_size`, which is what the previous compositor reported and
+    // what common/WorkspaceGeometry.qml was rebuilt away from. Nothing read those
+    // fields any more, so every box came out with w=0, was skipped as
+    // geometry-less, and the window list arrived empty — the check below then
+    // threw on `a[0].w`, `run()` never reached `finish()`, and the tool hung
+    // until the timeout killed it. A stale fixture does not fail, it hangs.
+    //
+    // ⚠️ GLOBAL IS THE POINT, not an accident of how it was written down.
+    // Virtual-2 starts at x=1280, so its window sits at x=1280 in the layout and
+    // at x=0 on its own screen. That difference is what `layoutWindows`' origin
+    // arguments are for, and a fixture written in per-screen coordinates cannot
+    // tell a shell that subtracts the origin from one that forgets to.
     readonly property var wins: [
         { id: 10, app_id: "kitty", workspace_id: 1,
-          layout: { pos_in_scrolling_layout: [1, 1], tile_size: [1232, 734] } },
+          at: [24, 33], size: [1232, 734] },
         { id: 11, app_id: "brave", workspace_id: 2,
-          layout: { pos_in_scrolling_layout: [1, 1], tile_size: [640, 800] } },
+          at: [0, 0], size: [640, 800] },
         { id: 12, app_id: "code",  workspace_id: 3,
-          layout: { pos_in_scrolling_layout: [1, 1], tile_size: [2560, 2160] } }
+          at: [1280, 0], size: [2560, 2160] }
     ]
 
     function run() {
@@ -124,14 +138,41 @@ Scope {
         // and holds a 1232 window; Virtual-2 is 5120 and holds a 2560 one. Half
         // of one screen must look like half, whichever screen it is — that is
         // B53, and it is the thing a shared denominator would destroy.
+        // ⚠️ THE ORIGIN IS PASSED, because ui/notch/pages/MonitorsPage.qml passes
+        // it. A check that calls the function with fewer arguments than the only
+        // caller does is checking a shape nothing runs.
         var a = G.layoutWindows(cols[0].windows,
-                                cols[0].logical.width, cols[0].logical.height)
+                                cols[0].logical.width, cols[0].logical.height,
+                                cols[0].logical.x, cols[0].logical.y)
         var b = G.layoutWindows(cols[1].windows,
-                                cols[1].logical.width, cols[1].logical.height)
+                                cols[1].logical.width, cols[1].logical.height,
+                                cols[1].logical.x, cols[1].logical.y)
+
+        // ⚠️ THAT THERE IS A BOX AT ALL COMES FIRST, and it is not a formality.
+        // `layoutWindows` drops a window it cannot measure, so a fixture whose
+        // fields have gone stale yields an EMPTY list — and the two checks below
+        // then throw on `a[0]` rather than failing. A thrown check leaves `run()`
+        // without ever reaching `finish()`, which is a hang and not a red line.
+        if (!a.length || !b.length) {
+            root.ok("both screens placed their window (a=" + a.length
+                    + ", b=" + b.length + ")", false)
+            root.note("  --    do the fixture windows still carry `at` and `size`?")
+            root.finish()
+            return
+        }
+
         root.ok("a nearly-full window on the small screen reads as nearly full",
                 a[0].w > 0.95)
         root.ok("a half window on the big screen reads as half",
                 Math.abs(b[0].w - 0.5) < 0.0005)
+
+        // ⚠️ AND IT IS PLACED AT THE LEFT EDGE OF ITS OWN SCREEN. Hyprland
+        // reports positions in the GLOBAL layout, so this window's `at` is 1280
+        // — where Virtual-2 begins. Drawn without subtracting that origin it
+        // lands a quarter of the way into its own thumbnail, and the picture is
+        // wrong in a way that looks deliberate.
+        root.ok("…at the left edge of that screen, not offset by where it starts",
+                Math.abs(b[0].x) < 0.0005)
 
         // ------------------------------------- 7 · nothing to draw
         root.ok("no outputs yields no columns",
