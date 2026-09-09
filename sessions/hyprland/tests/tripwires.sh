@@ -89,12 +89,34 @@ trap 'restore_now; exit 143' TERM HUP
 # So: ANCHOR A MUTATION TO SOMETHING STRUCTURAL, never to prose. `pragma
 # Singleton` and a property declaration survive an editing pass; a sentence in a
 # comment is rewritten by the next person who improves it.
+#
+# ⚠️ FIVE CASES WENT STALE IN ONE MIGRATION, and the guard caught all five —
+# which is the argument for the guard. The move from the previous compositor to
+# Hyprland, and the cutting back of the profile that followed it, took the
+# ground out from under them:
+#
+#   greeter        REMOVED. shell/ui/greeter/ and tests/greeter.sh are both
+#                  gone; the login screen is SDDM's now. A row naming two files
+#                  that do not exist is not a stale case, it is a case about
+#                  nothing, and there is nothing to re-point it at.
+#   no-secrets     docs/HYPRLAND.md has not been written yet — it is still on
+#                  the to-do list. Re-pointed at docs/CONFIG.md, which exists
+#                  and is published, so the check has a real file again.
+#   fingerprint    `Config.windows.defaultWidth` was removed from the shell.
+#                  Re-pointed at `Config.keys.mod`, which the config generator
+#                  reads and which therefore has to be in the fingerprint.
+#   bhctl-usage    the help text no longer reads `bhctl <cmd>` — the lines are
+#                  indented two spaces now, so the old sed matched nothing.
+#   workspaces     the centring step it deleted is gone: Hyprland reports where
+#                  a window actually is, so there is no slack to share by hand.
+#                  Re-pointed at the line that reads that position, which is
+#                  where "packed against the left edge" now comes from.
 CASES=$(cat <<'TABLE'
 no-python|lib/70-services.sh|$a python3 -c "print(1)"|python in an installer phase
 no-fetch-animation|dotfiles/zsh/zshrc|s/^        fastfetch$/        buchhwin-fetch/|a call to the deleted player
 setting-rows|shell/ui/settings/pages/DockPage.qml|s/key: "dock.enabled"/key: "dock.enabledX"/|a row over a key that does not exist
 key-readers|shell/config/Config.qml|s/^                property bool noCsd: true$/                property bool noCsd: true\n                property bool nobodyReadsThis: true/|a key nothing reads
-fingerprint|shell/services/Theming.qml|s/Config.windows.defaultWidth,//|a generated key outside the fingerprint
+fingerprint|shell/services/Theming.qml|s/Config.keys.mod,//|a generated key outside the fingerprint
 reset-page|shell/ui/settings/pages/DisplaysPage.qml|s/resetKeys: \["outputs"\]/resetKeys: []/|a page that writes settings its reset forgets
 displays|shell/services/Compositor.qml|s/toFixed(3)/toFixed(1)/|a refresh rate the compositor will not accept
 english|shell/services/Connectors.qml|s/^pragma Singleton$/pragma Singleton\n\/\/ Das ist der Fehler und wird nicht uebersetzt/|German in the source  # english-ok: the fixture IS German, that is the fault being injected
@@ -116,10 +138,9 @@ tap-targets|shell/ui/common/IconRail.qml|s/^                onClicked: root.acti
 no-secrets|docs/CONFIG.md|$a A machine at 192.168.178.42 answers on port 8080.|an address in a published file  # secrets-ok: the fixture IS an address, that is the fault being injected
 workspace-labels|shell/ui/notch/pages/WorkspacesPage.qml|s/box.modelData.ws.idx/box.modelData.ws.name/|a workspace label reading the name instead of the index
 config-shape|shell/config/Config.qml|s/^                property bool noCsd: true$/                property bool noCsd: true\n                property var crashesQuickshell: []/|a nested property var, which segfaults quickshell
-bhctl-usage|bin/bhctl|s/^bhctl backup .*$//|a subcommand that usage() no longer mentions
+bhctl-usage|bin/bhctl|s/^  prune .*$//|a subcommand that usage() no longer mentions
 switch-one-writer|shell/ui/common/Toggle.qml|s#^    HoverHandler {#    TapHandler { onTapped: root.toggled(!root.checked) }\n    HoverHandler {#|a switch that answers the press its row already answers
-greeter|shell/ui/greeter/GreeterFace.qml|s/uid >= 1000 /uid >= 0 /|a login screen offering system accounts as people
-no-secrets|docs/HYPRLAND.md|$a Measured on a Ryzen 7 7840HS with an RTX 4060.|an exact device model in a published file  # secrets-ok: the fixture IS a model, that is the fault being injected
+no-secrets|docs/CONFIG.md|$a Measured on a Ryzen 7 7840HS with an RTX 4060.|an exact device model in a published file  # secrets-ok: the fixture IS a model, that is the fault being injected
 no-foreign-bar|lib/80-shellenv.sh|s/^    remove_unwanted$/    true/|nothing removes the bar this desktop replaces
 notch-keys|shell/ui/surface/OverlaySurface.qml|s@^        Keys.onEscapePressed:@        // Keys.onEscapePressed:@|Escape answered by nothing at all
 reset-page|shell/config/Config.qml|s/typeof v.length === "number"/false/|a QML list<string> that never reaches the schema
@@ -131,7 +152,7 @@ motion|shell/ui/surface/ShellSurface.qml|s/^    implicitHeight: Math.max(1, root
 no-fetch-animation|shell/tools/render.qml|s/+ Math.max(0, root.fetchTextLines - root.fetchLogoLines) + ", "/+ 6 + ", "/|the fastfetch logo padding typed as a number again, right on one machine at most
 notch-frame|shell/ui/surface/OverlaySurface.qml|s/^            anchors.top: parent.top$/            anchors.verticalCenter: parent.verticalCenter/|the page centred in the card again, so every height change slides it by half
 monitors|shell/common/WorkspaceGeometry.qml|s/^            var want = wanted$/            var want = 1/|every monitor column pinned to the first workspace, so paging one column does nothing
-workspaces|shell/common/WorkspaceGeometry.qml|s/^        var offset = (spanW - total) \/ 2$/        var offset = 0/|the window row packed against the left edge again, with all the slack on the right
+workspaces|shell/common/WorkspaceGeometry.qml|s/^                x: Number.*$/                x: 0,/|the window row packed against the left edge again, with all the slack on the right
 TABLE
 )
 
