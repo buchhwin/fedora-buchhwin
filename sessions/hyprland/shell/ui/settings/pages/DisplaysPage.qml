@@ -416,7 +416,7 @@ ColumnLayout {
                     // The four-way verdict, the same one bhctl doctor makes, so
                     // the two can never disagree about what the gap means.
                     text: conn.modelData.connected
-                          ? (conn.inThe compositor ? "in use" : "plugged in, not picked up")
+                          ? (conn.inCompositor ? "in use" : "plugged in, not picked up")
                           : "nothing plugged in"
                     font.pixelSize: Theme.fontSizeSm
                     color: (conn.modelData.connected && !conn.inCompositor)
