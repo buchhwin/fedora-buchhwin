@@ -16,7 +16,7 @@
 // this note said clicking was impossible on the test machine. That was wrong —
 // measured afterwards: a real click on the settings window works, and the three
 // things that had made it look broken were a locked session, ydotool's
-// `--absolute` on a device with no ABS axes, and niri's overview standing open
+// `--absolute` on a device with no ABS axes, and the compositor's overview standing open
 // because a pointer move had crossed the top-left corner. The recipe that works
 // is in <screenshot-archive>/INDEX.md.
 //
@@ -234,7 +234,7 @@ Item {
 
         case 12:
             // ⚠️ ARGUMENTS WITH NO PROGRAM ARE DROPPED. A list starting with
-            // "-e" makes niri look for a binary called "-e", and the key that
+            // "-e" makes the compositor look for a binary called "-e", and the key that
             // uses it fails at the moment it is pressed — long after the box
             // was emptied.
             root.findFn(root.cmdRow, "write", 0).write("", "-e, btop")
@@ -395,12 +395,12 @@ Item {
             // place a SECOND list is right, because its whole job is to disagree
             // with the page if the page ever loses one.
             var want = ["gtk", "qt", "kitty", "alacritty", "hypr", "btop", "bat",
-                        "fastfetch", "delta", "tmux", "starship", "lazygit", "vscode"]
+                        "fastfetch", "delta", "tmux", "starship", "lazygit", "brave"]
             var missed = []
             for (var i = 0; i < want.length; i++)
                 if (String(th[want[i]]) !== "neutral")
                     missed.push(want[i] + "=" + th[want[i]])
-            root.check("theming table: all thirteen programs were set",
+            root.check("theming table: every theming target was set",
                        missed.length === 0,
                        missed.length ? missed.join(" ") : "13 of 13")
             // ⚠️ AND IT MUST NOT HAVE TOUCHED THE TWO THAT ARE NOT PROGRAMS.

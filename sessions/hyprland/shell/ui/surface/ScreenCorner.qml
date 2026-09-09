@@ -1,21 +1,21 @@
 // One rounded screen corner. Four of these make the display look like it has
 // them.
 //
-// ⚠️ NIRI CANNOT DO THIS, ASKED RATHER THAN ASSUMED. Its wiki has
+// ⚠️ THE COMPOSITOR CANNOT DO THIS, ASKED RATHER THAN ASSUMED. Its wiki has
 // `geometry-corner-radius` for windows and for layer surfaces and nothing for
 // the output itself — the only screen-wide rounding it mentions is in its own
 // design principles, as a shader it deliberately does not run. So this is ours,
 // and being ours it has to be cheap.
 //
 // ⚠️ AS BIG AS THE RADIUS, NOT AS BIG AS THE SCREEN. A single fullscreen
-// surface with four corners drawn on it would make niri blur and shadow the
+// surface with four corners drawn on it would make the compositor blur and shadow the
 // whole display — its own layer-rule documentation says it "has no way of
 // knowing about invisible margins, and will draw the shadow behind the entire
 // surface". That is the coloured halo this project has already chased once.
 // Four surfaces of r × r pixels cost four small textures and nothing else.
 //
 // ⚠️ AND INPUT GOES STRAIGHT THROUGH. An empty mask region means the corner is
-// drawn and not clickable. Without it the top-left corner would swallow niri's
+// drawn and not clickable. Without it the top-left corner would swallow the compositor's
 // overview gesture and the top-right one our own hot corner — two features
 // killed by a decoration.
 import QtQuick
@@ -61,7 +61,7 @@ PanelWindow {
         anchors.fill: parent
 
         // Repainted when the shape changes and at no other time. A Canvas that
-        // repaints per frame is exactly what niri's own design note warns about
+        // repaints per frame is exactly what the compositor's own design note warns about
         // for long-running effects.
         onWidthChanged: cut.requestPaint()
         onHeightChanged: cut.requestPaint()

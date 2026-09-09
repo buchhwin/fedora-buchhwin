@@ -26,7 +26,7 @@ ColumnLayout {
         Layout.fillWidth: true
         title: "Programs"
 
-        // ⚠️ ARGUMENT LISTS, NOT COMMAND LINES. niri's `spawn` takes one string
+        // ⚠️ ARGUMENT LISTS, NOT COMMAND LINES. the compositor's `spawn` takes one string
         // per argument, so a whole command line in one string makes it look for
         // a binary with spaces in its name — and it fails with a message that
         // does not mention the real cause. A comma is the separator here for
@@ -35,7 +35,7 @@ ColumnLayout {
             Layout.fillWidth: true
             key: "programs.terminal"
             label: "Terminal"
-            // Why it is this way: One argument per comma — niri's spawn takes
+            // Why it is this way: One argument per comma — the compositor's spawn takes
             // them apart, so a whole command line in one box would look for a
             // binary with spaces in its name.
             hint: "The program, and its arguments underneath."

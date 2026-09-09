@@ -2,7 +2,7 @@ pragma ComponentBehavior: Bound
 
 // Lock, suspend, log out, restart, shut down.
 //
-// It exists because `Super+Shift+E` was bound straight to niri's `quit`: one
+// It exists because `Super+Shift+E` was bound straight to the compositor's `quit`: one
 // keystroke, no question, every unsaved thing gone. A session menu is not
 // decoration around that — the SECOND press is the feature.
 //

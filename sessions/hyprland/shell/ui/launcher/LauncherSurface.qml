@@ -10,7 +10,7 @@
 // on `Ipc.launcher`.
 //
 // ⚠️ Exactly as big as what it draws, like every other surface here. From
-// niri's own layer-rule documentation: it "has no way of knowing about
+// the compositor's own layer-rule documentation: it "has no way of knowing about
 // invisible margins, and will draw the shadow behind the entire surface". A
 // full-screen window with a centred card would get a screen-sized shadow and a
 // screen-sized blur, which is what the notch's coloured halo was.

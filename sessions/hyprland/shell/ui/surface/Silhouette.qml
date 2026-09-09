@@ -28,7 +28,7 @@
 // 150×34 with perfectly vertical sides and no shoulder anywhere, which is not a
 // wrong radius but a missing curve.
 //
-// Widening the window instead is not the fix. niri "has no way of knowing about
+// Widening the window instead is not the fix. The compositor "has no way of knowing about
 // invisible margins, and will draw the shadow behind the entire surface" — blur
 // likewise — so a window wider than its shape brings back the coloured halo.
 // The shape has to fit the window, not the other way round.

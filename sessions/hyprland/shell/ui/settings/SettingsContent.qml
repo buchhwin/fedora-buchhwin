@@ -692,8 +692,8 @@ FocusScope {
 
             // ⚠️ THE ONE PLACE A REFUSED SETTING BECOMES VISIBLE, and it is
             // here because this is where the setting was made. The generator
-            // will not install a config.kdl that niri rejects — an invalid one
-            // means niri does not start at all — so a bad value leaves the
+            // will not install a config.kdl that the compositor rejects — an invalid one
+            // means the compositor does not start at all — so a bad value leaves the
             // desktop working and the change simply not applied. Without this
             // banner that is indistinguishable from a control that does
             // nothing, which is the exact failure this whole window exists to
@@ -737,7 +737,7 @@ FocusScope {
                     BarText {
                         Layout.fillWidth: true
                         text: "The desktop still boots — the previous configuration was kept. "
-                            + "Details in /tmp/buchhwin-niri.log."
+                            + "Details in /tmp/buchhwin-the compositor.log."
                         font.pixelSize: Theme.fontSizeSm
                         color: Theme.fgMuted
                         wrapMode: Text.WordWrap
@@ -769,7 +769,7 @@ FocusScope {
             // ⚠️ AND THE FIRST LINE OF THE TEXT IS THAT IT DOES NOT MATTER MUCH.
             // A warning that reads like a broken machine, on a machine that is
             // working perfectly, is how people learn to click warnings away.
-            // the compositor draws on the integrated GPU; this costs the second card.
+            // The compositor draws on the integrated GPU; this costs the second card.
             //
             // Same shape as the banner above rather than a new one: same
             // rounded pill background, same `warning` glyph — which tests/
@@ -816,7 +816,7 @@ FocusScope {
                     }
                     BarText {
                         Layout.fillWidth: true
-                        text: "Nothing on this desktop depends on it: niri draws with the built-in "
+                        text: "Nothing on this desktop depends on it: the compositor draws with the built-in "
                             + "graphics. Only offloading and any monitor wired to the second card "
                             + "are affected."
                         font.pixelSize: Theme.fontSizeSm

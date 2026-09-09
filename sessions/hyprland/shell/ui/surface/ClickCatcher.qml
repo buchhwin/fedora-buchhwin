@@ -1,6 +1,6 @@
 // Clicking beside the island closes it.
 //
-// niri has no focus-grab, so this cannot be had for free: it takes a real
+// The compositor has no focus-grab, so this cannot be had for free: it takes a real
 // fullscreen surface that swallows the click.
 //
 // ⚠️ The opacity is 0.004 and that number is load-bearing. A surface that is

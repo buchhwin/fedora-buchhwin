@@ -128,7 +128,7 @@ Singleton {
     readonly property real secondsLeft:
         !available ? 0 : (charging ? device.timeToFull : device.timeToEmpty)
 
-    // ⚠️ 15 AND 5 WERE HARD-CODED HERE while docs/CHECKLIST.md named the same
+    // ⚠️ 15 AND 5 WERE HARD-CODED HERE while the settings named the same
     // two numbers as the thresholds — so the documentation and the code agreed
     // by luck rather than by reading. They are settings now, and this is their
     // reader.

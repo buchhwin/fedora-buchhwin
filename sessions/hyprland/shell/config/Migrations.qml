@@ -323,7 +323,7 @@ Singleton {
         //   cursor.theme "Breeze_Dark" — that theme does not exist. The package
         //     we install, breeze-cursor-theme, ships Breeze_Light and
         //     breeze_cursors and nothing called Breeze_Dark (checked with
-        //     `rpm -ql`). niri was handed a name that resolves to nothing and
+        //     `rpm -ql`). The compositor was handed a name that resolves to nothing and
         //     drew its own pointer at its own size: "far too big".
         //   look.opacityPanel 0.78 and look.opacityApp 0.80 — his decision, in
         //     his words: take the transparency out everywhere except the
@@ -406,7 +406,7 @@ Singleton {
         // pinned by commit and SHA256 — but a file that says anything at all
         // wins, and files were still carrying the Breeze names. Those got there
         // in the era when our own default was `Breeze_Dark`, a theme that is on
-        // no machine: niri could not resolve it, fell back to its own pointer at
+        // no machine: the compositor could not resolve it, fell back to its own pointer at
         // its own size, and that is the "the cursor is far too big" report.
         // Step 8 -> 9 already rescued `Breeze_Dark` for exactly this reason and
         // simply did not know about the other two names.

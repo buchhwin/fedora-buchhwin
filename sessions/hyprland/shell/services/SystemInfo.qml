@@ -6,7 +6,7 @@ pragma Singleton
 // ⚠️ IT EXISTS BECAUSE HE ASKED FOR A PLACE TO LOOK: "es soll ganz unten in     // english-ok: his request, quoted
 // einem evtl nueen tab mit systeninfos so die wichtigesten systeminfos          // english-ok: same quote, second line
 // angezeigt werden". Which facts is his choice too — the machine (processor,    // english-ok: same quote, third line
-// memory, graphics, disk) and the system (Fedora, kernel, niri, quickshell, and
+// memory, graphics, disk) and the system (Fedora, kernel, the compositor, quickshell, and
 // this desktop). Session, monitors and battery he explicitly did NOT pick, so
 // they are not here.
 //

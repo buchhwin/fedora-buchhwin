@@ -49,7 +49,7 @@ PanelWindow {
     WlrLayershell.layer: root.fullscreenHere ? WlrLayer.Overlay : WlrLayer.Top
 
     // ⚠️ THE WINDOW IS EXACTLY AS BIG AS WHAT IS DRAWN IN IT. Nothing here is
-    // cosmetic — niri's blur rule applies to the whole LAYER SURFACE, not to
+    // cosmetic — the compositor's blur rule applies to the whole LAYER SURFACE, not to
     // the shape painted on it.
     //
     // This was full width and a constant `expandedHeight + flare` = 149 px, so
@@ -90,7 +90,7 @@ PanelWindow {
     // already had — what decides layout is SET, what moves is ANIMATED — applied
     // to the one place that was still breaking it.
     //
-    // ⚠️ AND IT IS SAFE HERE, for the reason the note below spells out: niri
+    // ⚠️ AND IT IS SAFE HERE, for the reason the note below spells out: the compositor
     // draws blur and shadow behind the WHOLE surface, so spare room usually
     // comes out as a halo — but this is the one surface with both switched off
     // (tools/hypr.qml: `surface("buchhwin-notch", notchRadius, false, false)`).
@@ -100,8 +100,8 @@ PanelWindow {
     anchors { top: true; left: true; right: true }
 
     //
-    // ⚠️ AND IT HAS NO INVISIBLE MARGIN. From niri's own layer-rule docs:
-    // "niri has no way of knowing about invisible margins, and will draw the
+    // ⚠️ AND IT HAS NO INVISIBLE MARGIN. From the compositor's own layer-rule docs:
+    // "the compositor has no way of knowing about invisible margins, and will draw the
     // shadow behind the entire surface." Blur is the same. The window used to
     // carry `flare` px of transparent border for the shoulders to curve into —
     // and that border came out as a blurred, colour-fringed halo around the
@@ -118,7 +118,7 @@ PanelWindow {
     //
     // Following the shape means re-sizing a WAYLAND LAYER SURFACE once per
     // frame, and that is not drawing — it is protocol. Every frame paid for a
-    // `set_size` plus an `ack_configure` round trip with niri, a buffer of a new
+    // `set_size` plus an `ack_configure` round trip with the compositor, a buffer of a new
     // size (so the swapchain is thrown away every frame), a fresh corner-radius
     // calculation, and a new input region. Measured on the VM at 60 Hz, ONE
     // opening of the quick panel: 11 × `set_size`, 9 × `ack_configure` — one per
@@ -129,7 +129,7 @@ PanelWindow {
     // never in the numbers.
     //
     // ⚠️ AND IT IS ONLY SAFE HERE. The rule the rest of this shell lives by —
-    // a surface must be exactly as big as what it draws — exists because niri
+    // a surface must be exactly as big as what it draws — exists because the compositor
     // draws blur and shadow behind the WHOLE surface, so spare room comes out
     // as a halo. The notch is the one surface with both switched off:
     // tools/hypr.qml calls `surface("buchhwin-notch", notchRadius, false, false)`

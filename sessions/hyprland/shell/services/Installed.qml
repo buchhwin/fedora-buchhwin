@@ -44,7 +44,7 @@ Singleton {
     property var keyboardVariants: []
     // xkb's own option names, "caps:escape" and the other ninety. The row for
     // these was a free text box, and a typo in it is not an error anywhere —
-    // niri passes the string to xkb, xkb ignores what it does not know, and the
+    // The compositor passes the string to xkb, xkb ignores what it does not know, and the
     // key you rebound simply does not change.
     property var keyboardOptions: []
     // ⚠️ FULL PATHS, because that is what the setting holds. The label is
@@ -53,7 +53,7 @@ Singleton {
     // its own theme rather than wherever the filesystem put it.
     property var soundFiles: []
     // The render nodes this machine has, stable form first. Feeds the one row
-    // that can stop niri from starting if it is given a path that does not
+    // that can stop the compositor from starting if it is given a path that does not
     // resolve, so offering the real ones is not a convenience here.
     property var renderDevices: []
 

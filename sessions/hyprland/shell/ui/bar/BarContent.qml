@@ -302,7 +302,7 @@ Item {
         // --------------------------------------------------- settings
         Pill {
             interactive: true
-            // ⚠️ `settingsOpen`, not a page — the settings window is a real niri
+            // ⚠️ `settingsOpen`, not a page — the settings window is a real compositor
             // window and sets no page at all. For a day this gear called a verb
             // that pointed at a property which had been deleted, and it did
             // nothing without saying so; the state it lights up on is now the

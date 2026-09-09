@@ -15,7 +15,7 @@ pragma ComponentBehavior: Bound
 //
 // ⚠️ AND THE QUESTION IS KEPT, in the smaller space rather than in spite of it.
 // The session page exists because `Super+Shift+E` was once bound straight to
-// niri's `quit`: one keystroke, no question, every unsaved thing gone. A row of
+// the compositor's `quit`: one keystroke, no question, every unsaved thing gone. A row of
 // five unlabelled icons is a MORE dangerous place for that, not less — the
 // shutdown pill is a centimetre from the lock pill. So the three that throw work
 // away arm on the first press and say so, in words, beside the row.

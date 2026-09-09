@@ -10,7 +10,7 @@ pragma Singleton
 //
 // What that meant in use: pick a wallpaper, and the SHELL recolours instantly
 // (QML bindings all the way down from Config to Theme), while GTK, Qt, kitty
-// and niri sit on the old colours until somebody types `bhctl theme apply`.
+// and the compositor sit on the old colours until somebody types `bhctl theme apply`.
 // Half of the project's central promise, quietly untrue — and
 // ui/notch/pages/WallpaperPage.qml even promised the other half in a comment.
 //
@@ -105,7 +105,7 @@ Singleton {
         var k = i.keyboard, t = i.touchpad, m = i.mouse
         return [k.layout, k.variant, k.options, k.repeatDelay, k.repeatRate,
                 t.tap, t.dwt, t.naturalScroll, t.middleEmulation,
-                t.accelSpeed, t.accelProfile, t.scrollMethod, t.clickMethod,
+                t.clickMethod,
                 t.scrollFactor, m.scrollFactor,
                 m.naturalScroll, m.accelSpeed, m.accelProfile,
                 i.focusFollowsMouse, i.warpMouseToFocus].join("\u0000")
@@ -132,7 +132,7 @@ Singleton {
         // so `t` is NULL here on every single start and this whole binding threw
         // with "Cannot read property 'palette' of null". Silently: the watcher
         // simply never got a fingerprint, so changing the palette re-coloured
-        // the shell and left GTK, Qt, kitty and niri alone — the exact failure
+        // the shell and left GTK, Qt, kitty and the compositor alone — the exact failure
         // this service was written to end.
         //
         // The test belongs here rather than inside `settled`: putting it in that
@@ -165,7 +165,7 @@ Singleton {
                 l.fontUi, l.fontMono, l.fontSize, l.profile,
                 g.enabled, g.mode,
                 g.gtk, g.qt, g.kitty, g.alacritty, g.hypr, g.btop, g.bat,
-                g.fastfetch, g.delta, g.tmux, g.starship, g.lazygit, g.vscode,
+                g.fastfetch, g.delta, g.tmux, g.starship, g.lazygit,
                 // ⚠️ Brave, and it belongs here for the ordinary reason —
                 // render.qml reads it — but it is worth naming because this is
                 // the rule the project has broken four times: a new generator
@@ -176,9 +176,8 @@ Singleton {
                 // program can throw away. They are in the fingerprint for the
                 // ordinary reason — render.qml reads them — and the update
                 // problem is a separate one, named in docs/CONFIG.md.
-                g.vesktop, g.spicetify,
-                // ⚠️ AND THE KEYS THE NIRI GENERATOR READS. Until now this
-                // watcher only ran the RENDERER, so every niri-side setting had
+                // ⚠️ AND THE KEYS THE CONFIG GENERATOR READS. Until now this
+                // watcher only ran the RENDERER, so every compositor-side setting had
                 // no watcher at all: adding an app to `windows.blurred` wrote
                 // nothing, and the window rule appeared only when somebody
                 // happened to run `bhctl hypr apply`. Measured — Nautilus got
@@ -198,9 +197,9 @@ Singleton {
                 //   keys.mod        1   Super -> Alt wrote nothing at all
                 //   binds           1   every key change, which is exactly what
                 //                       a rebinding tool would produce
-                //   motion.speed    1   the shell sped up, niri's own window
+                //   motion.speed    1   the shell sped up, the compositor's own window
                 //                       animations did not
-                //   theming.vscode  1   the newest theme target, forgotten
+                //   theming.<target> 1  a theme target added and forgotten
                 //
                 // Measured rather than read, each against a control that DID
                 // regenerate: change the key, wait, ask whether config.kdl was
@@ -215,7 +214,13 @@ Singleton {
                 // place, so the length alone would miss it — the join of key and
                 // action is what actually moves, and it is 63 short strings once
                 // per change, next to the 26 colours already here.
-                Config.surfaces.hotCorners,
+                // ⚠️ hotCorners AND notch.cornerRadius ARE NOT HERE ANY MORE.
+                // Both are drawn by the shell itself, straight from Config
+                // through QML bindings, so they follow the moment they change.
+                // Nothing under shell/tools reads either one — the generator
+                // that used to bake them into layer rules is gone — so every
+                // drag of that slider was paying for a full render over
+                // thirteen foreign config files to produce identical output.
                 Config.keys.mod,
                 // The terminal's behaviour, written into the file the renderer
                 // already produces. tests/fingerprint.sh asked for these the
@@ -232,9 +237,9 @@ Singleton {
                 root.inputPrint,
                 root.programsPrint,
                 // ⚠️ THESE WERE THE THREE DURATIONS, and they moved because the
-                // generator stopped reading them. It no longer restates niri's
+                // generator stopped reading them. It no longer restates the compositor's
                 // eight animations in our own numbers; it writes `slowdown` and
-                // lets niri's tuned defaults stand. So what has to be watched is
+                // lets the compositor's tuned defaults stand. So what has to be watched is
                 // what the file now actually depends on: the speed multiplier
                 // and whether animation happens at all. Both still resolve back
                 // through Theme to `motion.speed` and `look.profile`, so the
@@ -247,7 +252,7 @@ Singleton {
                 // three lines up, applied on the way in this time instead of
                 // after somebody noticed the pointer never changed.
                 Config.cursor.theme, Config.cursor.size,
-                // ⚠️ THE GPU niri DRAWS ON. tools/hypr.qml reads it, so it
+                // ⚠️ THE GPU the compositor DRAWS ON. tools/hypr.qml reads it, so it
                 // belongs here — the same rule as the two lines above, applied
                 // on the way in for the sixth time. The `Config.gpu ?` guard is
                 // not decoration: `settled` goes true one event-loop step before
@@ -295,18 +300,14 @@ Singleton {
                 // written shell.json and regenerated nothing. Twenty-ninth time
                 // the contract was broken, first time a check said so before
                 // anybody shipped it.
-                Config.windows.defaultWidth,
                 l.gapsIn, l.gapsOut, l.blur, l.blurPasses, l.blurOffset,
                 l.blurNoise, l.blurSaturation, l.shadows, l.shadowSoftness,
-                l.shadowSpread, l.shadowOffsetY, l.shadowBehindWindow,
+                l.shadowSpread, l.shadowOffsetY,
                 // The renderer reads this one, so it belongs here — same
                 // contract as opacityApp above, which was missing for a week.
                 l.shadowOpacity,
                 l.opacityActive,
-                // `hoverCornerRadius` went with them: hypr.qml:497 reads
-                // `notch.cornerRadius` and nothing else. It was picked up along
-                // with its neighbour rather than because anything wanted it.
-                l.opacityInactive, Config.notch.cornerRadius,
+                l.opacityInactive,
                 // ⚠️ THE COLOURS THEMSELVES, not the palette's NAME. The first
                 // version watched `Scheme.name` and `theme.palette`, and the
                 // acceptance test failed on the very case this service exists
@@ -422,7 +423,7 @@ Singleton {
             // in exactly the cases nobody is watching: editing shell.json by
             // hand, a `git pull` that changes a palette, a restore from backup,
             // `bhctl shell reset` followed by a restart. The desktop then ran
-            // with GTK, Qt, kitty and niri files describing yesterday's
+            // with GTK, Qt, kitty and the compositor files describing yesterday's
             // settings, and stayed that way until some UNRELATED setting moved
             // the fingerprint. Nothing reported it, because from the watcher's
             // point of view nothing had happened.
@@ -448,7 +449,7 @@ Singleton {
         if (root._seen === root.fingerprint) {
             // ⚠️ THE STAMP IS WRITTEN HERE, NOT WHEN THE GENERATOR EXITS, AND
             // THAT WAS MEASURED THE WRONG WAY ROUND FIRST. Stamping in
-            // niriProc.onExited looked obviously right and made every single
+            // stamping in the generator's onExited looked obviously right and made every single
             // restart report "the generated files are behind": the renderer
             // rewrites the derived palette, this service watches that file, and
             // at the moment the generator exits the fingerprint still contains

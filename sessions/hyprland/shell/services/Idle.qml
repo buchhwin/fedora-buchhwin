@@ -7,7 +7,7 @@ pragma Singleton
 // until the battery was flat. The last session concluded this needed technology
 // that was not here — the handout said Quickshell has no idle service at all —
 // and that was wrong on the first count. Quickshell 0.2.1 ships
-// `IdleMonitor` in Quickshell.Wayland (re-exported from _IdleNotify), niri 26.04
+// `IdleMonitor` in Quickshell.Wayland (re-exported from _IdleNotify), the compositor 26.04
 // implements ext_idle_notifier_v1, and the lock screen has been in this repo
 // since the beginning. Nothing was installed to make this work.
 //
@@ -101,7 +101,7 @@ Singleton {
     Process {
         id: screenOn
         // ⚠️ Called explicitly rather than trusting the compositor to undo it.
-        // niri's own wiki drives power-off-monitors from swayidle and says
+        // the compositor's own wiki drives power-off-monitors from swayidle and says
         // nothing about what turns them back on, and "it probably wakes on
         // input" is not something to find out with a dark screen. Turning on a
         // monitor that is already on costs nothing.
@@ -120,7 +120,7 @@ Singleton {
     //   after restarting the shell      2 qs processes   LockedHint=yes
     //                                   …and typing the password does nothing
     //
-    // niri keeps the session locked when the locking client dies. That is
+    // The compositor keeps the session locked when the locking client dies. That is
     // correct and it is the whole security property of ext-session-lock — but
     // what is left behind is a machine nobody can get back into without a
     // second terminal. Every path that restarts this unit reaches it: the

@@ -44,7 +44,7 @@ singleton Installed 1.0 Installed.qml
 # empty text boxes. Bindings over the services above — no process of its own.
 singleton Suggest 1.0 Suggest.qml
 singleton Gpu 1.0 Gpu.qml
-# What the KERNEL has plugged in, beside what niri is drawing on. The gap
+# What the KERNEL has plugged in, beside what the compositor is drawing on. The gap
 # between the two lists is what names the layer a missing monitor is missing in
 # — his B2. Asks nothing until the Displays page is opened.
 singleton Connectors 1.0 Connectors.qml

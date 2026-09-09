@@ -170,7 +170,7 @@ ColumnLayout {
             Layout.fillWidth: true
             key: "surfaces.hotCorners"
             label: "Hot corners"
-            hint: "niri already owns the top-left corner for its overview; choosing left or both switches that off."
+            hint: "the compositor already owns the top-left corner for its overview; choosing left or both switches that off."
             kind: "choice"
             choices: [
                 { value: "off",   label: "Off" },
@@ -186,7 +186,7 @@ ColumnLayout {
             label: "Rounded screen corners"
             // Why it is this way: this is four small overlays, and clicks pass
             // straight through them.
-            hint: "0 switches them off and creates no surfaces at all. niri cannot round the display itself."
+            hint: "0 switches them off and creates no surfaces at all. The compositor cannot round the display itself."
             kind: "slider"
             from: 0; to: 40; step: 1; unit: "px"
         }

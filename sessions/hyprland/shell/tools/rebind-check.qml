@@ -55,26 +55,26 @@ Item {
             check("the defaults are in force to start with",
                   Config.binds.length === Config.defaultBinds.length,
                   Config.binds.length + " bindings")
-            check("Terminal ships on Mod+Return", root.keyOf("Terminal") === "Mod+Return")
+            check("Terminal ships on SUPER + Return", root.keyOf("Terminal") === "SUPER + Return")
             break
 
         case 2:
             // ------------------------------------------------ a clean rebind
-            Config.setRebind("Mod+Return", "Mod+T")
+            Config.setRebind("SUPER + Return", "SUPER + T")
             break
 
         case 3:
-            check("the binding moved", root.keyOf("Terminal") === "Mod+T",
+            check("the binding moved", root.keyOf("Terminal") === "SUPER + T",
                   root.keyOf("Terminal"))
             check("nothing else moved with it",
                   Config.binds.length === Config.defaultBinds.length)
-            check("the browser is still on its own key", root.keyOf("Browser") === "Mod+B")
+            check("the browser is still on its own key", root.keyOf("Web browser") === "SUPER + B")
             check("the FILE holds an override, not a copy of the list",
                   Config.get("rebinds").length === 1
                   && (!Config.get("binds") || Config.get("binds").length === 0),
                   JSON.stringify(Config.get("rebinds")))
             check("rebindOf reports where it went",
-                  Config.rebindOf("Mod+Return") === "Mod+T")
+                  Config.rebindOf("SUPER + Return") === "SUPER + T")
             break
 
         case 4:
@@ -82,36 +82,36 @@ Item {
             //
             // Mod+B belongs to the browser. Trying to move the file manager
             // there has to be refused, and it has to name the browser.
-            var clash = Config.bindClash("Mod+E", "Mod+B")
+            var clash = Config.bindClash("SUPER + E", "SUPER + B")
             check("a taken key is refused", clash !== null,
                   clash ? String(clash.desc) : "nothing came back")
             check("and the refusal names the binding in the way",
-                  clash && String(clash.desc) === "Browser")
+                  clash && String(clash.desc) === "Web browser")
 
             // ⚠️ THE OTHER DIRECTION, or the check could simply be "always
             // refuse" and still look right here.
             check("a free key is allowed",
-                  Config.bindClash("Mod+E", "Mod+F9") === null)
+                  Config.bindClash("SUPER + E", "SUPER + F9") === null)
             check("a binding may keep its own key",
-                  Config.bindClash("Mod+E", "Mod+E") === null)
+                  Config.bindClash("SUPER + E", "SUPER + E") === null)
 
             // ⚠️ AND AGAINST THE MOVED KEY, not the default one. Mod+T is where
             // the terminal is NOW; Mod+Return is where it ships. A check that
             // only ever looked at the defaults would let a second binding onto
-            // Mod+T and produce exactly the config niri refuses to parse.
+            // Mod+T and produce exactly the config the compositor refuses to parse.
             check("the clash check sees the CURRENT keys",
-                  Config.bindClash("Mod+E", "Mod+T") !== null)
+                  Config.bindClash("SUPER + E", "SUPER + T") !== null)
             check("and the key it was freed from is available again",
-                  Config.bindClash("Mod+E", "Mod+Return") === null)
+                  Config.bindClash("SUPER + E", "SUPER + Return") === null)
             break
 
         case 5:
             // -------------------------------------------------- unbinding
-            Config.setRebind("Mod+B", "")
+            Config.setRebind("SUPER + B", "")
             break
 
         case 6:
-            check("an empty override unbinds", root.keyOf("Browser") === "",
+            check("an empty override unbinds", root.keyOf("Web browser") === "",
                   Config.binds.length + " bindings left")
             check("exactly one binding disappeared",
                   Config.binds.length === Config.defaultBinds.length - 1)
@@ -119,13 +119,13 @@ Item {
 
         case 7:
             // ---------------------------------------------- back to default
-            Config.setRebind("Mod+Return", "Mod+Return")
+            Config.setRebind("SUPER + Return", "SUPER + Return")
             break
 
         case 8:
             check("rebinding to the default key removes the override",
-                  Config.rebindOf("Mod+Return") === undefined)
-            check("and it is back where it ships", root.keyOf("Terminal") === "Mod+Return")
+                  Config.rebindOf("SUPER + Return") === undefined)
+            check("and it is back where it ships", root.keyOf("Terminal") === "SUPER + Return")
             check("the override list holds only the other one",
                   Config.get("rebinds").length === 1,
                   JSON.stringify(Config.get("rebinds")))
@@ -135,7 +135,7 @@ Item {
         case 9:
             check("clearing puts everything back",
                   Config.binds.length === Config.defaultBinds.length
-                  && root.keyOf("Browser") === "Mod+B")
+                  && root.keyOf("Web browser") === "SUPER + B")
             check("and empties the file", Config.get("rebinds").length === 0)
             steps.stop()
             Qt.callLater(Qt.quit)

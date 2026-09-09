@@ -13,7 +13,7 @@ pragma ComponentBehavior: Bound
 // writes through config/Outputs.qml, which is the only place that knows how to
 // edit that list.
 //
-// ⚠️ THE MODE LIST IS NOT INVENTED. It comes from `niri msg -j outputs`, which
+// ⚠️ THE MODE LIST IS NOT INVENTED. It comes from `hyprctl -j monitors`, which
 // is the only thing that knows what a monitor advertises. A resolution list
 // assembled from the usual suspects would offer modes the screen does not have
 // and hide the one it prefers.
@@ -50,11 +50,11 @@ ColumnLayout {
     }
 
     // The screens as the arrangement picture wants them: logical pixels, and a
-    // position for every one — falling back to what niri has them at now when
+    // position for every one — falling back to what the compositor has them at now when
     // nothing has been chosen.
     //
     // ⚠️ `logical` RATHER THAN THE MODE SIZE. A 3840x2160 screen at scale 2 is
-    // logically 1920x1080, and niri counts positions in logical pixels. Using
+    // logically 1920x1080, and the compositor counts positions in logical pixels. Using
     // the mode would be wrong by exactly the scale factor.
     // The arrangement control, so its geometry rules can be checked without a
     // pointer — see the note on its `id`.
@@ -148,11 +148,11 @@ ColumnLayout {
     }
 
     // ⚠️ CHANGING THE RESOLUTION KEEPS THE RATE ONLY IF THAT RATE EXISTS THERE.
-    // niri's wiki: with no rate given it "will pick the highest refresh rate for
+    // the compositor's wiki: with no rate given it "will pick the highest refresh rate for
     // the resolution" — so silently dropping the rate is a defined outcome, not
     // a failure. What is NOT acceptable is writing a rate the new resolution
     // does not have: the wiki says the value "must match exactly, down to the
-    // three decimal digits", and a mode niri cannot parse means it picks one
+    // three decimal digits", and a mode the compositor cannot parse means it picks one
     // itself and the page shows a choice that never took.
     // ⚠️⚠️ AND IT DROPS THE SCALE, ON HIS INSTRUCTION. "wenn man die auflösung    // english-ok: the request, quoted
     // von einem monitor ändert geht das aber er müsste dann automatisch mit      // english-ok: the request, quoted
@@ -160,14 +160,14 @@ ColumnLayout {
     // scaling nicht bei 2 bleiben sondern auf eins gehen".                       // english-ok: the request, quoted
     //
     // ⚠️ IT DELETES THE KEY RATHER THAN COMPUTING A NEW NUMBER, and that is the
-    // whole design decision. niri's own wiki: "If scale is unset, the compositor will
+    // whole design decision. the compositor's own wiki: "If scale is unset, the compositor will
     // guess an appropriate scale based on the physical dimensions and the
     // resolution." Writing our own heuristic would be a second automation
     // arguing with one that already exists and knows the physical size of the
     // panel, which we do not.
     //
     // It is also rule 6 in its plainest form: an entry EXISTS = you decided;
-    // no entry = niri decides. One state, not a value plus a flag that can
+    // no entry = the compositor decides. One state, not a value plus a flag that can
     // contradict it.
     //
     // ⚠️ AND IT DOES NOT CONTRADICT THE OLDER RULE that a hand-set scale must
@@ -211,7 +211,7 @@ ColumnLayout {
             Layout.fillWidth: true
             screens: root.placed
             onMoved: function (placements) {
-                // Every screen is written, not only the dragged one — niri
+                // Every screen is written, not only the dragged one — Hyprland
                 // re-places all of them from scratch on any change, so a
                 // half-positioned set moves screens nobody touched.
                 for (var i = 0; i < placements.length; i++) {
@@ -224,7 +224,7 @@ ColumnLayout {
 
         BarText {
             Layout.fillWidth: true
-            text: "Drag a screen to say where it is. They snap together: niri "
+            text: "Drag a screen to say where it is. They snap together: the compositor "
                 + "ignores a position that overlaps another screen, so there is "
                 + "no gap or overlap to get wrong."
             font.pixelSize: Theme.fontSizeSm
@@ -245,7 +245,7 @@ ColumnLayout {
             readonly property var info: Services.Compositor.outputs[card.name] || ({})
 
             Layout.fillWidth: true
-            // The connector name is what niri and `bhctl doctor` both call it,
+            // The connector name is what the compositor and `bhctl doctor` both call it,
             // and the model is what is written on the bezel. Both, because
             // matching "DP-2" to the screen on your left is guesswork otherwise.
             title: card.name + (card.info.model ? "  ·  " + card.info.model : "")
@@ -290,7 +290,7 @@ ColumnLayout {
             // looks for it.
             //
             // ⚠️ AND THERE IS STILL NO AUTOMATIC MODE, which is the whole point.
-            // niri already guesses: "If scale is unset, the compositor will guess an
+            // The compositor already guesses: "If scale is unset, the compositor will guess an
             // appropriate scale based on the physical dimensions and the
             // resolution of the monitor". A heuristic of ours beside that would
             // be two automatic systems fighting, and the loser would be whichever
@@ -301,12 +301,12 @@ ColumnLayout {
             OutputRow {
                 Layout.fillWidth: true
                 label: "Set the scale myself"
-                hint: "Off means niri chooses, from the screen's size and resolution."
+                hint: "Off means the compositor chooses, from the screen's size and resolution."
                 kind: "switch"
                 checked: Outputs.has(card.name, "scale")
                 onChanged: function (v) {
                     if (v)
-                        // Start from what niri chose, so the first drag moves
+                        // Start from what the compositor chose, so the first drag moves
                         // from where you already are rather than jumping.
                         Outputs.setField(card.name, "scale",
                                          Number((card.info.logical && card.info.logical.scale) || 1))
@@ -336,7 +336,7 @@ ColumnLayout {
                 advanced: true
                 label: "Variable refresh rate"
                 // ⚠️ THE HARDWARE ANSWERS THIS, not us. `vrr_supported` comes
-                // from niri, and a switch offered on a screen that cannot do it
+                // from the compositor, and a switch offered on a screen that cannot do it
                 // is a switch that does nothing — the exact class of fault his
                 // B10 report is about.
                 usable: card.info.vrr_supported === true
@@ -358,10 +358,10 @@ ColumnLayout {
                 advanced: true
                 label: "Rotation"
                 kind: "choice"
-                // ⚠️ LOWERCASE, AND THAT IS NOT COSMETIC. `niri msg -j outputs`
+                // ⚠️ LOWERCASE, AND THAT IS NOT COSMETIC. `hyprctl -j monitors`
                 // reports the transform capitalised ("Normal"), and the config
                 // wants it lowercase ("normal"). Writing back what was read
-                // produces a config niri rejects, and it looks correct.
+                // produces a config the compositor rejects, and it looks correct.
                 choices: [
                     { value: "normal", label: "None" },
                     { value: "90",     label: "90° left" },
@@ -404,7 +404,7 @@ ColumnLayout {
                 Layout.fillWidth: true
                 spacing: Theme.space3
 
-                readonly property bool inNiri:
+                readonly property bool inCompositor:
                     Services.Compositor.outputs[String(conn.modelData.name)] !== undefined
 
                 BarText {
@@ -416,10 +416,10 @@ ColumnLayout {
                     // The four-way verdict, the same one bhctl doctor makes, so
                     // the two can never disagree about what the gap means.
                     text: conn.modelData.connected
-                          ? (conn.inNiri ? "in use" : "plugged in, not picked up")
+                          ? (conn.inThe compositor ? "in use" : "plugged in, not picked up")
                           : "nothing plugged in"
                     font.pixelSize: Theme.fontSizeSm
-                    color: (conn.modelData.connected && !conn.inNiri)
+                    color: (conn.modelData.connected && !conn.inCompositor)
                            ? Theme.warn : Theme.fgMuted
                 }
             }

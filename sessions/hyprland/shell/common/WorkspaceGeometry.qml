@@ -6,7 +6,7 @@ pragma Singleton
 // picture now: `Mod+Tab` shows one column per workspace of this monitor (B32),
 // and `Shift+Alt+Tab` shows one column per MONITOR (B33). Rule 6 — a list may
 // not exist twice — and a copy would have been worse than usual here, because
-// the arithmetic is measured against niri's real numbers and a second copy would
+// the arithmetic is measured against the compositor's real numbers and a copy would
 // drift away from those measurements silently.
 //
 // It is a function rather than a pile of bindings for a reason this project has
@@ -15,16 +15,27 @@ pragma Singleton
 // screenshot. `tests/workspaces.sh` calls it directly, so the arithmetic is
 // checkable on a machine with one screen and no session.
 //
-// ⚠️ MEASURED INPUTS, not assumed ones. From `niri msg -j windows` on the lab
-// VM:
+// ⚠️ THIS WAS REBUILT FOR HYPRLAND, AND IT GOT SIMPLER RATHER THAN HARDER.
 //
-//   pos_in_scrolling_layout      [column, row], 1-based
-//   tile_size                    [w, h] in logical pixels
-//   tile_pos_in_workspace_view   NULL — it is not usable, so it is not used
+// The previous version reconstructed the picture from the previous compositor's scrolling layout:
+// `pos_in_scrolling_layout` gave a [column, row] and `tile_size` gave a size,
+// and the columns were stacked left to right to work out where things were. It
+// had to, because the previous compositor never reported a window's actual position — a workspace
+// there is legitimately wider than its screen, so there is no single frame to
+// give coordinates in.
 //
-// Each window was 1232 wide on a 1280 output: niri scrolls, so a workspace is
-// legitimately wider than its screen. Three of those as a share of the box is
-// 2.9x, and that overflow is exactly what "voll abgeschnitten" was.            // english-ok: the report, quoted
+// Hyprland reports the real rectangle. `hyprctl -j clients` gives every window
+// an `at` [x, y] and a `size` [w, h] in layout pixels, so the thumbnail is a
+// scale of what is on screen instead of a reconstruction of it. Floating
+// windows, overlapping windows and anything a layout plugin does all come out
+// right for free, because none of it is being inferred any more.
+//
+// ⚠️ WHAT CARRIED OVER, because it was measured rather than assumed: a window
+// does not fill its slot. On a 1280-wide screen a single window measured 1232
+// wide with about 24 px of wallpaper showing on each side — the gaps. Those
+// come through in `at`/`size` on their own now, which is why there is no
+// centring step here any more. It was compensating for information the previous compositor did
+// not provide.
 
 import QtQuick
 
@@ -32,74 +43,65 @@ QtObject {
     id: root
 
     // Returns [{ win, x, y, w, h }] with x/y/w/h as shares 0..1 of the box.
-    function layoutWindows(wins, outW, outH) {
+    //
+    // outX/outY are the monitor's origin in the global layout. They matter as
+    // soon as there is a second screen: a window on the right-hand monitor has
+    // an `at` in the thousands, and without the origin every one of them would
+    // be drawn off the edge of its own thumbnail. They default to 0 so a
+    // single-screen caller — and every test — can leave them out.
+    function layoutWindows(wins, outW, outH, outX, outY) {
         var out = []
         if (!wins || !wins.length)
             return out
 
-        // Group into columns, keeping niri's own column numbers.
-        var cols = {}
+        var originX = Number(outX || 0)
+        var originY = Number(outY || 0)
+
+        var boxes = []
+        var maxX = 0, maxY = 0
         for (var i = 0; i < wins.length; i++) {
-            var L = wins[i].layout
-            var p = (L && L.pos_in_scrolling_layout) || [i + 1, 1]
-            var size = (L && L.tile_size) || [0, 0]
-            var c = p[0]
-            if (cols[c] === undefined)
-                cols[c] = { w: 0, wins: [] }
-            if (size[0] > cols[c].w)
-                cols[c].w = size[0]
-            cols[c].wins.push({ win: wins[i], row: p[1], w: size[0], h: size[1] })
-        }
-
-        var keys = Object.keys(cols).map(Number).sort(function (a, b) { return a - b })
-
-        // ⚠️ THE DENOMINATOR IS THE WIDER OF SCREEN AND CONTENT, and that single
-        // choice is the whole of B77. A workspace that fits its screen is drawn
-        // against the screen, so a half-width window still looks half-width. One
-        // that scrolls past the edge is drawn against its own total, so it fits
-        // the box complete — smaller, but nothing clipped and the windows still
-        // comparable to each other.
-        var total = 0
-        for (var k = 0; k < keys.length; k++)
-            total += cols[keys[k]].w
-        var spanW = Math.max(outW || 0, total, 1)
-        var spanH = Math.max(outH || 0, 1)
-
-        // ⚠️⚠️ B82 · THE ROW IS CENTRED, AND THAT IS A MEASUREMENT RATHER THAN A
-        // TASTE. His report: "beim normalen supertab stimmen links und rechts    // english-ok: the report, quoted
-        // die abstände nicht zwischen fenster und rand, der ist rechts zu groß". // english-ok: the report, quoted
-        //
-        // He was right, and the cause was this loop starting at x = 0: one
-        // window of 1232 on a 1280 screen used 96 % of the box from the left
-        // edge, so the whole 4 % of slack collected on the right.
-        //
-        // ⚠️ CENTRING IS NOT THE "SYMMETRIC LOOKS NICER" ANSWER — it is what niri
-        // does. Photographed on the lab VM, one window, `grim -o Virtual-1`: the
-        // wallpaper shows through about 24 px on the LEFT and about 24 px on the
-        // RIGHT of a 1232-wide window on a 1280 screen. The thumbnail was drawing
-        // a layout the compositor never produces.
-        //
-        // ⚠️ And it costs nothing in the overflow case: there `spanW === total`,
-        // so the offset is 0 and B77's full-bleed picture is untouched.
-        var offset = (spanW - total) / 2
-
-        var x = offset
-        for (var j = 0; j < keys.length; j++) {
-            var col = cols[keys[j]]
-            col.wins.sort(function (a, b) { return a.row - b.row })
-            var y = 0
-            for (var m = 0; m < col.wins.length; m++) {
-                var e = col.wins[m]
-                out.push({
-                    win: e.win,
-                    x: x / spanW,
-                    y: y / spanH,
-                    w: e.w / spanW,
-                    h: e.h / spanH
-                })
-                y += e.h
+            var w = wins[i]
+            var at = w.at || [0, 0]
+            var size = w.size || [0, 0]
+            var b = {
+                win: w,
+                x: Number(at[0] || 0) - originX,
+                y: Number(at[1] || 0) - originY,
+                w: Number(size[0] || 0),
+                h: Number(size[1] || 0)
             }
-            x += col.w
+            // A window with no geometry yet — mapped this frame, or a client
+            // that has not been given a size — must not collapse the whole
+            // picture to a division by zero. It is skipped instead: an absent
+            // rectangle is more honest than one at the origin with no size.
+            if (b.w <= 0 || b.h <= 0)
+                continue
+            boxes.push(b)
+            if (b.x + b.w > maxX) maxX = b.x + b.w
+            if (b.y + b.h > maxY) maxY = b.y + b.h
+        }
+        if (!boxes.length)
+            return out
+
+        // ⚠️ THE DENOMINATOR IS THE LARGER OF SCREEN AND CONTENT, and that one
+        // choice is what keeps a thumbnail readable. A workspace that fits its
+        // screen is drawn against the screen, so a half-width window still
+        // looks half-width. Anything reaching past the edge — a plugin layout,
+        // a window dragged partly off — is drawn against its own extent, so it
+        // fits the box complete: smaller, but nothing clipped and the windows
+        // still comparable to each other.
+        var spanW = Math.max(Number(outW) || 0, maxX, 1)
+        var spanH = Math.max(Number(outH) || 0, maxY, 1)
+
+        for (var j = 0; j < boxes.length; j++) {
+            var e = boxes[j]
+            out.push({
+                win: e.win,
+                x: e.x / spanW,
+                y: e.y / spanH,
+                w: e.w / spanW,
+                h: e.h / spanH
+            })
         }
         return out
     }
@@ -107,7 +109,7 @@ QtObject {
     // ⚠️ B33 · WHICH WORKSPACE EACH MONITOR COLUMN SHOWS, as a pure function so
     // it can be checked headless — the same reason `layoutWindows` is one.
     //
-    // `outputs` is niri's map (connector name → output), `workspaces` its list.
+    // `outputs` is the compositor map (connector name → output), `workspaces` its list.
     // `wanted` is the index every column starts on: his instruction is that the
     // menu opens with the workspace he is standing on, on EVERY monitor —
     // "aber auf allen monitoren wird der aktuelle workspace genommen".          // english-ok: the request, quoted
@@ -115,9 +117,9 @@ QtObject {
     // ⚠️ INDICES COUNT PER OUTPUT. Measured on the lab VM with two heads: idx=1
     // exists on Virtual-1 AND on Virtual-2. So a column picks the workspace with
     // that index ON ITS OWN MONITOR, and a global sort by idx — which is what
-    // `Niri.orderedWorkspaces` gives — mixes the two together.
+    // a global sort by idx gives — mixes the two together.
     //
-    // ⚠️ A monitor may simply not have that index. the compositor creates workspaces on
+    // ⚠️ A monitor may simply not have that index. The compositor creates workspaces on
     // demand, so a monitor showing one workspace has no idx=3 at all. That
     // column falls back to the highest index it does have rather than going
     // blank: an empty column reads as "this monitor is empty", which is a

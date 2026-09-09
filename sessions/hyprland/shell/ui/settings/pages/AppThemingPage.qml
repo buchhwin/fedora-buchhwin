@@ -250,14 +250,22 @@ ColumnLayout {
             labelWidth: root.nameWidth
             usable: Config.theming.enabled
         }
+        // The compositor's own colours: the window border and the shadow. It is
+        // in this list rather than under Colours because it is the same
+        // question as the rows above — should the palette reach this program —
+        // and the answer happens to be about the program drawing the windows.
         ThemingRow {
             Layout.fillWidth: true
-            key: "theming.vscode"
-            label: "VS Code"
+            key: "theming.hypr"
+            label: "Window borders"
             states: root.states
             labelWidth: root.nameWidth
             usable: Config.theming.enabled
         }
+        // ⚠️ BRAVE IS THE ONE THAT COSTS SOMETHING THE OTHERS DO NOT, and the
+        // row says so rather than the docs alone: it colours a program whose
+        // files we do not own, so an update of THAT program can throw the
+        // theming off.
         ThemingRow {
             Layout.fillWidth: true
             key: "theming.brave"
@@ -266,27 +274,12 @@ ColumnLayout {
             labelWidth: root.nameWidth
             usable: Config.theming.enabled
         }
-        // ⚠️ THE LAST TWO COST SOMETHING THE OTHER THIRTEEN DO NOT, and the
-        // rows say so rather than the docs alone: these colour a program whose
-        // files we do not own, so an update of THAT program can throw the
-        // theming off. He chose them on 06.08. with that on the table.
-        ThemingRow {
-            Layout.fillWidth: true
-            key: "theming.vesktop"
-            label: "Discord"
-            hint: "Tick the buchhwin theme once under Settings, Themes — Vencord remembers it."
-            states: root.states
-            labelWidth: root.nameWidth
-            usable: Config.theming.enabled
-        }
-        ThemingRow {
-            Layout.fillWidth: true
-            key: "theming.spicetify"
-            label: "Spotify"
-            hint: "Run bhctl theme spotify after a Spotify update to put it back."
-            states: root.states
-            labelWidth: root.nameWidth
-            usable: Config.theming.enabled
-        }
+
+        // ⚠️ VS CODE, DISCORD AND SPOTIFY HAD ROWS HERE AND DO NOT ANY MORE.
+        // Their keys left Config.theming when the profile stopped installing
+        // the programs, and a row whose key no longer exists is worse than an
+        // absent one: JsonAdapter drops a write to a key it does not declare,
+        // so the switch moves, the file never changes, and nothing says why.
+        // tests/setting-rows.sh is what caught these.
     }
 }

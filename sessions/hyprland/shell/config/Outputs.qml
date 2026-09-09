@@ -14,7 +14,7 @@ pragma Singleton
 // it is repeated here rather than referenced because the next person to add a
 // setter will read this file and not that one.
 //
-// ⚠️ AN ENTRY EXISTING IS THE MARK FOR "SET BY HAND". No entry means niri
+// ⚠️ AN ENTRY EXISTING IS THE MARK FOR "SET BY HAND". No entry means Hyprland
 // decides. That is one state instead of a value plus a flag that can disagree
 // with it, and it is why `clearField` removes an entry that has nothing left in
 // it: an entry carrying only a name is a claim with no content, and it would

@@ -50,7 +50,7 @@ Item {
     // thing in this shell that simply blinked into existence while every panel
     // grew into place. `scale` is a transform inside the item's own bounds: it
     // never leaves the surface, so the objection above does not apply to it and
-    // the compositor is never told anything. Same 0.94 the launcher and the
+    // The compositor is never told anything. Same 0.94 the launcher and the
     // hovered notch content use, so all three arrive alike.
     property bool shown: false
     opacity: shown ? 1 : 0

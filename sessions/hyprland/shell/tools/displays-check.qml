@@ -13,7 +13,7 @@
 // three screens, two of them sharing a resolution at different refresh rates,
 // one at a scale that makes its logical size differ from its mode.
 //
-// The fixture is the JSON `niri msg -j outputs` really returns — measured on
+// The fixture is the JSON `hyprctl -j monitors` really returns — measured on
 // hardware, field for field — so the fixture and the real thing cannot drift
 // into different shapes. See services/Hyprland.qml for the seam.
 //
@@ -64,9 +64,9 @@ Scope {
 
         // ------------------------------------------------------- the mode maths
         //
-        // ⚠️ MILLI-HERTZ, AND THREE DECIMALS EXACTLY. niri's wiki: the refresh
+        // ⚠️ MILLI-HERTZ, AND THREE DECIMALS EXACTLY. the compositor's wiki: the refresh
         // rate "must match exactly, down to the three decimal digits, to what
-        // you see in niri msg outputs". 60000 has to become "60.000", not "60" —
+        // you see in hyprctl outputs". 60000 has to become "60.000", not "60" —
         // and `bhctl doctor` printed 74994 as "75" for months because a `%.3g`
         // looked close enough.
         root.ok("60000 mHz reads as 60.000 Hz",
@@ -134,7 +134,7 @@ Scope {
         // ⚠️⚠️ LOGICAL PIXELS, NOT MODE PIXELS. HDMI-A-1 in the fixture is
         // 3840x2160 at scale 2.0, so its logical size is 1920x1080 and its
         // neighbour to the right belongs at x=1920. Sizing by the mode puts it
-        // at 3840, which leaves a gap the width of a screen — and niri, finding
+        // at 3840, which leaves a gap the width of a screen — and the compositor, finding
         // no overlap, accepts it silently.
         var placed = page.placed
         root.ok("every screen is placed (got " + placed.length + ")", placed.length === 3)
@@ -150,7 +150,7 @@ Scope {
         //
         // "ich hab den rechten zu weit nach rechts geschoben dann war da ne     // english-ok: the report, quoted
         // Lücke … und ich konnte nicht mehr auf den anderen Monitor". A gap is  // english-ok: the report, quoted
-        // a legal arrangement as far as niri is concerned, so nothing downstream
+        // a legal arrangement as far as the compositor is concerned, so nothing downstream
         // rejects it — the pointer simply has no shared edge to cross and the
         // far screen is unreachable from the near one.
         //

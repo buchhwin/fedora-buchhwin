@@ -4,7 +4,7 @@ pragma Singleton
 //
 // One file, one writer. The settings window writes through this adapter and
 // nothing else touches the file, so there is no second format to keep in sync
-// and no daemon in the middle. niri's own config.kdl is GENERATED from these
+// and no daemon in the middle. the compositor's own config.kdl is GENERATED from these
 // values (see tools/hypr.qml) — it is an output, never an input, and editing
 // it by hand is editing something that will be overwritten.
 //
@@ -51,7 +51,7 @@ Singleton {
     readonly property alias launcher: adapter.launcher
     readonly property alias session: adapter.session
 
-    // Everything below feeds the generated niri config.
+    // Everything below feeds the generated compositor config.
     readonly property alias programs: adapter.programs
     readonly property alias keys: adapter.keys
     readonly property alias input: adapter.input
@@ -66,8 +66,8 @@ Singleton {
 
     // Resolve "@terminal" against `programs`, returning an ARGUMENT LIST.
     //
-    // niri's `spawn` takes one string per argument: `spawn "kitty" "-e" "fish"`.
-    // Passing the whole command line as a single string makes niri look for a
+    // the compositor's `spawn` takes one string per argument: `spawn "kitty" "-e" "fish"`.
+    // Passing the whole command line as a single string makes the compositor look for a
     // binary with spaces in its name, which fails with a message that does not
     // mention the real cause. So commands are lists everywhere, and only the
     // generator ever turns them into text.
@@ -210,7 +210,7 @@ Singleton {
     }
 
     // ⚠️ THE CONFLICT CHECK IS THE POINT OF THE WHOLE FEATURE, and it has to run
-    // BEFORE the write. Two bindings on one key is a KDL parse error, and niri
+    // BEFORE the write. Two bindings on one key leaves Hyprland to keep one of them, and which
     // does not start with a config it cannot parse — so the cost of finding out
     // afterwards is a session that will not come up, on the machine of somebody
     // who was changing a shortcut.
@@ -515,7 +515,7 @@ Singleton {
         // then hands back null for the whole block, so `Config.theme.palette`
         // throws, and three separate readers went down with it — Scheme (the
         // palette name), Theme (the accent) and the Theming watcher (which
-        // re-renders GTK, kitty and niri when the palette changes). None of them
+        // re-renders GTK, kitty and the compositor when the palette changes). None of them
         // said anything: the shell fell back to the built-in palette, which
         // happens to look like the default, so the desktop looked right while
         // choosing a different palette would have changed nothing outside the
@@ -727,9 +727,8 @@ Singleton {
                 property string starship: "inherit"
                 property string lazygit: "inherit"
                 // ⚠️ Also sets window.titleBarStyle to "native" in both states,
-                // which is not a colour: with niri's prefer-no-csd that is what
+                // which is not a colour: with the compositor's prefer-no-csd that is what
                 // removes VS Code's title bar and its buttons entirely.
-                property string vscode: "inherit"
                 // Brave, and it is the exact counterpart of the line above.
                 //
                 // ⚠️ TWO SEPARATE THINGS, AND HE ASKED FOR BOTH IN ONE BREATH:
@@ -739,7 +738,7 @@ Singleton {
                 //
                 //   browser.custom_chrome_frame = false   the FRAME. Set in
                 //       every state including "off", like VS Code's
-                //       titleBarStyle: it is not a colour, and niri's
+                //       titleBarStyle: it is not a colour, and the compositor's
                 //       prefer-no-csd then draws no frame at all.
                 //   browser.theme.user_color              the COLOUR, and only
                 //       when we are colouring.
@@ -767,8 +766,6 @@ Singleton {
                 // place would rewrite a shared object. Vesktop is Discord with
                 // Vencord already in it, so there is nothing to patch — the
                 // theme is a CSS file in a directory we may write.
-                property string vesktop: "inherit"
-                property string spicetify: "inherit"
             }
 
             // The work timer's presets, in minutes. A working day is made of
@@ -828,38 +825,46 @@ Singleton {
             // enough and odd enough per model to deserve two switches.
             // ⚠️ THE POINTER, AND NOTHING SET IT BEFORE. It came from whatever
             // gsettings happened to hold — `Adwaita` at 24 on the test VM —
-            // and niri's own `cursor {}` block carried only `hide-when-typing`,
+            // and the compositor's own `cursor {}` block carried only `hide-when-typing`,
             // so the desktop had no opinion about its own pointer at all.
             //
-            // Two writers, and BOTH are needed: niri draws the pointer over the
+            // Two writers, and BOTH are needed: the compositor draws the pointer over the
             // desktop and over any surface that does not set its own, while GTK
             // applications read `org.gnome.desktop.interface cursor-theme` and
             // ignore the compositor entirely. Setting one leaves the other
             // wrong, which shows up as a pointer that changes shape when it
-            // crosses a window edge. Verified from niri's shipped documentation
+            // crosses a window edge. Verified from the compositor's shipped documentation
             // (Configuration: Miscellaneous.md:20) that the block accepts
             // `xcursor-theme` and `xcursor-size` — not from memory.
             property JsonObject cursor: JsonObject {
-                // ⚠️⚠️ THE DEFAULT WAS `Breeze_Dark` AND THAT THEME IS NOT ON
-                // THE MACHINE. The comment here used to say it "ships with
-                // Fedora's breeze-cursor-theme" — that package is in NO list in
-                // packages/, so nothing ever installed it. Measured on his
-                // laptop: /usr/share/icons holds Adwaita, Breeze_Light,
-                // McMojave-cursors and breeze_cursors. niri was handed a name
-                // that does not resolve, fell back to its own pointer at its
-                // own size, and he reported it as "the cursor is far too big
+                // ⚠️⚠️ THE DEFAULT MUST NAME A THEME THAT IS ACTUALLY INSTALLED,
+                // and it has been wrong twice for the same reason.
+                //
+                // First it was `Breeze_Dark`, described here as shipping with
+                // breeze-cursor-theme — a package that was in no list under
+                // packages/, so nothing installed it. The compositor was handed
+                // a name that does not resolve, fell back to its own pointer at
+                // its own size, and the report was "the cursor is far too big
                 // and cannot be changed".
                 //
-                // McMojave-cursors is the honest default because it is the one
-                // the installer actually fetches — pinned, with a checksum, in
-                // lib/50-fonts.sh — so it exists on every machine this has ever
-                // run on. It is also his own choice, by name, from 06.08.2026.
+                // Then it was `McMojave-cursors`, which was honest at the time
+                // because lib/50-fonts.sh fetched it — a pinned third-party
+                // tarball, downloaded at install time onto a work machine, to
+                // replace a cursor the KDE base already provides. That phase is
+                // gone with the rest of the minimalism pass, so naming it here
+                // would put this comment straight back into its first mistake.
                 //
-                // ⚠️ Note the second half of that report: "and cannot be
+                // `breeze_cursors` is the one that is genuinely there:
+                // packages/dnf-desktop.txt installs breeze-cursor-theme, the
+                // Fedora KDE base has it anyway, and it is the pointer Plasma
+                // itself uses — so the two sessions match without either of them
+                // deciding anything for the other.
+                //
+                // ⚠️ Note the second half of that first report: "and cannot be
                 // changed". That was a separate fault in the settings row (see
                 // SettingRow.qml), and fixing only one of the two would have
-                // left him with a pointer he still could not correct.
-                property string theme: "McMojave-cursors"
+                // left a pointer that still could not be corrected.
+                property string theme: "breeze_cursors"
                 // 24 is the GNOME default and what the VM was running. It is a
                 // separate key from `look.scale` on purpose: the pointer is
                 // drawn by the compositor at its own size and does not follow
@@ -869,21 +874,21 @@ Singleton {
 
             // ⚠️ WHICH CHIP DRAWS THE DESKTOP, and it exists for one specific
             // machine shape: a hybrid laptop. On most of them the external
-            // display connectors are wired to the discrete GPU, so niri renders
+            // display connectors are wired to the discrete GPU, so the compositor renders
             // on the integrated one and copies every frame across for that
-            // screen. niri's own FAQ.md:43-55 names this and names the remedy —
+            // screen. the compositor's own FAQ.md:43-55 names this and names the remedy —
             // `debug { render-drm-device }`, pointed at the discrete card.
             //
             // ⚠️ IT IS NOT FREE. Naming the discrete GPU means it never idles,
-            // which on a laptop is watts. That is why the default is "let niri
+            // which on a laptop is watts. That is why the default is "let Hyprland
             // choose" and not "be clever".
             //
             // A separate group rather than a field on `outputs`: `outputs` is
             // one entry per monitor, and this is a single global choice with no
-            // per-output meaning in niri. Not in `look` either — `look` is
+            // per-output meaning in the compositor. Not in `look` either — `look` is
             // appearance, and this is hardware.
             property JsonObject gpu: JsonObject {
-                // "" means niri decides, following `outputs: []` — the mark for
+                // "" means the compositor decides, following `outputs: []` — the mark for
                 // "set by hand" is the entry existing, so there is one state
                 // rather than a value plus a flag that can disagree with it.
                 //
@@ -894,8 +899,8 @@ Singleton {
                 // are offered by the settings row; the stable one is offered
                 // first.
                 //
-                // ⚠️⚠️ A PATH niri CANNOT OPEN IS NOT CAUGHT BY `Hyprland --verify-config`.
-                // Measured on niri 26.04 with three controls: the block is
+                // ⚠️⚠️ A PATH the compositor CANNOT OPEN IS NOT CAUGHT BY `Hyprland --verify-config`.
+                // Measured on the compositor 26.04 with three controls: the block is
                 // accepted, an invented key inside it IS rejected (so the name
                 // is real and not silently ignored), and a device that does not
                 // exist validates perfectly happily. The safeguards are
@@ -1150,7 +1155,7 @@ Singleton {
                 // How soft the picture behind it is. 0 is the sharp photograph.
                 //
                 // ⚠️ IT IS BLURRED IN QML, NOT BY THE COMPOSITOR, and that is
-                // forced rather than chosen: niri's blur applies to LAYER
+                // forced rather than chosen: the compositor's blur applies to LAYER
                 // surfaces, and neither of these is one — the lock screen is an
                 // ext-session-lock surface and the greeter runs before there is
                 // a session at all. MultiEffect is the same tool the avatar mask
@@ -1219,7 +1224,7 @@ Singleton {
             // ⚠️ AND IT NEEDED NO NEW TECHNOLOGY, which was the opposite of what
             // the last session concluded. Quickshell 0.2.1 ships `IdleMonitor`
             // (Quickshell.Wayland, re-exported from _IdleNotify) with `timeout`,
-            // `isIdle` and `respectInhibitors`; niri 26.04 implements
+            // `isIdle` and `respectInhibitors`; the compositor 26.04 implements
             // `ext_idle_notifier_v1`, and the lock screen has been here all
             // along. swayidle was never needed and is not installed.
             //
@@ -1279,7 +1284,7 @@ Singleton {
                 // without a prompt while its session is the active one.
                 property string profile: "balanced"
 
-                // ⚠️ THE TWO THRESHOLDS docs/CHECKLIST.md HAS NAMED FOR WEEKS
+                // ⚠️ THE TWO THRESHOLDS
                 // and nothing ever read. Power.qml hard-coded 15 and 5, so the
                 // documented numbers and the real ones agreed by luck.
                 property int warnAt: 15
@@ -1429,19 +1434,19 @@ Singleton {
                 // is the first thing to turn down on a slow machine.
                 property int blurPasses: 3
                 // ⚠️ The FREE one, and therefore the one to reach for first.
-                // niri's own words: "Larger values produce a smoother blur, at
+                // the compositor's own words: "Larger values produce a smoother blur, at
                 // no additional GPU cost", and "try increasing offset first
                 // until you start getting artifacts. Then, if you still need
-                // smoother blur, increase passes by 1." niri's default is 3.
+                // smoother blur, increase passes by 1." the compositor's default is 3.
                 property real blurOffset: 5
                 // Pixel noise over the blur. It exists to break up the colour
                 // banding that a wide blur produces on a gradient — which is
-                // exactly what a sunset wallpaper is. niri's default is 0.02.
+                // exactly what a sunset wallpaper is. the compositor's default is 0.02.
                 property real blurNoise: 0.03
                 // Saturation of what shows through: 0 is grey, 1 is untouched,
                 // 2 is doubled. This is the difference between glass and frosted
                 // plastic — blur alone washes the colour out, and the reference
-                // screenshots are anything but washed out. niri's default is 1.5.
+                // screenshots are anything but washed out. the compositor's default is 1.5.
                 //
                 // ⚠️ 1.8 was too much, and it took the corner bug to show it.
                 // Measured with the quick panel open over a warm wallpaper: where
@@ -1459,7 +1464,7 @@ Singleton {
                 property bool glass: true
                 property bool shadows: true
                 // A shadow you notice as depth rather than as a shadow. These
-                // are niri's own numbers (CSS box-shadow semantics): softness
+                // are the compositor's own numbers (CSS box-shadow semantics): softness
                 // is the blur radius, spread grows the rectangle, offset moves
                 // it down. Generous and soft, as in the reference screenshots —
                 // and the same three values apply to windows AND to our own
@@ -1487,11 +1492,11 @@ Singleton {
                 // light palette the shadow is not the palette's darkest tone at
                 // all, it is black — see tools/render.qml.
                 property real shadowOpacity: 0.85
-                // Whether niri draws the shadow BEHIND the window as well as
+                // Whether the compositor draws the shadow BEHIND the window as well as
                 // around it.
                 //
                 // ⚠️ false, and it is a measurement rather than a preference.
-                // niri's reason for the other setting is real — without it a
+                // the compositor's reason for the other setting is real — without it a
                 // client's own rounded corners can show square shadow
                 // artefacts — but it costs everything the translucency buys:
                 // the shadow shows THROUGH an open window and darkens it.
@@ -1502,10 +1507,13 @@ Singleton {
                 //
                 // So the shadow around the window is unaffected and only the
                 // show-through changes. Our window rule already sets
-                // `clip-to-geometry true` with a corner radius, so niri does
+                // `clip-to-geometry true` with a corner radius, so the compositor does
                 // know the shape and the artefact it guards against does not
                 // arise. Anyone running fully opaque windows can set it back.
-                property bool shadowBehindWindow: false
+                // ⚠️ shadowBehindWindow WAS HERE AND HAS NO EQUIVALENT.
+                // It came from a compositor that could choose whether to draw a
+                // shadow under an opaque window. Hyprland always does, and its
+                // decoration.shadow block has no key for it.
                 property string fontUi: "Inter"
                 property string fontMono: "JetBrainsMono Nerd Font"
                 // ⚠️ "Material Symbols Rounded" is NOT what Fedora ships.
@@ -1534,7 +1542,7 @@ Singleton {
                 // Hot corners: "off", "left", "right" or "both".
                 //
                 // ⚠️ "right" IS THE DEFAULT, NOT "both", and that is not
-                // caution — niri already owns the top-LEFT corner and has it
+                // caution — the compositor already owns the top-LEFT corner and has it
                 // switched on. Its own docs (Configuration: Gestures.md) say
                 // "Put your mouse at the very top-left corner of a monitor to
                 // toggle the overview". Claiming that corner as well would give
@@ -1542,7 +1550,7 @@ Singleton {
                 // other one.
                 //
                 // Choosing "left" or "both" is therefore also a decision to turn
-                // niri's off, and the generator says so rather than letting the
+                // the compositor's off, and the generator says so rather than letting the
                 // two fight.
                 // It shipped as "off" for a round because the corner was
                 // believed to draw nothing and answer nothing. It did both; the
@@ -1631,7 +1639,7 @@ Singleton {
             // point of the shape, not the width of the pill's body. The
             // shoulders flare outwards towards the edge, so the body measures
             // `collapsedWidth - 2 * flare`. That is what keeps the layer surface
-            // exactly as big as what is painted on it: niri blurs and shadows
+            // exactly as big as what is painted on it: the compositor blurs and shadows
             // the whole surface, invisible margins included, and a shape that
             // reached past its own window was the coloured halo around the pill.
             // ⚠️⚠️ THE QUICK PANEL HAS TWO LEVELS NOW, on his instruction: "was
@@ -1715,7 +1723,7 @@ Singleton {
                 // name a monitor: DP-2 is right on exactly one desk and wrong
                 // everywhere else. ui/Shell.qml resolves it against the entry
                 // marked `primary` in `outputs`, falling back to the first
-                // screen niri reports. Put a connector name here instead and it
+                // screen the compositor reports. Put a connector name here instead and it
                 // simply wins — the list is still a plain list of names.
                 //
                 // ⚠️ AND THE PAGES DO NOT FOLLOW IT. The quick panel opens where
@@ -1895,7 +1903,7 @@ Singleton {
 
             // ---------------------------------------------------------------
             // Key bindings. Written to config.kdl, never handled by the shell:
-            // niri has no protocol for shell-owned shortcuts, and keys that
+            // The compositor has no protocol for shell-owned shortcuts, and keys that
             // live in the compositor keep working when the shell is dead.
             //
             // Each entry: { key, action, arg, desc } plus optional
@@ -1903,7 +1911,7 @@ Singleton {
             //   action "spawn"     → arg is a program ref ("@terminal") or a
             //                        bare command name
             //   action "spawn-sh"  → arg is a shell line (pipes, $VARS)
-            //   anything else      → a niri action, verbatim; arg is its
+            //   anything else      → a compositor action, verbatim; arg is its
             //                        argument if it takes one
             property JsonObject keys: JsonObject {
                 property string mod: "Super"
@@ -1916,31 +1924,42 @@ Singleton {
                     property string layout: "de"
                     property string variant: ""
                     property string options: ""
-                    property int repeatDelay: 400   // snappier than niri's 600
+                    property int repeatDelay: 400   // snappier than the compositor's 600
                     property int repeatRate: 40
                 }
                 // ⚠️ libinput flags do not accept `false` — `natural-scroll false`
-                // is a hard parse error, unlike most other niri flags. The
+                // is a hard parse error, unlike most other the compositor flags. The
                 // generator must OMIT a false flag, never write it out.
                 property JsonObject touchpad: JsonObject {
                     property bool tap: true
                     property bool dwt: true             // disable while typing
                     property bool naturalScroll: true
                     property bool middleEmulation: true
-                    property real accelSpeed: 0.2
-                    property string accelProfile: "adaptive"
-                    property string scrollMethod: "two-finger"
+                    // ⚠️ accelSpeed, accelProfile AND scrollMethod WERE HERE
+                    // AND COULD NOT WORK. Hyprland configures pointer
+                    // acceleration and scroll method GLOBALLY — input.sensitivity,
+                    // input.accel_profile, input.scroll_method — with per-device
+                    // overrides addressed by device NAME, which nothing knows at
+                    // generation time. Its input.touchpad block has no such keys;
+                    // checked against /usr/share/hypr/stubs/hl.meta.lua rather
+                    // than assumed.
+                    //
+                    // The mouse block already writes the globals. Leaving three
+                    // touchpad rows that write into shell.json and reach nothing
+                    // is the exact fault this project keeps finding: a control
+                    // that looks like it works. scroll_factor below DOES apply
+                    // per touchpad, which is why it stayed.
 
                     // ⚠️ THE SCHEMA HAD naturalScroll, accelSpeed AND
                     // scrollMethod BUT NO SPEED, so "scrolling is too fast" had
-                    // no answer anywhere in the settings. niri can do it, per
-                    // device, and it was probed on niri 26.04 with a control: a
+                    // no answer anywhere in the settings. The compositor can do it, per
+                    // device, and it was probed on the compositor 26.04 with a control: a
                     // `scroll-factor` in this block validates, an invented key
                     // in the same block is rejected as an unexpected node — so
                     // the block really is parsed and this is not a name being
                     // quietly swallowed.
                     //
-                    // 1.0 is niri's own default, so the generator writes it
+                    // 1.0 is the compositor's own default, so the generator writes it
                     // always rather than conditionally; there is no "off" for a
                     // multiplier.
                     property real scrollFactor: 1.0
@@ -1968,7 +1987,7 @@ Singleton {
                 // Our surfaces open on `Compositor.activeOutput`, which comes
                 // from the FOCUSED workspace. Moving the pointer without
                 // clicking does not move focus, so the launcher was right about
-                // the focus and wrong about him. niri's own wiki says this knob
+                // the focus and wrong about him. the compositor's own wiki says this knob
                 // "focuses windows AND OUTPUTS automatically when moving the
                 // mouse over them" — so with it on, the value we already read
                 // follows the pointer and every surface lands where he is
@@ -2008,7 +2027,7 @@ Singleton {
                 // because look.opacityTerminal makes it see-through; adding an
                 // opaque application would cost the GPU work and show nothing.
                 //
-                // niri turns on "xray" automatically alongside blur, which
+                // The compositor turns on "xray" automatically alongside blur, which
                 // blurs the wallpaper ONCE and reuses it for every window
                 // instead of recomputing per window per frame. That is the
                 // cheap path and the reason this is affordable on a laptop.
@@ -2024,13 +2043,13 @@ Singleton {
 
                 // How wide a new window opens, as a fraction of the screen.
                 //
-                // ⚠️⚠️ 1.0 RATHER THAN niri's OWN DEFAULT, and that is his
+                // ⚠️⚠️ 1.0 RATHER THAN the compositor's OWN DEFAULT, and that is his
                 // report rather than a preference of mine: "wenn man ein         // english-ok: his report, quoted
                 // terminal öffent oder genrell eine app soll die fullscrenn      // english-ok: his report, quoted
-                // sein und nicht halb vom screen wie jetzt". niri opens new      // english-ok: his report, quoted
+                // sein und nicht halb vom screen wie jetzt". The compositor opens new      // english-ok: his report, quoted
                 // windows at HALF the output and this project never said
                 // otherwise — `default-column-width` did not appear in the
-                // generator at all, so niri's default applied and looked like a
+                // generator at all, so the compositor's default applied and looked like a
                 // decision somebody had made.
                 //
                 // ⚠️ IT IS A COLUMN WIDTH, NOT FULLSCREEN, and the difference is
@@ -2041,7 +2060,12 @@ Singleton {
                 // ⚠️ 0 MEANS "the window decides", which is the compositor's other mode —
                 // `default-column-width {}` with nothing inside it. A dialog
                 // that knows it wants to be small then gets to be small.
-                property real defaultWidth: 1.0
+                // ⚠️ defaultWidth WAS HERE AND SAID THE SAME THING TWICE.
+                // It set the fraction of the screen a new window takes, which
+                // in Hyprland's master layout is master.mfact — already driven
+                // by the layout settings. Two keys for one number is the drift
+                // this project has a rule against, and the one that reaches the
+                // compositor is the one that stayed.
             }
 
             // Empty = let the compositor decide. Filled in per machine; the VM and the
@@ -2157,7 +2181,7 @@ Singleton {
             // listing them here too would start a second copy of each.
             //
             // ⚠️ The polkit agent IS here, and it has to be. It ships an XDG
-            // autostart file (/etc/xdg/autostart/), and niri does not process
+            // autostart file (/etc/xdg/autostart/), and the compositor does not process
             // those — so on this desktop nothing would ever start it and the
             // wifi radio switch would keep being refused. The path is the
             // package's own, checked with `dnf repoquery -l` rather than
@@ -2176,7 +2200,7 @@ Singleton {
             // is the promise; "the same state" is not one we can keep.
             property JsonObject session: JsonObject {
                 property bool restore: false
-                // app-ids as niri reports them, which are the freedesktop entry
+                // app-ids as the compositor reports them, which are the freedesktop entry
                 // ids in nearly every case (kitty, org.gnome.Nautilus,
                 // brave-browser). Maintained while you work rather than written
                 // at shutdown: a list only written on the way out is missing
@@ -2288,7 +2312,7 @@ Singleton {
                 // ⚠️ WHETHER THE COLOURS COME ALONG, AND IT IS OFF BY DEFAULT.
                 // With `theme.palette` on "wallpaper" every picture change
                 // recalculates the WHOLE scheme — terminal, GTK, Qt, btop,
-                // niri, all of it — so a slideshow every fifteen minutes would
+                // the compositor, all of it — so a slideshow every fifteen minutes would
                 // repaint the entire desktop every fifteen minutes. Measured:
                 // Forest_Color1.png gives base 27201b (warm), Desert_Color2.png
                 // gives 1b2027 (cold). That is not a slideshow, it is a desktop

@@ -9,7 +9,7 @@
 // It reaches the compositor's own window animations too, because tools/hypr.qml generates
 // those from the same three numbers — so this is the tempo of the whole desktop,
 // not only of our surfaces. That half arrives on its own: services/Theming.qml
-// fingerprints these values and runs the generator, and niri watches its own
+// fingerprints these values and runs the generator, and the compositor watches its own
 // config. Measured: 200 ms became 100 ms about two seconds after the file
 // changed, with nothing typed.
 import QtQuick
@@ -106,7 +106,7 @@ ColumnLayout {
         Layout.fillWidth: true
         // Measured, because the first version of this line said the opposite:
         // shell.json changes, the theming watcher notices within about two
-        // seconds, the generator rewrites config.kdl and niri reloads it. 200 ms
+        // seconds, the generator rewrites config.kdl and the compositor reloads it. 200 ms
         // became 100 ms with nothing typed.
         text: "the compositor's own window animations come from the same numbers, "
             + "and follow within a couple of seconds."

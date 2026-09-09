@@ -25,7 +25,7 @@ Item {
     // every program came back `none` and it looked like the .desktop route did
     // not work at all. It works; the list simply is not there yet when a
     // function asks for it. services/Apps.qml carries the same warning, and
-    // docs/LAPTOP-TEST.md records two earlier probes that reported "0 entries"
+    // Two earlier probes reported "0 entries"
     // for exactly this reason.
     readonly property var entries:
         DesktopEntries.applications ? DesktopEntries.applications.values : []

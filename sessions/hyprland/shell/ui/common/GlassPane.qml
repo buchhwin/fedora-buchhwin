@@ -2,7 +2,7 @@
 //
 // What makes glass look like glass is its EDGE. The middle of a translucent
 // panel is just blurred backdrop, and the compositor already produces that —
-// once, cheaply, via niri's xray blur. So everything here is about the edge: a
+// once, cheaply, via the compositor's xray blur. So everything here is about the edge: a
 // sheen lying over the upper part of the pane, and a fine glint along the
 // bottom where light bounces back up through it.
 //
@@ -16,7 +16,7 @@
 // On 06.08.2026 the glint went too. Asked directly whether it should stay once
 // the red corners were fixed, the answer was "ganz weg": the panes are to look  english-ok: quoted answer
 // like the windows, and the windows have neither border nor focus ring
-// (`border { off }`, `focus-ring { off }` in the generated niri config).
+// (`border { off }`, `focus-ring { off }` in the generated compositor config).
 //
 // ⚠️ THIS DEPARTS FROM THE REFERENCE SCREENSHOTS. That is deliberate and the
 // newer instruction wins; it is written down here so nobody later "restores"
@@ -30,9 +30,9 @@
 // what is behind the glass — needs to sample the backdrop, and a layer surface
 // cannot see its own backdrop. Only the compositor can. A shader in here would
 // have to draw and blur its own copy of the wallpaper in order to refract it,
-// which duplicates the one thing niri does for free and pays for it on every
+// which duplicates the one thing the compositor does for free and pays for it on every
 // frame. On a laptop that trade is the wrong way round. hyprglass does real
-// refraction because it runs inside Hyprland's render pipeline; niri has no
+// refraction because it runs inside Hyprland's render pipeline; the compositor has no
 // plugin interface, so that road is closed rather than merely harder.
 //
 // Cost: one extra draw for the sheen, no per-frame work, nothing running when

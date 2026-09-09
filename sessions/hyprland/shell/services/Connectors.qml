@@ -1,7 +1,7 @@
 pragma Singleton
 
 // What the KERNEL thinks is plugged in, which is a different question from what
-// the compositor is drawing on.
+// The compositor is drawing on.
 //
 // ⚠️ IT EXISTS FOR ONE REPORT, in his words: "HDMI Monitore werden nicht        // english-ok: his report, quoted
 // erkannt, DisplayPort schon".                                                  // english-ok: his report, quoted
@@ -11,13 +11,13 @@ pragma Singleton
 // next suspect was hybrid graphics, and that died too — the machine it happens
 // on has no discrete GPU at all.
 //
-// So this does not guess. It puts the kernel's list beside niri's, because the
+// So this does not guess. It puts the kernel's list beside the compositor's, because the
 // GAP between them names the layer the fault is in:
 //
 //   in neither list       the cable, the port, or a dock that needs a driver —
 //                         DisplayLink appears as no DRM connector at all
 //   kernel: disconnected  the cable or the monitor, not this desktop
-//   kernel yes, niri no   a compositor problem, addressable through `outputs`
+//   kernel yes, the compositor no   a compositor problem, addressable through `outputs`
 //   both, wrong mode      HDMI 1.4b does 4K at 30 Hz and no faster
 //
 // ⚠️ THE SAME FOUR-WAY VERDICT `bhctl doctor` MAKES, and deliberately so: two
@@ -64,7 +64,7 @@ Singleton {
         // no English here to parse and nothing that changes between versions.
         //
         // The directory is `card1-HDMI-A-1`; the connector name is what follows
-        // the first dash after the card number, and that is what niri calls it.
+        // the first dash after the card number, and that is what the compositor calls it.
         command: ["sh", "-c", `
             for d in /sys/class/drm/card*-*; do
                 [ -r "$d/status" ] || continue

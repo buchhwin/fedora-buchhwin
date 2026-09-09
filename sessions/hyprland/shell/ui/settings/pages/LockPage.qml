@@ -54,7 +54,7 @@ ColumnLayout {
             key: "lock.wallpaperBlur"
             label: "How soft the picture is"
             // Why it is this way: blurred in QML rather than by the compositor
-            // — niri blurs LAYER surfaces, and neither the lock screen (an
+            // — the compositor blurs LAYER surfaces, and neither the lock screen (an
             // ext-session-lock surface) nor the greeter (which runs before
             // there is a session) is one.
             hint: "0 is the sharp photograph."

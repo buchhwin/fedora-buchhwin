@@ -654,7 +654,7 @@ ColumnLayout {
     // what starts with the session: the order means nothing, and every entry is
     // a name this machine can produce. As comma-separated boxes they were nine
     // invitations to mistype an app-id — and a mistyped app-id is not an error
-    // anywhere. niri simply never matches the rule, and the window you wanted
+    // anywhere. The compositor simply never matches the rule, and the window you wanted
     // blurred is not blurred, with nothing in any log to say why.
     //
     // ⚠️ TICKS RATHER THAN CHIPS, since the pills went. The chip row said what
@@ -793,7 +793,7 @@ ColumnLayout {
                     Layout.fillWidth: true
                     enabled: root.usable
                     text: cmd.args
-                    // One string per argument, which is what niri's `spawn`
+                    // One string per argument, which is what the compositor's `spawn`
                     // takes — a whole command line in one string makes it look
                     // for a binary with spaces in its name.
                     placeholder: "No arguments — separate them with commas"

@@ -311,7 +311,7 @@ Singleton {
     }
 
     // For whoever learns that a monitor was plugged in. Nothing calls it yet —
-    // niri's output events are the obvious source and that is a separate piece
+    // the compositor's output events are the obvious source and that is a separate piece
     // of work — but the alternative to having it is a poll timer, and this
     // project does not get to have one of those.
     function refreshExternal() {

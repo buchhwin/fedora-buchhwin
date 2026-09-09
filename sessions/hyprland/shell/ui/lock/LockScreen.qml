@@ -63,7 +63,7 @@ Scope {
             }
 
             // ⚠️ THE BLUR HIS REFERENCE ASKS FOR, and it has to happen here
-            // rather than in the compositor: niri blurs LAYER surfaces, and this
+            // rather than in the compositor: the compositor blurs LAYER surfaces, and this
             // is an ext-session-lock surface. `blurMax` is the radius cap and
             // `blur` is how much of it is used — at 1.0 the number in the
             // setting is the radius.

@@ -18,7 +18,7 @@ pragma Singleton
 //
 // ⚠️ AND THE CONDITION HAS TO STAY NARROW OR IT BECOMES NOISE. A machine with
 // no NVIDIA says nothing. Secure Boot off says nothing. Module loaded says
-// nothing. The desktop does not depend on any of it — niri draws on the
+// nothing. The desktop does not depend on any of it — the compositor draws on the
 // integrated GPU, whose driver is in the kernel.
 //
 // ⚠️ NOTHING RUNS UNTIL SOMETHING ASKS, like Installed.qml next door. `probe()`

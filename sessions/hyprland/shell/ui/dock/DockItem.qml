@@ -3,7 +3,7 @@ pragma ComponentBehavior: Bound
 // One program in the dock: its icon, whether it is running, and what a click
 // does about that.
 //
-// ⚠️ AN APP ID IS NOT A DESKTOP ID, and this is where that bites. niri reports
+// ⚠️ AN APP ID IS NOT A DESKTOP ID, and this is where that bites. The compositor reports
 // `app_id` from the window; the dock's pinned list holds desktop entry ids. They
 // agree often enough to look identical and then do not: the predecessor found
 // `brave-browser` against `brave-origin`, and `org.gnome.Nautilus` against

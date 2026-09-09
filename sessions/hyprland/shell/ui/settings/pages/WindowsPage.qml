@@ -35,22 +35,14 @@ ColumnLayout {
             Layout.fillWidth: true
             key: "windows.noCsd"
             label: "No title bars"
-            // Why it is this way: and niri draws none. libadwaita header bars
+            // Why it is this way: and the compositor draws none. libadwaita header bars
             // stay: they are program content, not decoration.
             hint: "Asks every program to let the compositor draw the frame."
         }
-        SettingRow {
-            Layout.fillWidth: true
-            key: "windows.defaultWidth"
-            label: "How wide a window opens"
-            // Why it is this way: niri opens new windows at half the screen and
-            // this setting did not exist, so half looked like somebody's
-            // decision. It is "simple" rather than advanced because it is the
-            // first thing you notice on a fresh machine — he reported it twice.
-            hint: "Share of the screen a new window takes. All the way down lets the program choose."
-            kind: "slider"
-            from: 0; to: 1.0; step: 0.05; decimals: 2
-        }
+        // ⚠️ A ROW FOR `windows.defaultWidth` STOOD HERE, and it said the same
+        // thing as the layout split. In Hyprland's master layout the fraction
+        // a new window takes IS master.mfact, which Size & Shape already
+        // drives. Two controls for one number is how they end up disagreeing.
         SettingRow {
             Layout.fillWidth: true
             key: "windows.blurred"

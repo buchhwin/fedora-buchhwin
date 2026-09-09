@@ -2,10 +2,10 @@
 // them.
 //
 // His decision, 06.08.2026: the TOP-RIGHT corner is ours and opens the
-// notifications. The top-left stays niri's, where it toggles the overview —
+// notifications. The top-left stays the compositor's, where it toggles the overview —
 // one gesture may not mean two things, and this project has already paid for
 // that lesson once with the fullscreen strip. `left` and `both` remain settings
-// (choosing either also switches niri's off, in tools/hypr.qml), but the
+// (choosing either also switches the compositor's off, in tools/hypr.qml), but the
 // default is `right`.
 //
 // ⚠️ AND IT WAITS. A corner that fires the moment the pointer brushes it is a

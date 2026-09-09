@@ -23,7 +23,7 @@ pragma ComponentBehavior: Bound
 // INSIDE it. tests/motion.sh enforces exactly this — it fails a PanelWindow
 // whose size comes from a child.
 //
-// ⚠️ AND THEREFORE NO COMPOSITOR BLUR. niri blurs and shadows the WHOLE layer
+// ⚠️ AND THEREFORE NO COMPOSITOR BLUR. The compositor blurs and shadows the WHOLE layer
 // surface, invisible margins included; a full-width surface with blur on would
 // blur a band across the bottom of the screen and shadow it too. The notch has
 // both switched off for the same reason and paints its own shape. So does this:

@@ -36,7 +36,7 @@ pragma Singleton
 //
 // ⚠️ AND IT IS AN EVENT STREAM, NOT A POLL. `nmcli monitor` is one small
 // long-lived process that says nothing until something changes — the same shape
-// as `niri msg event-stream` in Hyprland.qml, and for the same reason: a timer
+// as `hyprctl event-stream` in Hyprland.qml, and for the same reason: a timer
 // asking every few seconds whether the network changed is a timer that wakes a
 // laptop up all day to be told no.
 //

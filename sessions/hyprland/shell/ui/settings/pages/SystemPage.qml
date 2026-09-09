@@ -14,7 +14,7 @@
 //
 // ⚠️ WHICH FACTS ARE ON THE PAGE IS HIS CHOICE, not a judgement call: the
 // machine (processor, memory, graphics, disk) and the system (Fedora, kernel,
-// niri, quickshell, this desktop). Session/monitors and battery/thermals were
+// the compositor, quickshell, this desktop). Session/monitors and battery/thermals were
 // offered and NOT picked, so they are absent rather than forgotten.
 //
 // ⚠️ THE READINGS ARE ActionRows WITH NO BUTTON, which is a shape this window

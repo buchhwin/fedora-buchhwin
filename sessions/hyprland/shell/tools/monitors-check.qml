@@ -10,7 +10,7 @@
 // headless on any machine.
 //
 // ⚠️ THE FIXTURE IS MEASURED, NOT INVENTED. The shape is what
-// `niri msg -j outputs` and `niri msg -j workspaces` really answered on the lab
+// `hyprctl -j monitors` and `hyprctl -j workspaces` really answered on the lab
 // VM once it had two heads:
 //
 //   Virtual-1  logical x=0    1280x800
@@ -20,7 +20,7 @@
 // ⚠️⚠️ AND THE ONE FACT THE WHOLE PAGE HANGS ON: `idx` COUNTS PER OUTPUT. idx=1
 // exists on BOTH screens above. A column therefore has to pick the workspace
 // with that index *on its own monitor*, and a global sort by idx — which is what
-// `Niri.orderedWorkspaces` gives — mixes the two together.
+// a global sort by index gives — mixes the two together.
 import QtQuick
 import Quickshell
 import Quickshell.Io
@@ -98,7 +98,7 @@ Scope {
 
         // ------------------------------------- 4 · an index a monitor lacks
         //
-        // Virtual-2 has no idx=2. the compositor creates workspaces on demand, so this is
+        // Virtual-2 has no idx=2. The compositor creates workspaces on demand, so this is
         // the normal state of a second screen rather than an edge case.
         var two = G.monitorColumns(root.outputs, root.spaces, root.wins, 2, null)
         root.ok("a monitor without that index still shows something",

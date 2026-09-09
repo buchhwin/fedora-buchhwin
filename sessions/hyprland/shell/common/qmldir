@@ -13,5 +13,5 @@ WaitFor 1.0 WaitFor.qml
 singleton Clock 1.0 Clock.qml
 # Shared by BOTH window maps — Mod+Tab (one column per workspace of this
 # monitor) and Shift+Alt+Tab (one column per monitor). A second copy would drift
-# away from the niri measurements the arithmetic is built on.
+# away from the compositor measurements the arithmetic is built on.
 singleton WorkspaceGeometry 1.0 WorkspaceGeometry.qml

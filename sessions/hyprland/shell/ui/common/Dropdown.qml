@@ -223,7 +223,7 @@ Item {
 
         // ⚠️⚠️ `grabFocus: false`, AND IT IS THE OTHER HALF OF THE FIX. With a
         // grab this is an xdg-popup the COMPOSITOR dismisses, and that loses the
-        // race every time: on the press niri tears the popup down, quickshell
+        // race every time: on the press the compositor tears the popup down, quickshell
         // writes `visible = false`, this handler runs, the list lets go of
         // OpenMenu — and only THEN is the same press delivered to the window,
         // where the catcher is already disabled and the row underneath acts.

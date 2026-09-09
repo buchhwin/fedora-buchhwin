@@ -13,7 +13,6 @@ Singleton {
     property var windows: []
     property var outputs: ({})
     property bool outputsKnown: false
-    property bool overviewOpen: false
     property bool configFailed: false
     property string keyboardLayout: ""
     property string activeOutput: ""
@@ -43,7 +42,6 @@ Singleton {
     }
     function focusWorkspace(idx) { run(["workspace", String(idx)]) }
     function focusWindow(id) { run(["focuswindow", "address:" + String(id)]) }
-    function toggleOverview() { run(["overview:toggle"]) }
     function moveWindowToWorkspace(id, idx) {
         run(["movetoworkspacesilent", String(idx) + ",address:" + String(id)])
     }
@@ -111,10 +109,24 @@ Singleton {
                 var c = rawClients[i]
                 var address = String(c.address || "")
                 var wid = address
+                // ⚠️ `at` AND `size` ARE THE POINT OF THIS OBJECT, and they were
+                // missing. common/WorkspaceGeometry.qml was written against
+                // the compositor, which reported a position inside a SCROLLING layout
+                // (`layout.pos_in_scrolling_layout`, `layout.tile_size`).
+                // Hyprland has no such concept and reports the real geometry
+                // instead, so the thumbnails fell back to a straight line of
+                // equal boxes and silently stopped resembling the screen.
+                //
+                // Both arrive from `hyprctl -j clients` as [x, y] and [w, h] in
+                // layout pixels, which is what the geometry code wants anyway.
+                var at = c.at || [0, 0]
+                var size = c.size || [0, 0]
                 wins.push({ id: wid, workspace_id: Number(c.workspace ? c.workspace.id : -1),
                             title: String(c.title || ""), app_id: String(c.class || c.initialClass || ""),
                             is_focused: address === activeAddress, is_urgent: false,
-                            is_floating: !!c.floating, fullscreen: Number(c.fullscreen || 0) })
+                            is_floating: !!c.floating, fullscreen: Number(c.fullscreen || 0),
+                            at: [Number(at[0] || 0), Number(at[1] || 0)],
+                            size: [Number(size[0] || 0), Number(size[1] || 0)] })
                 if (address === activeAddress) root.focusedWindowId = wid
             }
             root.workspaces = ws

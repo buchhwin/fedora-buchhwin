@@ -1,6 +1,6 @@
 // Keyboard — layout, variant, options, and how fast a held key repeats.
 //
-// ⚠️ THE LAYOUT REACHES niri AND NOTHING ELSE. The login screen and the TTY are
+// ⚠️ THE LAYOUT REACHES THE COMPOSITOR AND NOTHING ELSE. The login screen and the TTY are
 // not the session, and the login screen is where the password is typed FIRST —
 // the installer sets the system layout separately for exactly that reason.
 import QtQuick
@@ -24,7 +24,10 @@ ColumnLayout {
             Layout.fillWidth: true
             key: "keys.mod"
             label: "Mod key"
-            hint: "niri's own note: not Ctrl or Shift — Ctrl is what programs use for their own shortcuts, and Shift is for typing."
+            // Why the list is not longer: Ctrl is what programs use for their
+            // own shortcuts and Shift is for typing, so either as the desktop's
+            // modifier collides on every second key.
+            hint: "Super is the one modifier no program claims for itself."
             kind: "choice"
             choices: [
                 { value: "Super", label: "Super" },

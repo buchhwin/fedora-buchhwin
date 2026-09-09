@@ -1,4 +1,4 @@
-// The settings window — a REAL niri window, not a surface floating over one.
+// The settings window — a REAL the compositor window, not a surface floating over one.
 //
 // ⚠️ THAT IS THE DECISION THIS FILE EXISTS TO RECORD, and it is his. Everything
 // else this shell opens is a layer surface: the notch pages, the launcher, the
@@ -16,10 +16,10 @@
 // `minimized`, `maximized` and `fullscreen`, and the app-id is whatever Qt
 // gives the process. The window rule that rounds and floats this window
 // therefore matches on the id READ OFF THE RUNNING MACHINE with
-// `niri msg -j windows`, not on a name invented here. See tools/hypr.qml.
+// `hyprctl -j clients`, not on a name invented here. See tools/hypr.qml.
 //
 // There is no title bar to remove: `prefer-no-csd` is already in the generated
-// config, so niri asks every client to draw none and draws none itself.
+// config, so the compositor asks every client to draw none and draws none itself.
 import QtQuick
 import Quickshell
 import "../../ipc"
@@ -32,7 +32,7 @@ FloatingWindow {
     title: "Settings"
 
     // A working size on the 4 px grid, and one that still fits the 1280x800 the
-    // lab VM runs at. niri decides where it lands; the window rule makes it
+    // lab VM runs at. The compositor decides where it lands; the window rule makes it
     // float rather than joining the scrolling row.
     //
     // ⚠️ IT GREW WITH THE PAGE SPLIT. Twenty-one entries under three headings is
@@ -47,7 +47,7 @@ FloatingWindow {
     // ⚠️ The window is CREATED when the settings open and destroyed when they
     // close — ui/Shell.qml loads it on `Ipc.settingsOpen`, the same way the
     // launcher is loaded. So `closed` is the other direction of the same
-    // switch: niri can shut this window (Mod+Q, and it is a window like any
+    // switch: the compositor can shut this window (Mod+Q, and it is a window like any
     // other), and without this the shell would still believe it was open and
     // `settings toggle` would do nothing on the next press.
     onClosed: Ipc.hideSettings()

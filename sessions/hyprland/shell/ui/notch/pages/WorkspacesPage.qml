@@ -16,16 +16,16 @@ pragma ComponentBehavior: Bound
 // So this draws what the compositor DOES tell us, and it turns out to be enough
 // to recognise a workspace at a glance:
 //
-//   niri msg -j windows      app_id · title · id · workspace_id · is_focused
+//   hyprctl -j clients      app_id · title · id · workspace_id · is_focused
 //                            · is_floating · layout
-//   niri msg -j workspaces   id · idx · name · is_active · output
+//   hyprctl -j workspaces   id · idx · name · is_active · output
 //
 // ⚠️ AND `layout` IS WHY THE BOXES ARE IN THE RIGHT PLACES. It carries
 // `pos_in_scrolling_layout: [column, row]` and `tile_size`, measured on the
 // machine rather than assumed — so a column that is half as wide is drawn half
 // as wide, and three windows side by side look like three windows side by side.
 //
-// ⚠️ Everything comes from `Services.Compositor`, which is fed by niri's
+// ⚠️ Everything comes from `Services.Compositor`, which is fed by the compositor's
 // event-stream. No polling: a map that costs CPU while nobody is looking at it
 // is the kind of idle work this desktop is not allowed to do.
 
@@ -64,7 +64,7 @@ ColumnLayout {
     //
     // ⚠️ `logical`, NOT THE MODE SIZE, and the Displays page has the same note
     // for the same reason: a 3840x2160 screen at scale 2 is logically 1920x1080,
-    // and niri counts in logical pixels. Both numbers give 16:9 here, but on a
+    // and the compositor counts in logical pixels. Both give 16:9 here, but on a
     // rotated or fractionally scaled output only one of them is the shape you
     // are looking at.
     //
@@ -92,9 +92,14 @@ ColumnLayout {
     // draws the same picture with one column per MONITOR instead of one per
     // workspace, and rule 6 says a list may not exist twice. A second copy would
     // have been the worse kind of duplicate — the arithmetic is measured against
-    // niri's own numbers, and the copy would have drifted from those quietly.
-    function layoutWindows(wins, outW, outH) {
-        return WorkspaceGeometry.layoutWindows(wins, outW, outH)
+    // the compositor's own numbers, and a copy would have drifted from those
+    // quietly.
+    //
+    // The origin is passed straight through: these thumbnails are all of the
+    // ACTIVE monitor, so its position in the global layout has to come off the
+    // window coordinates before they mean anything inside a box.
+    function layoutWindows(wins, outW, outH, outX, outY) {
+        return WorkspaceGeometry.layoutWindows(wins, outW, outH, outX, outY)
     }
 
     // The workspaces, each with its own windows already gathered. Done once
@@ -125,7 +130,7 @@ ColumnLayout {
         //
         // It listed every workspace on every screen, so on three monitors the
         // switcher was three desktops wide and two thirds of it was somewhere
-        // he was not looking. `niri msg -j workspaces` carries `output` on each
+        // he was not looking. `hyprctl -j workspaces` carries `output` on each
         // entry — the filter costs nothing and the information was already here.
         //
         // ⚠️ `activeOutput` RATHER THAN THE SURFACE'S OWN SCREEN, and the two
@@ -187,7 +192,7 @@ ColumnLayout {
                 // it means the row reflows every time a window opens.
                 //
                 // ⚠️ THE REAL OUTPUT'S RATIO, NOT A CONSTANT 16:9. `logical` is
-                // in niri's answer and services/Hyprland.qml already parses it; the
+                // in the compositor's answer and services/Hyprland.qml already parses it; the
                 // Displays page reads exactly the same field. On a 16:9 screen
                 // this is his number, and on the 16:10 laptop it is the more
                 // honest one. 16:9 is the fallback for the moment during startup
@@ -246,7 +251,7 @@ ColumnLayout {
                     // still works; it is just not what the label is for.
                     //
                     // ⚠️ Measured before it was changed rather than assumed:
-                    // `niri msg -j workspaces` on the VM answers
+                    // `hyprctl -j workspaces` on the VM answers
                     // `{"idx":1,"name":"scratch"}` and `{"idx":2,"name":null}`.
                     // The first guess — that Rust's `None` was arriving as a
                     // truthy STRING — was wrong, and the machine said so in one
@@ -277,21 +282,21 @@ ColumnLayout {
                     //   angezeigt werden … also die richtige größe der Fenster"  // english-ok: the report, quoted
                     //
                     // ⚠️ MEASURED, and the numbers say why it overflowed. Three
-                    // windows on the lab VM, `niri msg -j windows`:
+                    // windows on the lab VM, `hyprctl -j clients`:
                     //
                     //   kitty      col/row [1,1]   tile 1232x734
                     //   Alacritty  col/row [2,1]   tile 1232x734
                     //   kitty      col/row [3,1]   tile 1232x734
                     //   output Virtual-1           logical 1280x800
                     //
-                    // Each window is 96% of the screen — niri is a SCROLLING
+                    // Each window is 96% of the screen — the compositor is a SCROLLING
                     // compositor, so a workspace is legitimately wider than its
                     // output. As shares in a RowLayout that is 2.9x the box, and
                     // the row ran off the end. Clamping each tile would have
                     // destroyed the very thing B53 added: comparable widths.
                     //
                     // So the box is a scale drawing of the workspace instead.
-                    // Columns are laid out in niri's own order and every tile is
+                    // Columns are laid out in the compositor's own order and every tile is
                     // placed and sized against the SAME denominator, so relative
                     // sizes survive and nothing can leave the box.
                     Item {
@@ -312,8 +317,25 @@ ColumnLayout {
                                     : null
                             return (o && o.logical && o.logical.height > 0) ? o.logical.height : 0
                         }
+                        // The origin of the monitor this workspace lives on.
+                        // Hyprland positions windows in the GLOBAL layout, so
+                        // without it everything on a second screen lands past
+                        // the right edge of its own box.
+                        readonly property real outX: {
+                            var o = Services.Compositor.outputs
+                                    ? Services.Compositor.outputs[String(box.modelData.ws.output || "")]
+                                    : null
+                            return (o && o.logical) ? (o.logical.x || 0) : 0
+                        }
+                        readonly property real outY: {
+                            var o = Services.Compositor.outputs
+                                    ? Services.Compositor.outputs[String(box.modelData.ws.output || "")]
+                                    : null
+                            return (o && o.logical) ? (o.logical.y || 0) : 0
+                        }
                         readonly property var placed:
-                            root.layoutWindows(box.modelData.windows, tiles.outW, tiles.outH)
+                            root.layoutWindows(box.modelData.windows, tiles.outW, tiles.outH,
+                                               tiles.outX, tiles.outY)
 
                         BarText {
                             anchors.centerIn: parent
@@ -367,7 +389,7 @@ ColumnLayout {
 
                                 // ⚠️⚠️ THE COMMENT THAT USED TO BE HERE WAS THE
                                 // BUG, WRITTEN DOWN AS A REASON. It claimed
-                                // "niri's app_id IS the freedesktop icon name
+                                // "the compositor's app_id IS the freedesktop icon name
                                 // in nearly every case, and where it is not,
                                 // the fallback catches it". Measured on
                                 // 10.08.2026 over the twenty programs this
@@ -410,7 +432,7 @@ ColumnLayout {
                                 // while the model underneath is being rewritten
                                 // by a compositor event is a fight nobody wins.
                                 // The tile fades, the target box lights up, and
-                                // the actual move is niri's job.
+                                // the actual move is the compositor's job.
                                 DragHandler {
                                     id: drag
                                     onActiveChanged: {
@@ -425,7 +447,7 @@ ColumnLayout {
                                         var target = root.groups[t].ws
                                         if (target.id === tile.win.workspace_id)
                                             return
-                                        // ⚠️ `idx`, not `id` — niri's reference
+                                        // ⚠️ `idx`, not `id` — the compositor's reference
                                         // is the INDEX. They differ: here the
                                         // workspaces are idx 1/2/3 with ids
                                         // 1/3/4.

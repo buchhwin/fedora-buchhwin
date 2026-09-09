@@ -2,7 +2,7 @@
 //
 // One less program, and it means the image lives in the same process as the
 // palette that is derived from it. It sits on the `background` layer, which
-// niri zooms along with the overview — that is the correct behaviour, not a
+// The compositor zooms along with the overview — that is the correct behaviour, not a
 // side effect: the wallpaper belongs to the workspace you are looking at.
 import QtQuick
 import Quickshell

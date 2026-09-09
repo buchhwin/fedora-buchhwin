@@ -13,8 +13,8 @@
 //   * This surface is only ever page-sized, for the same reason.
 //   * Neither has to animate into a shape the other needs.
 //
-// ⚠️ THE SURFACE IS EXACTLY AS BIG AS WHAT IT DRAWS. From niri's own docs on
-// layer rules: "niri has no way of knowing about invisible margins, and will
+// ⚠️ THE SURFACE IS EXACTLY AS BIG AS WHAT IT DRAWS. From the compositor's own docs on
+// layer rules: "the compositor has no way of knowing about invisible margins, and will
 // draw the shadow behind the entire surface." Blur behaves the same way. A
 // surface with a transparent border therefore gets a blurred, colour-fringed
 // halo — which is precisely the "the colours bug out around it" that was
@@ -44,7 +44,7 @@ PanelWindow {
     // AFTER this one. wlr-layer-shell stacks within a layer by creation order,
     // so the catcher sat on top of the panel and ate every click meant for it —
     // "ich geh z. B. auf Medien oder auf Settings, schließt sich das Fenster und ich komme nicht in die Tab".  // english-ok: the report, quoted
-    // Measured with `niri msg layers`: both namespaces in the Top layer, with
+    // Measured with `hyprctl layers`: both namespaces in the Top layer, with
     // nothing deciding between them but the order they were made in.
     //
     // Raising the panel a layer is the fix rather than reordering the loaders,
@@ -434,7 +434,7 @@ PanelWindow {
         // of every open re-sized a Wayland layer surface.
         //
         // That is protocol, not drawing: `set_size` plus an `ack_configure`
-        // round trip with niri, a buffer of a new size (the swapchain discarded
+        // round trip with the compositor, a buffer of a new size (the swapchain discarded
         // every frame), a fresh blur and corner-radius calculation for the new
         // geometry, and a new input region. Measured on the VM at 60 Hz, ONE
         // opening of the quick panel: 11 × `set_size`, 9 × `ack_configure`.
@@ -443,7 +443,7 @@ PanelWindow {
         // ⚠️ AND UNLIKE THE NOTCH THIS SURFACE CANNOT SIMPLY BE OVERSIZED. The
         // notch has blur and shadow switched off (`surface("buchhwin-notch",
         // notchRadius, false, false)`) so spare room costs nothing there; this
-        // one is translucent and blurred, and niri applies both to the WHOLE
+        // one is translucent and blurred, and the compositor applies both to the WHOLE
         // surface, so a surface bigger than what it draws comes out as the
         // blurred, colour-fringed halo described at the top of this file.
         //

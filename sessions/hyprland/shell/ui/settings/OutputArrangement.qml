@@ -3,13 +3,13 @@ pragma ComponentBehavior: Bound
 // Where the monitors are, as a picture you can drag.
 //
 // ⚠️⚠️ THE ONE THING THAT MAKES THIS HARD, AND IT IS NOT THE DRAGGING. From
-// niri's own wiki (Configuration:-Outputs.md, "position"):
+// the compositor's own wiki (Configuration:-Outputs.md, "position"):
 //
 //     If the position is unset or results in an OVERLAP, the output is instead
 //     placed automatically.
 //
 // So a canvas that lets two tiles overlap is a control that lies: it shows the
-// arrangement you drew, writes it, and niri quietly puts the monitor somewhere
+// arrangement you drew, writes it, and the compositor quietly puts the monitor somewhere
 // else entirely. Overlap is therefore PREVENTED here rather than reported — a
 // dragged tile snaps to a free edge of its neighbours, and there is no state in
 // which this writes a position the compositor will refuse.
@@ -19,9 +19,9 @@ pragma ComponentBehavior: Bound
 // to put another output directly adjacent to it on the right, set its x to
 // 1920." Sizing tiles by the mode would be wrong by exactly the scale factor,
 // and wrong in the direction that looks plausible. `logical` comes straight from
-// `niri msg -j outputs` and already carries the scaled size.
+// `hyprctl -j monitors` and already carries the scaled size.
 //
-// ⚠️ AND niri RE-PLACES EVERY OUTPUT FROM SCRATCH on any change, sorted by name:
+// ⚠️ AND the compositor RE-PLACES EVERY OUTPUT FROM SCRATCH on any change, sorted by name:
 // first all the ones with an explicit position, then the rest to the right of
 // those. That is why dropping one tile writes positions for ALL of them — a
 // half-positioned set moves the screens you never touched.
@@ -105,7 +105,7 @@ Item {
     function _toLogical(v) { return v / root._k }
 
     // Does rect a overlap rect b? Touching edges is not overlap — that is the
-    // arrangement everybody actually wants, and niri accepts it.
+    // arrangement everybody actually wants, and the compositor accepts it.
     function _overlaps(a, b) {
         return a.x < b.x + b.w && b.x < a.x + a.w
             && a.y < b.y + b.h && b.y < a.y + a.h
@@ -123,7 +123,7 @@ Item {
     // The arrangement could produce exactly that: `_settle` pins one axis to a
     // neighbour's edge and leaves the other at wherever the finger was, so a
     // screen could land flush on the right while sliding far enough down to
-    // clear its neighbour entirely. Legal for niri, and a dead end for a mouse.
+    // clear its neighbour entirely. Legal for the compositor, and a dead end for a mouse.
     //
     // `_minTouch` keeps a corner-kiss from counting as contact: a shared edge
     // has to be worth aiming at, not one logical pixel tall.
@@ -241,13 +241,13 @@ Item {
         }
         // ⚠️ NO LEGAL PLACE MEANS DO NOT MOVE, and it is a real case: drag a
         // screen into a pocket enclosed by three others. Refusing is the honest
-        // answer — writing the overlap would hand the decision to niri, which
+        // answer — writing the overlap would hand the decision to the compositor, which
         // is exactly what this whole file is avoiding.
         if (best === null)
             return null
 
         // ⚠️ EVERY SCREEN IS WRITTEN, not just the dragged one — see the note at
-        // the top about niri re-placing from scratch. And the set is normalised
+        // the top about the compositor re-placing from scratch. And the set is normalised
         // so the top-left corner is (0,0): the arrangement is what matters, and
         // letting the origin wander means a drag to the left slowly walks every
         // coordinate negative.

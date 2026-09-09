@@ -109,7 +109,7 @@ ColumnLayout {
             key: "look.blurPasses"
             advanced: true
             label: "Blur passes"
-            hint: "Passes cost GPU, offset does not — niri's own documentation says so. Raise the offset first."
+            hint: "Passes cost GPU, offset does not — the compositor's own documentation says so. Raise the offset first."
             kind: "slider"
             from: 1; to: 6; step: 1
             usable: Config.look.blur
@@ -189,15 +189,10 @@ ColumnLayout {
             from: 0; to: 1.0; step: 0.05; decimals: 2
             usable: Config.look.shadows
         }
-        SettingRow {
-            Layout.fillWidth: true
-            key: "look.shadowBehindWindow"
-            advanced: true
-            label: "Shadow behind the window"
-            // Why it is this way: measured on Nautilus, the interior went from
-            // (66,50,35) to (40,32,25).
-            hint: "Off, because a translucent window shows its own shadow through itself."
-            usable: Config.look.shadows
-        }
+        // ⚠️ A ROW FOR `look.shadowBehindWindow` STOOD HERE. The setting came
+        // from a compositor that could choose whether to draw a shadow under
+        // an opaque window; Hyprland always does, and its decoration.shadow
+        // block has no key for it. A switch that writes into shell.json and
+        // reaches nothing is worse than no switch.
     }
 }

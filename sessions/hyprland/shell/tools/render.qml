@@ -75,7 +75,7 @@ Scope {
     // own config reloads on every write, so an unchanged rewrite is a reload
     // for nothing, and `bhctl theme apply` on an unchanged palette touched
     // seven files' mtimes. tools/hypr.qml has done it this way from the start,
-    // because niri live-reloads and the cost was immediately visible there.
+    // because the compositor live-reloads and the cost was immediately visible there.
     //
     // `blockLoading` on the views is what makes reading and writing possible in
     // the same statement.
@@ -138,10 +138,7 @@ Scope {
         case "tmux":      v = g.tmux;      break
         case "starship":  v = g.starship;  break
         case "lazygit":   v = g.lazygit;   break
-        case "vscode":    v = g.vscode;    break
         case "brave":     v = g.brave;     break
-        case "vesktop":   v = g.vesktop;   break
-        case "spicetify": v = g.spicetify; break
         case "hypr":      v = g.hypr;      break
         default:          v = "inherit"
         }
@@ -230,7 +227,7 @@ Scope {
     // means a stub that overrides nothing — not a deletion.
     //
     // ⚠️ FileView has no delete, and that is not an obstacle but the better
-    // answer: kitty.conf `include`s theme.conf and niri's config.kdl includes
+    // answer: kitty.conf `include`s theme.conf and the compositor's config.kdl includes
     // colors.kdl. A deleted file is a pointer into nothing; a file of nothing
     // but comments is exactly as ineffective for both readers — and says why.
     // Measured for the one case where "ineffective" was not obvious: qt6ct
@@ -484,7 +481,7 @@ Scope {
             //
             // It looked "nicely transparent" only while UNFOCUSED and went
             // solid black the moment it was selected — because the only
-            // translucency it had was niri's `opacity 0.96` on inactive
+            // translucency it had was the compositor's `opacity 0.96` on inactive
             // windows. That is the wrong tool twice over: it fades the TEXT
             // along with the background, and it inverts the meaning, making
             // the window you are not using the readable one.
@@ -526,11 +523,11 @@ Scope {
             "color15 " + col(m, "text") + "\n"
     }
 
-    // ------------------------------------------------------------------- niri
+    // -------------------------------------------------------------- compositor
     // COLOURS ONLY. This file is `include`d by the generated config.kdl, and
     // the split is what lets a palette change leave the keybindings alone.
     //
-    // ⚠️ Two rules, both from niri's own documentation and both easy to break:
+    // ⚠️ Two rules, both from the compositor's own documentation and both easy to break:
     //
     //  * No `on`, no `off`, no `width`, no `gaps` here. Whether a border exists
     //    is a look setting and belongs to tools/hypr.qml. Worse, the meaning
@@ -780,7 +777,7 @@ Scope {
     // ------------------------------------------------------- compositor colours
     //
     // ⚠️ THIS USED TO BE DEAD CODE, AND NOTHING SAID SO. Its predecessor wrote
-    // niri's colors.kdl and was left behind by the move to Hyprland: the switch
+    // the compositor's colors.kdl and was left behind by the move to Hyprland: the switch
     // in stateOf() lost its case, the theming block lost its key, and the emit
     // call went with the rest. The function stayed, compiled, and was never
     // called — so from the palette switcher onwards everything looked right
@@ -854,7 +851,7 @@ Scope {
         // Inactive is the same set on purpose: Qt uses it for windows that do
         // not have focus, and a desktop where the unfocused window changes
         // colour is the very effect kitty's background_opacity note argues
-        // against. niri already dims unfocused windows if look.opacityInactive
+        // against. The compositor already dims unfocused windows if look.opacityInactive
         // says so — one mechanism, not two.
         var inactive = active.slice()
         // Disabled differs in exactly one thing: text stops being readable as
@@ -1136,111 +1133,6 @@ Scope {
     FileView { id: f23; blockLoading: true; printErrors: false }
     FileView { id: f24; blockLoading: true; printErrors: false }
 
-    // ------------------------------------------------------------- Vesktop
-    //
-    // ⚠️ VESKTOP RATHER THAN DISCORD, AND IT WAS MEASURED BEFORE IT WAS
-    // DECIDED. Vencord themes a Discord that has been PATCHED, and on this
-    // system Discord is a flatpak: /var/lib/flatpak/…/discord/resources/app.asar
-    // is root-owned with a LINK COUNT OF 2, which means it is hardlinked into
-    // OSTree's object store — writing through it rewrites a shared object, and
-    // the next `flatpak update` throws the patch away regardless.
-    //
-    // Vesktop is Discord with Vencord already inside it, so there is nothing to
-    // patch: the theme is a CSS file in a directory that belongs to the user.
-    // He chose it over patching on 10.08.2026 with both costs on the table.
-    //
-    // ⚠️ THE PATH IS READ OUT OF THE SHIPPED SOURCE, NOT GUESSED. Vesktop's
-    // app.asar carries its own TypeScript:
-    //
-    //     export const DATA_DIR = process.env.VENCORD_USER_DATA_DIR
-    //         || (PORTABLE ? join(vesktopDir, "Data") : join(app.getPath("userData")))
-    //     export const VENCORD_THEMES_DIR = join(DATA_DIR, "themes")
-    //
-    // and under flatpak `app.getPath("userData")` is
-    // ~/.var/app/dev.vencord.Vesktop/config/vesktop — confirmed by the
-    // `settings/` directory the app creates there on its first run.
-    //
-    // ⚠️⚠️ AND A THEME FILE IS NOT ENOUGH ON ITS OWN. Vencord is DOWNLOADED by
-    // Vesktop at first start — it is not in the flatpak — so its settings, and
-    // with them the list of enabled themes, do not exist until then. The file
-    // is written here and has to be ticked ONCE under Settings → Themes. That
-    // is a manual step, so it is said out loud: the row in the settings window
-    // carries it, and so does docs/CONFIG.md. A theme that is written and never
-    // enabled would be a generator writing into the void, which is exactly what
-    // tests/reachable.sh exists to catch.
-    function vesktopCss(m) {
-        return head(false, m) +
-            "/* Ticked once under Settings -> Themes; Vencord remembers it. */\n" +
-            ":root {\n" +
-            "    --background-primary: " + col(m, "base") + ";\n" +
-            "    --background-secondary: " + col(m, "mantle") + ";\n" +
-            "    --background-secondary-alt: " + col(m, "surface0") + ";\n" +
-            "    --background-tertiary: " + col(m, "crust") + ";\n" +
-            "    --background-accent: " + accentOf(m) + ";\n" +
-            "    --background-floating: " + col(m, "surface0") + ";\n" +
-            "    --background-modifier-hover: " + col(m, "surface1") + ";\n" +
-            "    --background-modifier-active: " + col(m, "surface2") + ";\n" +
-            "    --background-modifier-selected: " + col(m, "surface1") + ";\n" +
-            "    --channeltextarea-background: " + col(m, "surface0") + ";\n" +
-            "    --text-normal: " + col(m, "text") + ";\n" +
-            "    --text-muted: " + col(m, "subtext0") + ";\n" +
-            "    --text-link: " + accentOf(m) + ";\n" +
-            "    --header-primary: " + col(m, "text") + ";\n" +
-            "    --header-secondary: " + col(m, "subtext1") + ";\n" +
-            "    --interactive-normal: " + col(m, "subtext1") + ";\n" +
-            "    --interactive-hover: " + col(m, "text") + ";\n" +
-            "    --interactive-active: " + col(m, "text") + ";\n" +
-            "    --interactive-muted: " + col(m, "overlay0") + ";\n" +
-            "    --brand-experiment: " + accentOf(m) + ";\n" +
-            "    --brand-experiment-560: " + accentOf(m) + ";\n" +
-            "    --button-danger-background: " + col(m, "red") + ";\n" +
-            "    --info-warning-foreground: " + col(m, "yellow") + ";\n" +
-            "    --info-positive-foreground: " + col(m, "green") + ";\n" +
-            "    --scrollbar-thin-thumb: " + col(m, "surface2") + ";\n" +
-            "    --scrollbar-auto-thumb: " + col(m, "surface2") + ";\n" +
-            "    --scrollbar-auto-track: " + col(m, "mantle") + ";\n" +
-            "}\n"
-    }
-
-    // ----------------------------------------------------------- spicetify
-    //
-    // A `color.ini` under ~/.config/spicetify/Themes/buchhwin/ — spicetify's own
-    // layout, one section per colour scheme. The theme is applied by the
-    // spicetify binary, which the installer pins and which has to be re-run
-    // after a Spotify update; docs/CONFIG.md carries that sentence.
-    //
-    // ⚠️ SPOTIFY IS INSTALLED PER-USER FOR THIS TO WORK AT ALL. spicetify writes
-    // into Spotify's own Apps directory, and in a SYSTEM flatpak that is
-    // root-owned — measured. As a --user install it lives under
-    // ~/.local/share/flatpak and belongs to him, so nothing here needs root.
-    //
-    // ⚠️ SIX-DIGIT HEX WITHOUT THE HASH. spicetify's ini parser takes the value
-    // literally and a leading '#' starts a comment in an ini file — the whole
-    // line would vanish, silently, and the theme would fall back to Spotify's
-    // own colours.
-    function spicetifyIni(m) {
-        function bare(c) { return String(c).replace("#", "") }
-        return "; Generated by buchhwin from palette '" + Scheme.name + "'"
-             + (m === "neutral" ? ", neutral (themed, but colourless)" : "") + ".\n"
-             + "; Do not edit — regenerated on every palette or look change.\n"
-             + "[buchhwin]\n"
-             + "text               = " + bare(col(m, "text")) + "\n"
-             + "subtext            = " + bare(col(m, "subtext0")) + "\n"
-             + "main               = " + bare(col(m, "base")) + "\n"
-             + "sidebar            = " + bare(col(m, "mantle")) + "\n"
-             + "player             = " + bare(col(m, "mantle")) + "\n"
-             + "card               = " + bare(col(m, "surface0")) + "\n"
-             + "shadow             = " + bare(col(m, "crust")) + "\n"
-             + "selected-row       = " + bare(col(m, "subtext1")) + "\n"
-             + "button             = " + bare(accentOf(m)) + "\n"
-             + "button-active      = " + bare(accentOf(m)) + "\n"
-             + "button-disabled    = " + bare(col(m, "surface2")) + "\n"
-             + "tab-active         = " + bare(col(m, "surface1")) + "\n"
-             + "notification       = " + bare(col(m, "surface0")) + "\n"
-             + "notification-error = " + bare(col(m, "red")) + "\n"
-             + "misc               = " + bare(col(m, "surface2")) + "\n"
-    }
-
     // ------------------------------------------------------------- VS Code
     //
     // ⚠️ AN EXTENSION, NOT A PILE OF colorCustomizations. VS Code has no
@@ -1250,75 +1142,7 @@ Scope {
     // ONE LINE pointer in the user's file. That is the same shape as kitty's
     // include and btop's `color_theme`, and it is the shape this project uses
     // everywhere for a reason: `off` has something to take back out.
-    function vscodePackage() {
-        return JSON.stringify({
-            name: "buchhwin-theme",
-            displayName: "Buchhwin",
-            description: "Generated from the buchhwin palette. Do not edit.",
-            version: "1.0.0",
-            publisher: "buchhwin",
-            engines: { vscode: "^1.70.0" },
-            categories: ["Themes"],
-            contributes: {
-                themes: [{
-                    label: "Buchhwin",
-                    uiTheme: Theme.dark ? "vs-dark" : "vs",
-                    path: "./themes/buchhwin-color-theme.json"
-                }]
-            }
-        }, null, 2) + "\n"
-    }
 
-    function vscodeTheme(m) {
-        var c = ({
-            "editor.background": col(m, "base"),
-            "editor.foreground": col(m, "text"),
-            "editorLineNumber.foreground": col(m, "overlay0"),
-            "editorLineNumber.activeForeground": accentOf(m),
-            "editorCursor.foreground": accentOf(m),
-            "editor.selectionBackground": col(m, "surface1"),
-            "editor.lineHighlightBackground": col(m, "mantle"),
-            "sideBar.background": col(m, "mantle"),
-            "sideBar.foreground": col(m, "subtext1"),
-            "sideBarSectionHeader.background": col(m, "surface0"),
-            "activityBar.background": col(m, "crust"),
-            "activityBar.foreground": col(m, "text"),
-            "activityBarBadge.background": accentOf(m),
-            "activityBarBadge.foreground": accentFgOf(m),
-            "statusBar.background": col(m, "crust"),
-            "statusBar.foreground": col(m, "subtext0"),
-            "titleBar.activeBackground": col(m, "crust"),
-            "titleBar.activeForeground": col(m, "text"),
-            "tab.activeBackground": col(m, "base"),
-            "tab.inactiveBackground": col(m, "mantle"),
-            "tab.activeBorderTop": accentOf(m),
-            "panel.background": col(m, "mantle"),
-            "terminal.background": col(m, "base"),
-            "terminal.foreground": col(m, "text"),
-            "focusBorder": accentOf(m),
-            "list.activeSelectionBackground": col(m, "surface1"),
-            "list.hoverBackground": col(m, "surface0"),
-            "errorForeground": col(m, "red"),
-            "editorError.foreground": col(m, "red"),
-            "editorWarning.foreground": col(m, "yellow"),
-            "editorInfo.foreground": col(m, "blue")
-        })
-        return JSON.stringify({
-            name: "Buchhwin",
-            type: Theme.dark ? "dark" : "light",
-            colors: c,
-            tokenColors: [
-                { scope: ["comment"], settings: { foreground: col(m, "overlay1"),
-                                                  fontStyle: "italic" } },
-                { scope: ["string"], settings: { foreground: col(m, "green") } },
-                { scope: ["constant.numeric"], settings: { foreground: col(m, "peach") } },
-                { scope: ["keyword", "storage.type"], settings: { foreground: col(m, "mauve") } },
-                { scope: ["entity.name.function"], settings: { foreground: col(m, "blue") } },
-                { scope: ["variable"], settings: { foreground: col(m, "text") } },
-                { scope: ["entity.name.type"], settings: { foreground: col(m, "yellow") } }
-            ]
-        }, null, 2) + "\n"
-    }
 
     // ⚠️ THE USER'S OWN FILE, TOUCHED WITH TWO KEYS AND A BACKUP.
     //
@@ -1328,32 +1152,6 @@ Scope {
     // what is left still does not parse, NOTHING is written and the line to add
     // by hand is printed instead. Destroying somebody's editor settings to set
     // a colour scheme would be a poor trade.
-    function vscodeSettings(mode) {
-        var raw = f16.text()
-        var obj = ({})
-        if (raw && raw.trim().length) {
-            var stripped = raw.split("\n").filter(function (l) {
-                return l.replace(/^\s+/, "").indexOf("//") !== 0
-            }).join("\n")
-            try {
-                obj = JSON.parse(stripped)
-            } catch (e) {
-                return null
-            }
-            if (typeof obj !== "object" || obj === null)
-                return null
-        }
-        if (mode === "off") {
-            delete obj["workbench.colorTheme"]
-        } else {
-            obj["workbench.colorTheme"] = "Buchhwin"
-        }
-        // Not part of the colour scheme, and set in both states on purpose:
-        // "native" means the compositor draws the frame, and niri's
-        // prefer-no-csd then draws none at all — no title bar, no buttons.
-        obj["window.titleBarStyle"] = "native"
-        return JSON.stringify(obj, null, 4) + "\n"
-    }
 
     // Brave's Preferences — the same shape as vscodeSettings above, and for the
     // same two reasons: it is a JSON file somebody else owns, and one of the
@@ -1727,7 +1525,7 @@ Scope {
             emitFile(mQt, f7, root.cfg + "/qt6ct/colors/buchhwin.conf",
                      qtColors, offText("#", "qt"), "qt6ct", "qt")
             // ⚠️ THE ONE FILE THAT REACHES THE COMPOSITOR. Its predecessor was
-            // written for niri and then left uncalled through the move to
+            // written for the compositor and then left uncalled through the move to
             // Hyprland, so a palette change stopped arriving there entirely —
             // silently, because a function nobody calls raises nothing.
             // generated/colors.lua is loaded by hyprland.lua after the shipped
@@ -1750,28 +1548,6 @@ Scope {
             // is written.
             var batBefore = written
             var home = Quickshell.env("HOME") || "~"
-            var ext = home + "/.vscode/extensions/buchhwin-theme"
-            var mCode = stateOf("vscode")
-            emitFile(mCode, f14, ext + "/package.json",
-                     function () { return root.vscodePackage() },
-                     root.vscodePackage(), "vscode manifest", "vscode")
-            emitFile(mCode, f15, ext + "/themes/buchhwin-color-theme.json",
-                     root.vscodeTheme,
-                     // ⚠️ `off` writes an EMPTY theme rather than deleting it.
-                     // The pointer in settings.json is taken out at the same
-                     // time, but a stale pointer at a deleted theme makes VS
-                     // Code fall back with a warning on every start.
-                     JSON.stringify({ name: "Buchhwin", colors: {}, tokenColors: [] },
-                                    null, 2) + "\n",
-                     "vscode theme", "vscode")
-            f16.path = root.cfg + "/Code/User/settings.json"
-            var codeSettings = root.vscodeSettings(mCode)
-            if (codeSettings === null)
-                note("  skip   vscode settings.json does not parse — "
-                     + "add \"workbench.colorTheme\": \"Buchhwin\" by hand")
-            else
-                write(f16, root.cfg + "/Code/User/settings.json", codeSettings,
-                      "vscode settings (" + mCode + ")")
 
             // Brave. The same shape as vscode's settings.json above: a foreign
             // JSON file, merged rather than replaced, and skipped entirely if it
@@ -1795,21 +1571,15 @@ Scope {
                      "bat", "bat")
             root.batPending = written !== batBefore
 
-            // ⚠️ THE TWO WHOSE FILES LIVE OUTSIDE ~/.config, each for its own
-            // reason: Vesktop is a flatpak and keeps its data under ~/.var/app,
-            // and spicetify insists on ~/.config/spicetify whatever
-            // XDG_CONFIG_HOME says — so the first is spelled out from $HOME and
-            // the second from root.cfg like the rest.
-            emitFile(stateOf("vesktop"), f21,
-                     home + "/.var/app/dev.vencord.Vesktop/config/vesktop/themes/buchhwin.css",
-                     vesktopCss,
-                     "/* buchhwin: theming is OFF for Vesktop. */\n",
-                     "vesktop", "vesktop")
-            emitFile(stateOf("spicetify"), f22,
-                     root.cfg + "/spicetify/Themes/buchhwin/color.ini",
-                     spicetifyIni,
-                     "; buchhwin: theming is OFF for spicetify.\n",
-                     "spicetify", "spicetify")
+            // ⚠️ VS CODE, SPOTIFY AND VESKTOP USED TO BE THEMED HERE, and all
+            // three are gone along with the packages that made them plausible.
+            // The installer no longer brings a browser, an editor or a music
+            // player: it installs a session, not a workstation. Writing a colour
+            // file into an extension directory for an editor nobody installed is
+            // the definition of work that cannot be observed.
+            //
+            // Nothing about the palette changed, so if you install any of them
+            // yourself they simply use their own themes.
 
             // ⚠️ starship STILL HAS NO WRITER, and it is not an oversight:
             // read in its own binary and --help output, it names a single

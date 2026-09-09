@@ -49,18 +49,11 @@ ColumnLayout {
         }
         SettingRow {
             Layout.fillWidth: true
-            key: "input.touchpad.accelSpeed"
-            label: "Pointer speed"
-            kind: "slider"
-            from: -1.0; to: 1.0; step: 0.05; decimals: 2
-        }
-        SettingRow {
-            Layout.fillWidth: true
             key: "input.touchpad.scrollFactor"
             label: "Scrolling speed"
             // Why it is this way: the schema had natural scroll, pointer
             // acceleration and scroll method, so "scrolling is too fast" had no
-            // answer anywhere. 1.0 is niri's own; below 1 is slower.
+            // answer anywhere. 1.0 is the compositor's own; below 1 is slower.
             hint: "There was no speed here at all."
             kind: "slider"
             from: 0.1; to: 3.0; step: 0.1; decimals: 1
@@ -69,31 +62,9 @@ ColumnLayout {
         // ── fine adjustments ─────────────────────────────────────────────────
         SettingRow {
             Layout.fillWidth: true
-            key: "input.touchpad.accelProfile"
-            advanced: true
-            label: "Acceleration"
-            hint: "Flat disables pointer acceleration entirely."
-            kind: "choice"
-            choices: root.accelProfiles
-        }
-        SettingRow {
-            Layout.fillWidth: true
             key: "input.touchpad.dwt"
             advanced: true
             label: "Disable while typing"
-        }
-        SettingRow {
-            Layout.fillWidth: true
-            key: "input.touchpad.scrollMethod"
-            advanced: true
-            label: "Scroll method"
-            kind: "choice"
-            choices: [
-                { value: "two-finger",     label: "Two finger" },
-                { value: "edge",           label: "Edge" },
-                { value: "on-button-down", label: "Button held" },
-                { value: "no-scroll",      label: "None" }
-            ]
         }
         SettingRow {
             Layout.fillWidth: true

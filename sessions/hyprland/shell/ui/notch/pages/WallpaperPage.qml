@@ -118,7 +118,7 @@ ColumnLayout {
             if (i < 0 || i >= Services.Wallpaper.count)
                 return
             // Writes one key in shell.json. Everything else — the image on
-            // screen, the derived palette, GTK, Qt, kitty, niri — follows from
+            // screen, the derived palette, GTK, Qt, kitty, the compositor — follows from
             // that, and follows again after a restart. See theme/Scheme.qml.
             Services.Wallpaper.choose(Services.Wallpaper.pathAt(i))
         }

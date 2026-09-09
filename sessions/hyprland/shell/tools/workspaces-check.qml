@@ -11,10 +11,10 @@
 // ⚠️ THE FIXTURE IS A MEASUREMENT, NOT AN INVENTION. Every number below was read
 // off the running compositor with three windows open:
 //
-//   niri msg -j windows | jq '.[].layout'
+//   hyprctl -j clients | jq '.[].layout'
 //     pos_in_scrolling_layout [1,1] [2,1] [3,1]
 //     tile_size               1232x734 each
-//   niri msg -j outputs        Virtual-1 logical 1280x800
+//   hyprctl -j monitors        Virtual-1 logical 1280x800
 //
 // That is the case he reported — three windows, each nearly the full width of a
 // 1280 screen, which as plain shares adds up to 2.9 boxes.
@@ -55,15 +55,26 @@ Scope {
         }
         root.ok("the page builds", true)
 
-        function win(col, row, w, h, id) {
+        // ⚠️ THE FIXTURE SPEAKS THE NEW SHAPE, AND IT TAKES A POSITION.
+        // It used to build a [column, row] index and a tile size, because that
+        // is all the previous compositor reported — a scrolling layout has no
+        // single frame to give coordinates in. Hyprland reports the real
+        // rectangle, so a window here is an `at` and a `size`, exactly as
+        // `hyprctl -j clients` hands them over.
+        //
+        // ⚠️ x IS EXPLICIT RATHER THAN DERIVED FROM THE COLUMN. The first
+        // attempt computed it as (col - 1) * w, which is only right when every
+        // window is the same width — and case 3 below is deliberately three
+        // windows of two different widths, so it put the middle one 160 px to
+        // the left of where it belongs and failed a check that was correct.
+        function win(x, y, w, h, id) {
             return { id: id, app_id: "x", workspace_id: 1, is_focused: false,
-                     layout: { pos_in_scrolling_layout: [col, row],
-                               tile_size: [w, h] } }
+                     at: [x, y], size: [w, h] }
         }
 
         // ------------------------------------------- 1 · the reported case
-        var three = [win(1, 1, 1232, 734, 1), win(2, 1, 1232, 734, 2),
-                     win(3, 1, 1232, 734, 3)]
+        var three = [win(0, 0, 1232, 734, 1), win(1232, 0, 1232, 734, 2),
+                     win(2464, 0, 1232, 734, 3)]
         var p = page.layoutWindows(three, 1280, 800)
         root.ok("three windows produce three rectangles", p.length === 3)
 
@@ -75,7 +86,7 @@ Scope {
         root.ok("nothing reaches past the box (max right edge " + worst.toFixed(3) + ")",
                 worst <= 1.0005)
 
-        // Three equal columns share the width equally, in niri's order.
+        // Three equal columns share the width equally, in the compositor's order.
         root.ok("the three columns are equal thirds",
                 root.near(p[0].w, 1 / 3) && root.near(p[1].w, 1 / 3)
                 && root.near(p[2].w, 1 / 3))
@@ -89,12 +100,12 @@ Scope {
         // tile to the box would also stop the overflow — and would make a
         // half-width window and a full-width one the same size, which is the
         // thing B53 was asked for.
-        var half = [win(1, 1, 640, 800, 1), win(2, 1, 640, 800, 2)]
+        var half = [win(0, 0, 640, 800, 1), win(640, 0, 640, 800, 2)]
         var ph = page.layoutWindows(half, 1280, 800)
         root.ok("two half-width windows are half the box each",
                 root.near(ph[0].w, 0.5) && root.near(ph[1].w, 0.5))
 
-        var lone = page.layoutWindows([win(1, 1, 640, 800, 1)], 1280, 800)
+        var lone = page.layoutWindows([win(0, 0, 640, 800, 1)], 1280, 800)
         root.ok("a single half-width window stays HALF, not stretched",
                 root.near(lone[0].w, 0.5))
 
@@ -104,15 +115,20 @@ Scope {
         // abstände nicht zwischen fenster und rand, der ist rechts zu groß".     // english-ok: the report, quoted
         //
         // ⚠️ AND THE ANSWER IS A PHOTOGRAPH, NOT A PREFERENCE. `grim -o
-        // Virtual-1` on the lab VM with one window: niri leaves about 24 px of
+        // Virtual-1` on the lab VM with one window: the compositor leaves about 24 px of
         // wallpaper on the LEFT and about 24 px on the RIGHT of a 1232-wide
         // window on a 1280 screen. It centres. The thumbnail used to start every
         // row at x = 0, so all of the slack collected on one side and the picture
         // showed a layout the compositor never produces.
         //
-        // Two assertions, because "centred" without the second one is also true
-        // of a row that has been stretched to fill.
-        var narrow = page.layoutWindows([win(1, 1, 640, 800, 1)], 1280, 800)
+        // ⚠️ THE MECHANISM CHANGED AND THE PROPERTY DID NOT. The old geometry
+        // code CENTRED the row itself, because the previous compositor reported
+        // no position and the slack had to be shared by hand. Hyprland reports
+        // where the window actually is, gaps included — so the fixture now says
+        // "1232 wide at x = 24 on a 1280 screen", which is what `hyprctl -j
+        // clients` returns for the photographed case, and the check is that the
+        // thumbnail reproduces it rather than invents it.
+        var narrow = page.layoutWindows([win(24, 24, 1232, 734, 1)], 1280, 800)
         var gapL = narrow[0].x
         var gapR = 1 - (narrow[0].x + narrow[0].w)
         root.ok("a window narrower than the screen is centred, not packed left",
@@ -122,7 +138,8 @@ Scope {
         // the denominator is the content itself, so there is no slack to share
         // and the row still fills the box edge to edge.
         var over = page.layoutWindows(
-            [win(1, 1, 1232, 734, 1), win(2, 1, 1232, 734, 2), win(3, 1, 1232, 734, 3)],
+            [win(0, 0, 1232, 734, 1), win(1232, 0, 1232, 734, 2),
+             win(2464, 0, 1232, 734, 3)],
             1280, 800)
         root.ok("an overflowing workspace still fills the box, with no gap added",
                 root.near(over[0].x, 0)
@@ -133,7 +150,7 @@ Scope {
         // His example: the settings window, open, "nur in der Mitte des Screens  // english-ok: the report, quoted
         // aber halt nur so groß wie das settings menu". A narrow middle column   // english-ok: the report, quoted
         // between two wide ones.
-        var mid = [win(1, 1, 480, 800, 1), win(2, 1, 320, 400, 2), win(3, 1, 480, 800, 3)]
+        var mid = [win(0, 0, 480, 800, 1), win(480, 0, 320, 400, 2), win(800, 0, 480, 800, 3)]
         var pm = page.layoutWindows(mid, 1280, 800)
         root.ok("a middle window narrower than its neighbours is drawn narrower "
                 + "(" + pm[1].w.toFixed(3) + " vs " + pm[0].w.toFixed(3) + ")",
@@ -150,7 +167,7 @@ Scope {
                 root.near(pm[2].x + pm[2].w, 1))
 
         // ------------------------------------------- 4 · rows stack downwards
-        var stacked = [win(1, 1, 1280, 400, 1), win(1, 2, 1280, 400, 2)]
+        var stacked = [win(0, 0, 1280, 400, 1), win(0, 400, 1280, 400, 2)]
         var ps = page.layoutWindows(stacked, 1280, 800)
         root.ok("two rows in one column share the column's width",
                 root.near(ps[0].w, 1) && root.near(ps[1].w, 1))

@@ -1,9 +1,9 @@
 // Press a key, get the name the compositor calls it.
 //
-// ⚠️ IT REFUSES WHAT IT DOES NOT KNOW, and that is the whole design. niri takes
+// ⚠️ IT REFUSES WHAT IT DOES NOT KNOW, and that is the whole design. The compositor takes
 // XKB key names, Qt hands out Qt key codes, and the two only line up through a
 // table. A guess that gets through here becomes a line in config.kdl, and a
-// config.kdl niri cannot parse means niri does not start — on the machine of
+// config.kdl the compositor cannot parse means the compositor does not start — on the machine of
 // somebody who was in the middle of changing a shortcut. So an unmapped key
 // says so and changes nothing.
 //
@@ -69,7 +69,7 @@ FocusScope {
         [Qt.Key_BracketRight]: "bracketright",
         [Qt.Key_QuoteLeft]:    "grave",
         // The media keys, so the volume and brightness bindings can be moved
-        // like any other. These are the names niri already has in the defaults.
+        // like any other. These are the names the compositor already has in the defaults.
         [Qt.Key_VolumeUp]:     "XF86AudioRaiseVolume",
         [Qt.Key_VolumeDown]:   "XF86AudioLowerVolume",
         [Qt.Key_VolumeMute]:   "XF86AudioMute",
@@ -79,7 +79,7 @@ FocusScope {
         [Qt.Key_Calculator]:   "XF86Calculator"
     })
 
-    // ⚠️ Mod, Ctrl, Alt, Shift, in that order and always that order. niri does
+    // ⚠️ Mod, Ctrl, Alt, Shift, in that order and always that order. The compositor does
     // not care, but the defaults are written this way and a list where half the
     // rows say `Mod+Shift+C` and half say `Shift+Mod+C` cannot be read down.
     function nameFor(event) {

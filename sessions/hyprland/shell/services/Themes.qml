@@ -80,7 +80,7 @@ Singleton {
     }
 
     // Choosing writes ONE key, exactly as choosing a wallpaper does. The shell's
-    // own colours, GTK, Qt, kitty, btop and niri are all downstream of it, on
+    // own colours, GTK, Qt, kitty, btop and the compositor are all downstream of it, on
     // this start and on the next — see theme/Scheme.qml and services/Theming.qml.
     function choose(name) {
         if (!name || name === Config.theme.palette) return

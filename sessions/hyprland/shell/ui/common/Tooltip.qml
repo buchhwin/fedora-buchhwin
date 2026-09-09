@@ -5,7 +5,7 @@
 //
 // ⚠️ A CHILD OF THE SURFACE, NEVER ITS OWN WINDOW. A second layer surface for a
 // tooltip would mean a second namespace, a second shadow and a second blur pass
-// for four words — and niri draws both behind the WHOLE surface, invisible
+// for four words — and the compositor draws both behind the WHOLE surface, invisible
 // margins included, so it would also come with the coloured halo this project
 // spent a round removing from the notch. It overflows into the panel it lives
 // in instead, which is where there is room anyway.

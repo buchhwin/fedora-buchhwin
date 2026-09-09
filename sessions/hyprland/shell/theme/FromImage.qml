@@ -5,7 +5,7 @@ pragma Singleton
 // The output is an ordinary palette — the same 26 semantic names every
 // hand-written one has — so nothing downstream needs to know where it came
 // from. That is the whole reason this is cheap to add: Theme.qml, the renderer,
-// GTK, Qt, kitty and niri all keep working unchanged.
+// GTK, Qt, kitty and the compositor all keep working unchanged.
 //
 // Three decisions, each of which is the difference between a scheme you would
 // use and one you would switch off after a day:

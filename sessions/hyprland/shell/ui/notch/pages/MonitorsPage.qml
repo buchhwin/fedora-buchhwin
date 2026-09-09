@@ -16,7 +16,7 @@ pragma ComponentBehavior: Bound
 //
 // ⚠️ THE GEOMETRY IS SHARED, NOT COPIED — `common/WorkspaceGeometry.qml`. Both
 // surfaces draw a workspace to scale, and that arithmetic is measured against
-// niri's own numbers; a second copy would drift away from those quietly.
+// the compositor's own numbers; a second copy would drift away from those quietly.
 
 import QtQuick
 import QtQuick.Layouts
@@ -45,7 +45,7 @@ ColumnLayout {
     // belongs to the arrows.
     property int wanted: 1
 
-    // ⚠️ THE MONITOR LIST HAS TO BE ASKED FOR. niri has no event for outputs
+    // ⚠️ THE MONITOR LIST HAS TO BE ASKED FOR. The compositor has no event for outputs
     // (measured — see Hyprland.qml), so `Compositor.outputs` stays EMPTY until
     // somebody calls `refreshOutputs()`. Until today only the Displays page ever
     // did, which is why the workspace map falls back to 16:9 for anybody who has
@@ -59,7 +59,7 @@ ColumnLayout {
     // Every column, worked out by the shared pure function so it can be checked
     // without a compositor. See tests/monitors.sh.
     // ⚠️ PER COLUMN, AND KEPT ON ROOT. A delegate is destroyed and rebuilt
-    // every time niri sends an event, so a column that remembered its own index
+    // every time the compositor sends an event, so a column that remembered its own index
     // would forget it the moment a window moved — which is exactly when it
     // matters. Map of connector name → index; empty means "use `wanted`".
     property var perOutput: ({})
@@ -93,7 +93,7 @@ ColumnLayout {
         var next = root.wanted + by
         if (next < 1)
             return
-        // Do not walk past the last workspace any monitor actually has: niri
+        // Do not walk past the last workspace any monitor actually has: Hyprland
         // creates them on demand, so an index nobody has is an empty screen.
         var most = 1
         for (var i = 0; i < root.columns.length; i++) {
@@ -129,7 +129,7 @@ ColumnLayout {
                 spacing: Theme.space1
 
                 // The connector name, so it is obvious which box is which
-                // screen. niri's own name, not a made-up "Monitor 1" — that is
+                // screen. the compositor's own name, not a made-up "Monitor 1" — that is
                 // the name every other surface and `bhctl doctor` use.
                 BarText {
                     Layout.fillWidth: true
@@ -180,8 +180,17 @@ ColumnLayout {
                             (col.modelData.logical && col.modelData.logical.height > 0)
                             ? col.modelData.logical.height : 0
 
+                        // ⚠️ THE ORIGIN IS PASSED, AND ON A SECOND SCREEN IT
+                        // IS THE DIFFERENCE BETWEEN A PICTURE AND AN EMPTY BOX.
+                        // Hyprland reports a window's position in the GLOBAL
+                        // layout, so everything on the right-hand monitor has
+                        // an x in the thousands. Without subtracting where the
+                        // monitor starts, every one of those is drawn past the
+                        // right edge of its own thumbnail.
                         readonly property var placed: WorkspaceGeometry.layoutWindows(
-                            col.modelData.windows, tiles.outW, tiles.outH)
+                            col.modelData.windows, tiles.outW, tiles.outH,
+                            (col.modelData.logical && col.modelData.logical.x) || 0,
+                            (col.modelData.logical && col.modelData.logical.y) || 0)
 
                         BarText {
                             anchors.centerIn: parent
@@ -229,7 +238,7 @@ ColumnLayout {
                                 }
 
                                 // ⚠️⚠️ THE GESTURE, AND IT IS TWO CALLS BECAUSE
-                                // NIRI'S INDICES COUNT PER OUTPUT. Measured on the
+                                // WORKSPACE INDICES COUNT PER OUTPUT. Measured on the
                                 // lab VM with two heads:
                                 //
                                 //   idx=1 exists on Virtual-1 AND on Virtual-2

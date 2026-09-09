@@ -36,7 +36,7 @@ Singleton {
 
     // ---------------------------------------------------------------- screens
     //
-    // The value is the connector name, because that is what niri and our own
+    // The value is the connector name, because that is what the compositor and our own
     // `monitors` keys match on. The label carries the size, because "Virtual-1"
     // and "DP-3" tell you nothing about which screen is which.
     readonly property var monitors: {
@@ -151,7 +151,7 @@ Singleton {
 
     // ----------------------------------------------------------- workspaces
     //
-    // Only the NAMED ones. niri numbers the rest, and a number is not a name
+    // Only the NAMED ones. The compositor numbers the rest, and a number is not a name
     // this key can hold — `workspaces` is the list of names to create.
     readonly property var workspaceNames: {
         var out = []

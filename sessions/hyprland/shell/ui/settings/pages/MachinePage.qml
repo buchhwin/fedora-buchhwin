@@ -18,7 +18,7 @@ ColumnLayout {
     // ⚠️ THE GPU LIST WAS EMPTY UNLESS YOU HAD VISITED ANOTHER PAGE FIRST.
     // `renderChoices` below reads Services.Installed, and Installed scans only
     // when asked — KeyboardPage and TypePage both ask, this page never did. So
-    // "Render on" offered one entry ("niri chooses") on a fresh window and the
+    // "Render on" offered one entry ("the compositor chooses") on a fresh window and the
     // full list after a detour through Keyboard, which reads as a list that
     // sometimes works. Found while adding the update rows, not by a check.
     //
@@ -31,7 +31,7 @@ ColumnLayout {
     }
 
     readonly property var renderChoices: {
-        var out = [{ value: "", label: "niri chooses" }]
+        var out = [{ value: "", label: "the compositor chooses" }]
         var d = Services.Installed.renderDevices
         for (var i = 0; i < d.length; i++)
             out.push({ value: d[i].path, label: d[i].driver ? d[i].driver : d[i].path })
@@ -186,8 +186,8 @@ ColumnLayout {
         // in the window where that is the right way round. `Hyprland --verify-config`
         // accepts a device path that does not exist (measured on 26.04, with a
         // control: an invented KEY in the same block is rejected, a missing
-        // DEVICE is not), and a config naming a device niri cannot open means
-        // niri does not start. Everywhere else a typed value that this machine
+        // DEVICE is not), and a config naming a device the compositor cannot open means
+        // The compositor does not start. Everywhere else a typed value that this machine
         // does not have is merely wrong; here it costs the session, and a
         // "Not installed here" caption under a text box would be a warning
         // shown after the damage was already typed.
@@ -206,11 +206,11 @@ ColumnLayout {
             advanced: true
             label: "Render on"
             // Why it is this way: On a hybrid laptop the external display
-            // sockets usually belong to the second card, so niri renders on
+            // sockets usually belong to the second card, so the compositor renders on
             // the built-in one and copies each frame across for that screen —
             // naming the second card here removes the copy, and costs battery,
             // because that card then never idles.
-            hint: "Which GPU niri draws with."
+            hint: "Which GPU the compositor draws with."
             kind: "choice"
             choices: root.renderChoices
         }

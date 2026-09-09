@@ -6,7 +6,7 @@ pragma Singleton
 // the notch is open, and a keybinding has no idea which screen you meant. The
 // surfaces bind to this; nobody assigns to their own `page`.
 //
-// Keys live in the compositor (niri has no protocol for shell-owned shortcuts),
+// Keys live in the compositor (the compositor has no protocol for shell-owned shortcuts),
 // so they reach us through `qs -c buchhwin ipc call notch media`. That
 // also means the shortcuts keep working when this shell is dead — they simply
 // fail to reach anyone, instead of the compositor swallowing them.
@@ -54,7 +54,7 @@ Singleton {
     // so three surfaces grabbed the keyboard.
     //
     // A connector name (DP-2, HDMI-A-1) or "" for "no opinion, show everywhere".
-    // Empty is the honest default, not a fallback to guessing: niri has no event
+    // Empty is the honest default, not a fallback to guessing: the compositor has no event
     // for focus moving between outputs without a workspace change, so
     // Compositor.activeOutput can legitimately be empty and the old
     // everywhere-behaviour is then exactly right.
@@ -168,7 +168,7 @@ Singleton {
     // ------------------------------------------------------------- settings
     //
     // ⚠️ NOT A PAGE EITHER, AND FOR A STRONGER REASON THAN THE LAUNCHER'S. The
-    // settings window is a REAL niri window: you move it, you push it to another
+    // settings window is a REAL the compositor window: you move it, you push it to another
     // workspace, you leave it open beside the thing you are changing. A single
     // `page` string can express none of that.
     //
@@ -195,8 +195,8 @@ Singleton {
     //
     // A click needs a coordinate, and under Wayland a client does not know where
     // its window sits on the screen — so the two halves come from the two
-    // parties that each know one: niri says where the WINDOW is
-    // (`niri msg -j windows`), and this says where the ROW is inside it.
+    // parties that each know one: the compositor says where the WINDOW is
+    // (`hyprctl -j clients`), and this says where the ROW is inside it.
     //
     // ⚠️ IT IS NOT TEST SCAFFOLDING IN PRODUCTION CODE, by this project's own
     // rule 5: every surface has to be reachable from outside, and "where is the
@@ -342,7 +342,7 @@ Singleton {
         // ⚠️ `settings` USED TO BE HERE AND IS NOW ITS OWN TARGET. It opened the
         // quick panel on its overview tab, because there was no settings window
         // to open — the placeholder in QuickPage.qml said as much in words. M8
-        // is that window, and a real niri window is not one of the notch's
+        // is that window, and a real the compositor window is not one of the notch's
         // pages, so `qs -c buchhwin ipc call settings toggle` is where it went.
         //
         // The history is worth keeping, because it is why tests/ipc-names.sh
@@ -538,7 +538,7 @@ Singleton {
     // The settings window. Same four verbs as the launcher, and the same
     // reasoning: `open` rather than `show`, because the command line cannot
     // reach a function of that name.
-    // ⚠️ B64 · TILING TWO FULL WINDOWS SIDE BY SIDE, from outside. niri can only
+    // ⚠️ B64 · TILING TWO FULL WINDOWS SIDE BY SIDE, from outside. The compositor can only
     // size the FOCUSED column, so the sequence lives in services/Hyprland.qml — this
     // is the way in, and it is what the key binding calls.
     //

@@ -128,6 +128,25 @@ QtObject {
 
     property var warnings: []
 
+    // The modifier the whole table hangs off.
+    //
+    // ⚠️ THIS SETTING HAD NO READER AND THEREFORE NO EFFECT. `keys.mod` has a
+    // row in the settings window and sat in the theming fingerprint, so
+    // changing it from Super to Alt rewrote thirteen colour files and left
+    // every binding on Super. config/Binds.qml spells SUPER because a table has
+    // to say something; this is where it becomes what was actually chosen.
+    //
+    // ⚠️ WORD-BOUNDARY, NOT A SUBSTRING. A plain replace would also rewrite the
+    // letters inside a key NAME. There is no such key today, but the failure
+    // would be a binding that silently never fires, which is the hardest kind
+    // to notice.
+    function withMod(key) {
+        var mod = String(Config.keys.mod || "SUPER").toUpperCase()
+        if (mod === "SUPER")
+            return String(key)
+        return String(key).replace(/SUPER/g, mod)
+    }
+
     function line(b) {
         var action = String(b.action)
         var make = root.actions[action]
@@ -145,7 +164,7 @@ QtObject {
             }
         }
 
-        return "hl.bind(" + Lua.str(b.key) + ", " + make(arg) + root.options(b) + ")\n"
+        return "hl.bind(" + Lua.str(root.withMod(b.key)) + ", " + make(arg) + root.options(b) + ")\n"
     }
 
     function build() {
@@ -163,10 +182,10 @@ QtObject {
                 continue
 
             // ⚠️ FIRST WINS, AND THE SECOND IS REPORTED. Hyprland does not
-            // refuse a duplicate the way niri's parser did — it quietly keeps
+            // refuse a duplicate the way the compositor's parser did — it quietly keeps
             // one of them, which is how a rebind onto an occupied key looks like
             // "the new binding does not work" with nothing in any log.
-            var key = String(b.key)
+            var key = root.withMod(b.key)
             if (seen[key]) {
                 root.warnings.push("duplicate key, later binding dropped: " + key)
                 dropped++
@@ -188,13 +207,13 @@ QtObject {
 
         // Workspaces 1-9, generated rather than typed out eighteen times.
         //
-        // ⚠️ THE DEDUPE APPLIES HERE TOO. In the niri generator this loop
+        // ⚠️ THE DEDUPE APPLIES HERE TOO. In the compositor generator this loop
         // appended without consulting `seen`, so rebinding anything onto Mod+3
         // produced a duplicate that its own duplicate check could not see.
         var generated = ""
         for (var n = 1; n <= 9; n++) {
-            var focusKey = "SUPER + " + n
-            var moveKey = "SUPER + SHIFT + " + n
+            var focusKey = root.withMod("SUPER + " + n)
+            var moveKey = root.withMod("SUPER + SHIFT + " + n)
             if (!seen[focusKey]) {
                 seen[focusKey] = true
                 generated += "hl.bind(" + Lua.str(focusKey)

@@ -39,7 +39,7 @@ Item {
     // ⚠️ AN ALIAS ONTO THE POPUP'S OWN VISIBILITY, NOT A FLAG WITH A BINDING.
     // Same fault, same fix as common/Dropdown.qml, and the account is there:
     // a written value destroys a binding, and quickshell WRITES `visible` when
-    // the compositor dismisses the surface — after which the flag and the
+    // The compositor dismisses the surface — after which the flag and the
     // surface disagree for ever and the list can never be shown again.
     property alias open: popup.visible
 
@@ -120,7 +120,7 @@ Item {
         anchor.adjustment: PopupAdjustment.All
 
         // ⚠️ NO GRAB, for the reason measured in common/Dropdown.qml: with one,
-        // the compositor dismisses this surface on the press and the SAME press
+        // The compositor dismisses this surface on the press and the SAME press
         // then reaches the row underneath, which acts. Without it the window's
         // catcher gets the press first, closes the list and swallows it — which
         // is the behaviour he asked for. Choosing a folder needs no typing.

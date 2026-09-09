@@ -4,7 +4,7 @@ pragma ComponentBehavior: Bound
 // machine.
 //
 // ⚠️ IT EDITS NOW, AND THE CLASH CHECK IS THE REASON IT TOOK A SECOND PASS.
-// Two bindings on one key is a KDL parse error, and niri does not start with a
+// Two bindings on one key is a KDL parse error, and the compositor does not start with a
 // config it cannot parse — so a rebinding that is only checked afterwards costs
 // a session, on the machine of somebody who was changing a shortcut. The check
 // runs in Config.bindClash BEFORE anything is written, and the row says which
@@ -115,7 +115,7 @@ ColumnLayout {
         root.capturingFor = ""
         root.clashFor = ""
         Config.setRebind(defaultKey, wanted)
-        // ⚠️ AND THE GENERATOR RUNS. Bindings live in the generated niri config,
+        // ⚠️ AND THE GENERATOR RUNS. Bindings live in the generated compositor config,
         // which nothing rewrites on its own — they are kept out of the theming
         // fingerprint so a palette change cannot touch them. Without this line
         // the new key would sit in shell.json doing nothing until somebody
@@ -174,7 +174,7 @@ ColumnLayout {
                 Config.flush()
                 // ⚠️ It used to say "then run `bhctl hypr apply`" underneath,
                 // and that sentence was the honest description of a button that
-                // only did half the job. Bindings live in the generated niri
+                // only did half the job. Bindings live in the generated compositor
                 // config, which is deliberately outside the theming fingerprint
                 // so a palette change cannot rewrite it — so nothing rewrote it
                 // at all. Now the button finishes.

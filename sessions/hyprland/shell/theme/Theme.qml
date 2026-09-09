@@ -10,7 +10,7 @@ pragma Singleton
 //
 // Everything here is derived from two inputs: the 26-name palette and the
 // handful of numbers in Config.look. Change the palette and the whole desktop
-// follows, including GTK, Qt, kitty and niri — and, since M9, the login screen,
+// follows, including GTK, Qt, kitty and the compositor — and, since M9, the login screen,
 // which runs this same file from a copy in /usr/share/buchhwin because the
 // greeter user cannot read a 0700 home. The line that used to stand here said
 // "there is no greeter yet"; `bhctl greeter sync` is what keeps that true copy
@@ -191,7 +191,7 @@ Singleton {
     // ⚠️ Deliberately NOT a shader. Refraction needs to sample what lies behind
     // the window, and a layer surface cannot see that — only the compositor
     // can. A shader here would have to draw and blur its own copy of the
-    // wallpaper to refract, duplicating the one thing niri already does
+    // wallpaper to refract, duplicating the one thing the compositor already does
     // cheaply, and paying for it every frame on a laptop. A gradient costs one
     // draw and no per-frame work.
     //
@@ -363,10 +363,10 @@ Singleton {
     readonly property int durFast: (animate && !reduceMotion)
                                    ? _ms(Config.motion ? Config.motion.durHover : 150, 150) : 0
 
-    // ⚠️ KEPT, because tools/hypr.qml writes niri's `slowdown` from it and the
+    // ⚠️ KEPT, because tools/hypr.qml writes the compositor's `slowdown` from it and the
     // compositor has one number, not three. Derived from the movement duration
     // against its default rather than stored twice — the setting he sees is the
-    // one that decides, and niri follows it.
+    // one that decides, and the compositor follows it.
     readonly property real motionSpeed: {
         var d = durSlow
         if (!(d > 0))
@@ -375,9 +375,9 @@ Singleton {
     }
 
     // ⚠️ THIS WAS OutExpo FOR ONE ROUND AND THAT WAS MY MISTAKE. The argument
-    // was that niri opens windows with `ease-out-expo`, so matching it would
+    // was that the compositor opens windows with `ease-out-expo`, so matching it would
     // make the compositor and the shell move alike. The argument is fine and
-    // the application was wrong: niri uses expo for a window's OPACITY AND
+    // the application was wrong: the compositor uses expo for a window's OPACITY AND
     // SCALE as it appears, and SPRINGS for anything that changes size.
     //
     // OutExpo puts about 99 % of the distance into the first third of the

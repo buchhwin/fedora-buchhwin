@@ -95,7 +95,7 @@ Scope {
     // recolours the shell and nothing else. That was the state until today:
     // tools/render.qml's header claimed the running shell re-rendered on a
     // palette change, and nothing in shell/ ever launched it. Pick a wallpaper,
-    // and GTK, Qt, kitty and niri kept the old colours until somebody typed
+    // and GTK, Qt, kitty and the compositor kept the old colours until somebody typed
     // `bhctl theme apply` by hand.
     //
     // A Timer rather than a property reference: the service reads two dozen
@@ -144,8 +144,8 @@ Scope {
     // the screen comes from the caller. This is the caller.
     //
     // The mark is an entry in `outputs` carrying `primary: true`, which is the
-    // same key the Displays page writes as niri's `focus-at-startup`. One
-    // state: marked, or not marked and then it is simply the first screen niri
+    // same key the Displays page writes as the compositor's `focus-at-startup`. One
+    // state: marked, or not marked and then it is simply the first screen the compositor
     // reports. No second "is this automatic?" flag to drift out of step.
     readonly property string primaryOutput: {
         var outs = Config.outputs
@@ -164,7 +164,7 @@ Scope {
     // the monitor it was just opened on" — a per-opening one. The quick panel
     // is configured for every screen and still has to appear on exactly one.
     //
-    // An empty target means the compositor had no opinion (niri has no event
+    // An empty target means the compositor had no opinion (the compositor has no event
     // for focus moving between outputs without a workspace change), and then
     // the honest answer is the old behaviour: show it, rather than hide it
     // everywhere and leave a keypress with no answer at all.
@@ -181,7 +181,7 @@ Scope {
     //
     // Loaded on `Ipc.settingsOpen` the same way the launcher is, so closing it
     // destroys it — and the window's own `closed` signal turns the flag back
-    // off when niri is what closed it.
+    // off when the compositor is what closed it.
     LazyLoader {
         activeAsync: Ipc.settingsOpen
         component: SettingsWindow {}
@@ -278,7 +278,7 @@ Scope {
                     ? root.wants(Config.wallpaper.monitors, modelData) : false)
 
             // Furthest back, under everything including the bar's own strut.
-            // niri zooms the background layer along with the overview, which is
+            // The compositor zooms the background layer along with the overview, which is
             // the correct behaviour rather than a side effect: the wallpaper
             // belongs to the workspace you are looking at.
             LazyLoader {
@@ -299,7 +299,7 @@ Scope {
             }
 
             // The pages, floating under the notch. Its own window so that both
-            // it and the notch are exactly the size of what they draw — niri
+            // it and the notch are exactly the size of what they draw — the compositor
             // blurs and shadows the whole surface, invisible margins included.
             LazyLoader {
                 activeAsync: perScreen.overlayHere && Ipc.expanded
@@ -308,7 +308,7 @@ Scope {
 
             // ⚠️ THE DOCK IS THE OPPOSITE CASE TO THE TWO ABOVE, and that is
             // deliberate rather than inconsistent. Those two are exactly the
-            // size of what they draw, because niri blurs and shadows the whole
+            // size of what they draw, because the compositor blurs and shadows the whole
             // surface. The dock spans its entire edge and switches blur off
             // instead — because its contents change every time a program opens,
             // and a surface that follows its contents is the horizontal wobble
@@ -333,9 +333,9 @@ Scope {
 
             // The hot corners. Two tiny surfaces, each with its own dwell.
             //
-            // ⚠️ `hotCorners` defaults to "right" and NOT "both", because niri
+            // ⚠️ `hotCorners` defaults to "right" and NOT "both", because the compositor
             // already owns the top-left corner and has it switched on — its own
-            // docs say so. Choosing "left" or "both" also switches niri's off;
+            // docs say so. Choosing "left" or "both" also switches the compositor's off;
             // that happens in tools/hypr.qml, so the two can never both answer
             // the same corner.
             LazyLoader {
@@ -371,7 +371,7 @@ Scope {
             }
 
             // The four rounded screen corners. ⚠️ One LazyLoader each rather
-            // than one surface with four corners drawn on it: niri blurs and
+            // than one surface with four corners drawn on it: the compositor blurs and
             // shadows the WHOLE surface, so a fullscreen one would put both
             // behind the entire display. Four r × r textures instead.
             //
@@ -381,7 +381,7 @@ Scope {
             // ⚠️ WRITTEN OUT, NOT A `Repeater`, AND THE FIRST ATTEMPT WAS THE
             // Repeater. It instantiates delegates into an ITEM, and this
             // delegate is a `Scope` — so it built nothing, said nothing, and
-            // `niri msg -j layers` answered "0 corner surfaces" while the
+            // `hyprctl -j layers` answered "0 corner surfaces" while the
             // journal stayed clean. The two hot corners above are written out
             // for the same reason.
             LazyLoader {

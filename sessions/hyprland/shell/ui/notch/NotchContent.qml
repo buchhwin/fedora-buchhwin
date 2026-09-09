@@ -247,7 +247,7 @@ Item {
         // the page assembles. Measured on the VM, opening the quick panel:
         // `set_size(150, 34)` → `set_size(672, 306)` → `set_size(712, 376)`.
         // Three re-sizes for one opening, and each one is a round trip with
-        // niri plus a new buffer.
+        // The compositor plus a new buffer.
         //
         // It is also what it LOOKS like: the panel arrives at the wrong size and
         // grows twice while you watch. Synchronous costs one page build on the
