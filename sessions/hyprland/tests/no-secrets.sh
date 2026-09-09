@@ -20,7 +20,6 @@
 #
 # ⚠️ AND THE OLD GUARD COULD ONLY EVER SEE THE CHECKED-OUT TREE. History is
 # public too. This script checks the tree; `git log -p` is checked by the same
-# patterns in the release procedure — see docs/CHECKLIST.md.
 #
 # ⚠️ THE RULE THIS ENFORCES, given on 10.08.2026 and meant to stand: addresses,
 # passwords and anything else private are never published — not even from a test

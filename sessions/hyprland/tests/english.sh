@@ -6,7 +6,7 @@
 # not a one-off translation but a boundary that decays: the next label typed in
 # a hurry is German, because the person typing it thinks in German. It happened
 # once already — ~90 visible strings, 55 keybinding descriptions that land in
-# niri's own shortcut overlay, and a whole checklist, all in a public
+# the compositor's own shortcut overlay, and a whole checklist, all in a public
 # repository whose own plan says English.
 #
 # So it is checked rather than remembered, in the same shape as
@@ -188,7 +188,7 @@ if (( fail )); then
 
   This repository is public and its plan says English — everywhere, without an
   i18n apparatus. A German label reaches further than it looks: the `desc:`
-  fields become the entries in niri's own keyboard-shortcut overlay.
+  fields become the entries in the compositor's own keyboard-shortcut overlay.
 
   If a line is right as it stands — the name of a key, a folder that really is
   called that on the machine — say so on the line:

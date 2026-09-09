@@ -30,7 +30,13 @@ skip() { printf '  \033[38;5;179mskip\033[0m  %s\n' "$1"; }
 work="$(mktemp -d)"
 trap 'rm -rf "$work"' EXIT
 
-cfg="$work/config"
+# ⚠️ THE PATH HAS TO END IN THE SESSION'S OWN ROOT, or every check below looks
+# in the wrong place. phase_shell derives its config home by APPENDING
+# buchhwin-sessions/hyprland unless XDG_CONFIG_HOME already ends in it — the
+# isolation that keeps this session out of Plasma's ~/.config. A plain
+# "$work/config" therefore made the renderer write one directory deeper than
+# this test looked, and every generated file was reported as never written.
+cfg="$work/config/buchhwin-sessions/hyprland"
 mkdir -p "$cfg"
 
 # ⚠️ KEEP BOTH REPORTS, because "not written" on its own is a dead end.
@@ -45,9 +51,14 @@ mkdir -p "$cfg"
 # The log is a fixed path shared by every run, so it is copied HERE: this
 # script installs twice, and the second run would otherwise overwrite the
 # evidence from the first.
+# ⚠️ install-hyprland.sh, NOT install.sh — THE SAME RENAME THAT KILLED
+# tests/install-runs.sh killed this one too, and here it was quieter. The
+# installer simply did not exist, so nothing rendered, and every check below
+# reported the file it was looking for as `not written`. That reads as a
+# broken renderer rather than a test calling a program by the wrong name.
 rm -f /tmp/buchhwin-render.log
 XDG_CONFIG_HOME="$cfg" XDG_CACHE_HOME="$work/cache" \
-    timeout 120 bash install.sh --only shell >"$work/install.log" 2>&1
+    timeout 120 bash install-hyprland.sh --only shell >"$work/install.log" 2>&1
 cp -f /tmp/buchhwin-render.log "$work/render.log" 2>/dev/null || true
 
 why() {
@@ -285,7 +296,7 @@ fi
 # A second run must not fight the user's own file.
 printf '# mine\ninclude theme.conf\nfont_size 14\n' > "$cfg/kitty/kitty.conf"
 XDG_CONFIG_HOME="$cfg" XDG_CACHE_HOME="$work/cache" \
-    timeout 120 bash install.sh --only shell >/dev/null 2>&1
+    timeout 120 bash install-hyprland.sh --only shell >/dev/null 2>&1
 if grep -q '^font_size 14' "$cfg/kitty/kitty.conf"; then
     pass "an existing kitty.conf is left alone"
 else
@@ -309,10 +320,10 @@ if ! command -v jq >/dev/null; then
     exit $fail
 fi
 
-set_states() {   # mode gtk qt kitty niri  [enabled]
+set_states() {   # mode gtk qt kitty the compositor  [enabled]
     jq --arg m "$1" --arg g "$2" --arg q "$3" --arg k "$4" --arg n "$5" \
        --argjson e "${6:-true}" \
-       '.theming = {enabled: $e, mode: $m, gtk: $g, qt: $q, kitty: $k, niri: $n}' \
+       '.theming = {enabled: $e, mode: $m, gtk: $g, qt: $q, kitty: $k, hypr: $n}' \
        "$cfg/buchhwin/shell.json" > "$work/s.json" \
         && mv "$work/s.json" "$cfg/buchhwin/shell.json"
 }
@@ -325,7 +336,7 @@ set_one() {      # target state
 # Every file the renderer owns, in one place, so "off takes everything back"
 # and "enabled=false takes everything back" cannot drift apart from the list.
 generated=(gtk-3.0/gtk.css gtk-3.0/settings.ini gtk-4.0/gtk.css gtk-4.0/settings.ini
-           kitty/theme.conf niri/colors.kdl qt6ct/colors/buchhwin.conf
+           kitty/theme.conf buchhwin/hyprland/generated/colors.lua qt6ct/colors/buchhwin.conf
            btop/themes/buchhwin.theme alacritty/buchhwin.toml tmux/buchhwin.conf
            git/buchhwin-delta.gitconfig lazygit/buchhwin.yml)
 

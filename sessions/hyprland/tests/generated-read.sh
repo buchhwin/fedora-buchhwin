@@ -42,11 +42,11 @@ check kitty/theme.conf              kitty/kitty.conf         "theme.conf"
 check alacritty/buchhwin.toml       alacritty/alacritty.toml "buchhwin"
 check tmux/buchhwin.conf            tmux/tmux.conf           "buchhwin"
 check qt6ct/colors/buchhwin.conf    qt6ct/qt6ct.conf         "buchhwin.conf"
-check niri/colors.kdl               niri/config.kdl          "colors.kdl"
+check buchhwin/hyprland/generated/colors.lua  buchhwin/hyprland/hyprland.lua  "colors"
 # lazygit is reached through an environment variable rather than an include —
-# niri sets LG_CONFIG_FILE, which is why the owner here is the compositor's
+# The compositor sets LG_CONFIG_FILE, which is why the owner here is the compositor's
 # config and not lazygit's own.
-check lazygit/buchhwin.yml          niri/config.kdl          "buchhwin.yml"
+check lazygit/buchhwin.yml          buchhwin/hyprland/generated/settings.lua  "buchhwin.yml"
 
 # btop names its theme by NAME, not by path: `color_theme = "buchhwin"` against
 # a file called buchhwin.theme. Checking for the path would never match.

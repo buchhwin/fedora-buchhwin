@@ -54,10 +54,15 @@ stub() { printf '#!/bin/sh\n%s\n' "$2" > "$bin/$1"; chmod +x "$bin/$1"; }
 stub sudo     'cat >/dev/null 2>&1; exit 0'
 stub dnf      'exit 0'
 stub systemctl 'exit 0'
-# `rpm -q X` answers "not installed", which is the honest state of a sandbox.
-# It costs two warnings (weak dependencies, sddm) and those are counted, not
-# hidden — phase_summary prints the total and this test reads it.
-stub rpm      'exit 1'
+# ⚠️ `rpm -q sddm` AND `rpm -q plasma-desktop` MUST ANSWER "INSTALLED", and the
+# blanket `exit 1` that stood here is why three phases were never reached.
+# phase_greeter calls `die` when SDDM is missing, which is right on a real
+# machine — preflight refuses to start without it — but in a sandbox where
+# nothing is installed it aborted the run, so Login screen, Shell and tools and
+# Done were never exercised at all. The stub now answers for the two packages
+# this profile REQUIRES to exist and says "not installed" for everything else,
+# which is the honest shape of the machine it is pretending to be.
+stub rpm      'case " $* " in *" sddm "*|*" plasma-desktop "*) exit 0 ;; *) exit 1 ;; esac'
 stub flatpak  'exit 0'
 # No network, deliberately: the two downloads must degrade to a warning rather
 # than to a broken run. That is a claim about the installer, so it is exercised.
@@ -102,8 +107,14 @@ printf '%s\n' "$files" | while IFS= read -r f; do
     mkdir -p "$src/$(dirname "$f")"
     cp -p "$f" "$src/$f"
 done
-[[ -f "$src/install.sh" ]] || { echo "  the copy has no install.sh — cannot test"; exit 2; }
-chmod +x "$src/install.sh" "$src/bin/bhctl" 2>/dev/null
+# ⚠️ install-hyprland.sh, NOT install.sh, AND THAT RENAME MADE THIS TEST INERT.
+# The standalone repository had install.sh; the monorepo renamed it when the two
+# sessions moved under sessions/ and nothing updated this line. The guard below
+# then exited 2 on every run — "cannot test" — which CI reports as a skip. So
+# the one suite that runs the installer from top to bottom has not actually run
+# since the merge, and every fault it exists to catch went unseen.
+[[ -f "$src/install-hyprland.sh" ]] || { echo "  the copy has no install-hyprland.sh — cannot test"; exit 2; }
+chmod +x "$src/install-hyprland.sh" "$src/bin/bhctl" 2>/dev/null
 
 run_installer() {   # $@ = extra install.sh arguments; $SYSFS = fake /sys, if any
     env -i \
@@ -115,7 +126,7 @@ run_installer() {   # $@ = extra install.sh arguments; $SYSFS = fake /sys, if an
         XDG_RUNTIME_DIR="$tmp/run" \
         BUCHHWIN_SYSFS="${SYSFS:-$tmp/sysfs-empty}" \
         TERM=dumb \
-        bash "$src/install.sh" "$@" </dev/null
+        bash "$src/install-hyprland.sh" "$@" </dev/null
 }
 # ⚠️ `</dev/null` IS LOAD-BEARING. The `sudo` stub drains stdin, so that a
 # heredoc piped into `sudo tee` is consumed exactly as it would be in a real
@@ -132,7 +143,7 @@ run_installer() {   # $@ = extra install.sh arguments; $SYSFS = fake /sys, if an
 mkdir -p "$tmp/sysfs-empty/bus/pci/devices"
 
 # ------------------------------------------------- 1. it reaches the end
-printf '  %-44s ' "install.sh runs to the end"
+printf '  %-44s ' "install-hyprland.sh runs to the end"
 out="$(run_installer --skip preflight 2>&1)"; rc=$?
 if (( rc == 0 )); then
     printf '\033[38;5;114mok\033[0m\n'
@@ -159,9 +170,16 @@ fi
 # also the one that returns early in the most situations (no greetd, no copy, no
 # config). A phase that quietly does not run at all is exactly what this loop is
 # for — it caught `sddm` being in no package list at all.
-for sect in "Graphics" "Base system" "Desktop" "Applications" "Codecs" \
-            "Fonts" "Cursors" "Shell" "Theme" "Compositor" "Services" \
-            "Login screen" "Shell and tools" "Done"; do
+# ⚠️ Graphics, Codecs AND Cursors ARE NOT IN THIS LIST ANY MORE, because those
+# phases no longer exist. lib/10-gpu.sh is gone entirely: RPM Fusion, the NVIDIA
+# akmod and the codec swap were decisions about the machine's graphics stack
+# taken while installing a window manager, and the dwl session this profile is
+# measured against has never made any of them. Cursors went with them — it
+# fetched a third-party cursor tarball to replace Breeze, which the KDE base
+# already provides and which env.lua points at.
+for sect in "Base system" "Hyprland session on KDE" "Applications" \
+            "Fonts" "Shell" "Theme" "Compositor" "Services" \
+            "KDE login manager" "Shell and tools" "Done"; do
     printf '  %-44s ' "phase reached: $sect"
     if grep -qE "==>.* ${sect}\$" <<< "$out"; then
         printf '\033[38;5;114mok\033[0m\n'
@@ -170,49 +188,9 @@ for sect in "Graphics" "Base system" "Desktop" "Applications" "Codecs" \
     fi
 done
 
-# ----------------------------------- 1b. the GPU phase, and its own control
-#
-# ⚠️ "IT INSTALLED NOTHING" IS NOT A RESULT ON ITS OWN. A phase that correctly
-# skips and a phase that does nothing at all look identical from the outside,
-# and the second one is what an untested branch usually is. So the skip is
-# measured against a run where the same code MUST take the other path.
-printf '  %-44s ' "no NVIDIA: the branch says so and stops"
-out_no="$(run_installer --only gpu 2>&1)"
-if grep -q 'no NVIDIA GPU' <<< "$out_no"; then
-    printf '\033[38;5;114mok\033[0m\n'
-else
-    printf '\033[38;5;203mdid not report an empty bus\033[0m\n'
-    printf '%s\n' "$out_no" | tail -6 | sed 's/^/      /'; fail=1
-fi
-
-printf '  %-44s ' "hybrid fixture: the branch runs"
-fx="$tmp/sysfs-hybrid"
-mkdir -p "$fx/bus/pci/devices/0000:c5:00.0" "$fx/bus/pci/devices/0000:01:00.0"
-printf '0x030000\n' > "$fx/bus/pci/devices/0000:c5:00.0/class"
-printf '0x1002\n'   > "$fx/bus/pci/devices/0000:c5:00.0/vendor"
-printf '0x030000\n' > "$fx/bus/pci/devices/0000:01:00.0/class"
-printf '0x10de\n'   > "$fx/bus/pci/devices/0000:01:00.0/vendor"
-out_yes="$(SYSFS="$fx" run_installer --only gpu 2>&1)"
-# It gets as far as RPM Fusion and stops there, because the `rpm` stub cannot
-# answer `rpm -E %fedora`. Reaching that point is the proof: it is past the
-# detector, past the hybrid message, and inside the branch that installs.
-if grep -q 'hybrid graphics' <<< "$out_yes" && grep -q 'RPM Fusion' <<< "$out_yes"; then
-    printf '\033[38;5;114mok\033[0m\n'
-else
-    printf '\033[38;5;203mnever entered the NVIDIA branch\033[0m\n'
-    printf '%s\n' "$out_yes" | tail -6 | sed 's/^/      /'; fail=1
-fi
-
-printf '  %-44s ' "a failed GPU phase still exits 0"
-# The rule this checks is the one that keeps a machine usable: nothing in
-# phase_gpu may `die`, because aborting the install to protect a GPU the desktop
-# does not draw on trades a working desktop for nothing.
-SYSFS="$fx" run_installer --only gpu >/dev/null 2>&1
-if (( $? == 0 )); then
-    printf '\033[38;5;114mok\033[0m\n'
-else
-    printf '\033[38;5;203mthe GPU phase took the installer down with it\033[0m\n'; fail=1
-fi
+# The GPU phase and its three checks are gone. lib/10-gpu.sh no longer exists:
+# nothing in this profile enables RPM Fusion, builds an akmod or swaps a mesa
+# driver, so there is no branch left to prove takes both paths.
 
 # ------------------------------------------- 2. no phase hit an unbound name
 #

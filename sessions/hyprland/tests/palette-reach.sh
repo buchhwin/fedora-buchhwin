@@ -16,11 +16,11 @@
 #   MUST CHANGE     files that carry colours. A palette switch that leaves one
 #                   alone is a program still wearing the old scheme.
 #   MUST NOT CHANGE files that carry none. config.kdl is the important one:
-#                   niri's colours live in colors.kdl, which config.kdl
+#                   the compositor's colours live in colors.kdl, which config.kdl
 #                   INCLUDES, and that separation is why a palette switch does
 #                   not have to touch the compositor's structure. If it ever
 #                   starts changing, the include has stopped doing its job and
-#                   every palette switch is costing a full niri reload.
+#                   every palette switch is costing a full the compositor reload.
 #
 # ⚠️ TWO DARK PALETTES, deliberately. Between a dark and a light one the GTK
 # settings.ini files change as well (gtk-application-prefer-dark-theme), which
@@ -33,10 +33,10 @@ command -v qs >/dev/null || { echo "quickshell (qs) not installed"; exit 2; }
 fail=0
 tmp="$(mktemp -d)" || exit 2
 trap 'rm -rf "$tmp"' EXIT
-mkdir -p "$tmp/buchhwin" "$tmp/niri" "$tmp/environment.d" "$tmp/share" "$tmp/home" \
+mkdir -p "$tmp/buchhwin" "$tmp/buchhwin/hyprland/generated" "$tmp/environment.d" "$tmp/share" "$tmp/home" \
          "$tmp/gtk-3.0" "$tmp/gtk-4.0" "$tmp/kitty" "$tmp/qt6ct/colors" \
          "$tmp/btop/themes" "$tmp/alacritty" "$tmp/tmux" "$tmp/bat/themes" \
-         "$tmp/git" "$tmp/lazygit" "$tmp/Code/User"
+         "$tmp/git" "$tmp/lazygit"
 
 # Colours. Every one of these is written from the 26 palette names.
 MUST_CHANGE=(
@@ -50,25 +50,23 @@ MUST_CHANGE=(
     "bat/themes/buchhwin.tmTheme"
     "git/buchhwin-delta.gitconfig"
     "lazygit/buchhwin.yml"
-    "niri/colors.kdl"
-    # ⚠️ spicetify FOLLOWS XDG_CONFIG_HOME — measured, because the first note
-    # about it in lib/40-apps.sh claimed the opposite and would have put this
-    # file somewhere this test never looks.
-    "spicetify/Themes/buchhwin/color.ini"
+    "buchhwin/hyprland/generated/colors.lua"
 )
 # No colours in them — each listed with its reason, so a change that moves a
 # file between the lists has to say why rather than just editing an array.
 MUST_NOT_CHANGE=(
-    "niri/config.kdl"           # colours are in colors.kdl, which this includes
+    # The compositor settings and bindings: colours live in their own module,
+    # which those two never mention, so a palette change must not touch them.
+    "buchhwin/hyprland/generated/settings.lua"
+    "buchhwin/hyprland/generated/binds.lua"
     "gtk-3.0/settings.ini"      # font and icon theme; dark-vs-light is the only mover
     "gtk-4.0/settings.ini"      # same
-    "Code/User/settings.json"   # names the theme; the theme file carries the colours
 )
 
 render() {   # $1 = palette
     printf '{"version":1,"theme":{"palette":"%s","accent":"blue"}}\n' "$1" \
         > "$tmp/buchhwin/shell.json"
-    for tool in render niri; do
+    for tool in render hypr; do
         HOME="$tmp/home" XDG_CONFIG_HOME="$tmp" XDG_DATA_HOME="$tmp/share" \
             BUCHHWIN_TOOL="$tool" QT_QPA_PLATFORM=offscreen \
             timeout 60 qs -p shell >/dev/null 2>&1
@@ -100,24 +98,6 @@ snap() {     # $1 = destination file
             printf '%s missing\n' "$f" >> "$1"
         fi
     done
-    # ⚠️ The VS Code extension lives under HOME, not XDG_CONFIG_HOME — VS Code
-    # looks in ~/.vscode/extensions whatever the XDG variables say, so the two
-    # halves of this snapshot legitimately read from different roots.
-    local vs="$tmp/home/.vscode/extensions/buchhwin-theme/themes/buchhwin-color-theme.json"
-    if [[ -f "$vs" ]]; then
-        printf 'vscode-theme %s\n' "$(fingerprint "$vs")" >> "$1"
-    else
-        printf 'vscode-theme missing\n' >> "$1"
-    fi
-    # ⚠️ AND SO DOES VESKTOP'S, for a different reason: it is a flatpak, so its
-    # data lives under ~/.var/app whatever XDG_CONFIG_HOME says. The path is
-    # read out of the app's own shipped source — see the note in render.qml.
-    local ve="$tmp/home/.var/app/dev.vencord.Vesktop/config/vesktop/themes/buchhwin.css"
-    if [[ -f "$ve" ]]; then
-        printf 'vesktop-theme %s\n' "$(fingerprint "$ve")" >> "$1"
-    else
-        printf 'vesktop-theme missing\n' >> "$1"
-    fi
 }
 
 printf '  %-40s ' "everforest-dark renders"
@@ -147,7 +127,7 @@ changed() {  # $1 = key — true when the two snapshots differ for it
 # bolted on with `+ 1`. The count used to be `${#MUST_CHANGE[@]} + 1`, and the
 # moment a second such file appeared it reported one fewer than it checked — a
 # number a tool invents about itself reads exactly like a measurement.
-CHECKED=( "${MUST_CHANGE[@]}" vscode-theme vesktop-theme )
+CHECKED=( "${MUST_CHANGE[@]}" )
 
 stale=""
 for f in "${CHECKED[@]}"; do
@@ -171,7 +151,7 @@ else
     printf '\033[38;5;203mchanged and should not have:%s\033[0m\n' "$moved"
     printf '      config.kdl changing means the colors.kdl include has stopped\n'
     printf '      carrying the colours, so every palette switch now costs a\n'
-    printf '      full niri reload.\n'
+    printf '      full the compositor reload.\n'
     fail=1
 fi
 

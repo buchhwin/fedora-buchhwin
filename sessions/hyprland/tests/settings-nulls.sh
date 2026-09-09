@@ -28,9 +28,16 @@ red=$'\e[38;5;203m'; green=$'\e[38;5;114m'; off=$'\e[0m'
 fail=0
 
 run_doctor() {   # $1 = json body
+    # ⚠️ THE FIXTURE HAS TO SIT WHERE bhctl LOOKS, AND IT DID NOT.
+    # bhctl derives its config root by APPENDING buchhwin-sessions/hyprland
+    # unless XDG_CONFIG_HOME already ends in it — that is the session isolation
+    # the whole profile is built on. A fixture one level short means doctor
+    # reads a file that is not there and reports nothing, which reads as the
+    # check having been removed rather than the path being wrong.
     local t; t="$(mktemp -d)"
-    mkdir -p "$t/buchhwin"
-    printf '%s\n' "$1" > "$t/buchhwin/shell.json"
+    local root="$t/buchhwin-sessions/hyprland"
+    mkdir -p "$root/buchhwin"
+    printf '%s\n' "$1" > "$root/buchhwin/shell.json"
     XDG_CONFIG_HOME="$t" bash bin/bhctl doctor 2>/dev/null
     rm -rf "$t"
 }

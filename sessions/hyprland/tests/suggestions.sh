@@ -7,7 +7,7 @@
 # already knew: which screens exist, which app-ids are running, which programs
 # are installed, which xkb options xkb has. His words were "überall wo es          # english-ok: the brief, quoted
 # Vorschläge geben muss" — and the reason it matters is not convenience. A         # english-ok: the brief, quoted
-# mistyped app-id is not an error anywhere: niri takes the string, never matches
+# mistyped app-id is not an error anywhere: the compositor takes the string, never matches
 # a window with it, and the window you wanted blurred is simply not blurred. No
 # log line, no red check, nothing to notice.
 #

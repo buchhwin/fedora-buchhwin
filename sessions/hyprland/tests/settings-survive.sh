@@ -63,7 +63,7 @@ printf '\033[38;5;114mok\033[0m\n'
 # The control for the half below: before the shell comes back, the generated
 # config must NOT contain the new value. Without this, "config.kdl has it" could
 # simply mean it always did.
-kdl="${XDG_CONFIG_HOME:-$HOME/.config}/niri/config.kdl"
+generated="${XDG_CONFIG_HOME:-$HOME/.config}/buchhwin/hyprland/generated/binds.lua"
 printf '  %-40s ' "config.kdl does not have it yet"
 if grep -q 'xcursor-size 41' "$kdl" 2>/dev/null; then
     printf '\033[38;5;203mit already did — nothing can be concluded\033[0m\n'

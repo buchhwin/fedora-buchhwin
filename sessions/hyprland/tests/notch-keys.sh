@@ -29,7 +29,7 @@
 # TAKEN. The obvious proof is to open the calendar, press Escape and see the
 # panel stay open — the calendar answers Escape by jumping to today. On the test
 # machine that measurement is worthless: a control run showed that NO key
-# reaches niri at all (Mod+Ö and Mod+2 both move nothing), on a session that
+# reaches the compositor at all (Mod+Ö and Mod+2 both move nothing), on a session that
 # also cannot be screenshotted and gives every window `window_size: None`. A
 # green run of that test would have proved the tooling was silent, not that the
 # chain works. This checks what can honestly be checked, and the runtime proof

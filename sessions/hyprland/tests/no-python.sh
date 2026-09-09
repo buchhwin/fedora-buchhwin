@@ -13,7 +13,7 @@
 #
 # ⚠️ AND ONE OF THOSE FOUR WAS ALSO WRONG. The one that reassembled a mode out
 # of `current_mode` and milli-hertz printed 74.994 Hz as "75", because it used
-# `%.3g`. niri prints the right thing itself, and `niri msg outputs` without
+# `%.3g`. The compositor prints the right thing itself, and `hyprctl outputs` without
 # `-j` needed no parser at all. The rule was not being pedantic; the detour was
 # the bug.
 #

@@ -70,7 +70,10 @@ run() { # run <shell-dir> <out-file>
 maketree() { # maketree <dir>
     mkdir -p "$1/bin"
     cp -a shell "$1/shell"
-    cp -a install.sh "$1/install.sh"
+    # ⚠️ install-hyprland.sh — the same rename that made two other suites
+    # inert. `cp` failed, the fixture had no installer, and every question
+    # about a checkout came back "no".
+    cp -a install-hyprland.sh "$1/install-hyprland.sh"
     cp -a bin/bhctl "$1/bin/bhctl"
 }
 
@@ -198,12 +201,12 @@ if grep -qE '"(kitty|alacritty|foot|gnome-terminal)"' shell/services/Update.qml;
 else
     ok "install: no terminal named in the code"
 fi
-# install.sh restarts buchhwin-shell, so a child of the shell would be killed by
+# install-hyprland.sh restarts buchhwin-shell, so a child of the shell would be killed by
 # the very update it is running. See the note on install().
 if grep -q 'Quickshell.execDetached' shell/services/Update.qml; then
     ok "install: detached, so the restart cannot kill the terminal"
 else
-    bad "install: not detached — install.sh restarts the shell and would kill it"
+    bad "install: not detached — the installer restarts the shell and would kill it"
 fi
 
 # ── 6 · nothing runs on its own ─────────────────────────────────────────────

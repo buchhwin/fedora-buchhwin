@@ -10,10 +10,10 @@
 # This check hands the shell three monitors that do not exist.
 #
 # ⚠️ AND THE FIXTURE IS REAL JSON, not a convenient shape. Every field below was
-# measured from `niri msg -j outputs` on hardware — including the three that the
+# measured from `hyprctl -j monitors` on hardware — including the three that the
 # handouts did not document until this round: `current_mode` (an INDEX into
 # `modes`), `vrr_supported`, and `logical` (the SCALED geometry, which is what
-# niri counts positions in).
+# The compositor counts positions in).
 #
 # The three screens are chosen to break the three things that have actually been
 # got wrong here:

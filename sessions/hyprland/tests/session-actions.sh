@@ -130,7 +130,7 @@ printf '  %-34s ' "the three that cost work ask"
 
 # lock and suspend are reversible and go at once. The other three throw away
 # every unsaved thing, and the whole reason a session menu exists here is that
-# Super+Shift+E was once bound straight to niri's `quit`.
+# Super+Shift+E was once bound straight to the compositor's `quit`.
 for id in logout reboot poweroff; do
     grep -qE "\{ id: \"$id\",.*ask: true" "$src" \
         || report "no question" "$id does not have ask: true"

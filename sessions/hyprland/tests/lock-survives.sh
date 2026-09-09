@@ -11,7 +11,7 @@
 #   restart buchhwin-shell        2 qs processes   LockedHint=yes
 #                                 and typing the password does nothing
 #
-# niri keeps the session locked when the locking client dies, which is correct
+# The compositor keeps the session locked when the locking client dies, which is correct
 # and is the entire security property of ext-session-lock. What is left is a
 # machine with no way in short of another terminal. The paths that reach it are
 # ordinary: the rescue key, `bhctl update`, and Restart=always after a crash.

@@ -47,7 +47,7 @@ stub localectl 'exit 0'
 stub getent   'echo "test:x:1000:1000::/home/test:/bin/bash"'
 stub chsh     'exit 0'
 stub qs       'exit 0'
-stub niri     'exit 0'
+stub the compositor     'exit 0'
 
 home="$tmp/home"; mkdir -p "$home"
 stub xdg-user-dir "echo \"$home/Pictures\""

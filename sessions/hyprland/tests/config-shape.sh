@@ -154,8 +154,8 @@ printf '\033[38;5;114mok\033[0m\n'
 # ⚠️ A DEFAULT THAT NAMES SOMETHING ON THE MACHINE MUST BE SOMETHING WE PUT
 # THERE. `cursor.theme` shipped as "Breeze_Dark" with a comment claiming it
 # "ships with Fedora's breeze-cursor-theme" — a package that appears in none of
-# the lists under packages/. So every fresh machine handed niri a theme name
-# that does not resolve, niri fell back to its own pointer at its own size, and
+# the lists under packages/. So every fresh machine handed the compositor a theme name
+# that does not resolve, the compositor fell back to its own pointer at its own size, and
 # it was reported as "the cursor is far too big and cannot be changed".
 #
 # The check is deliberately about what the INSTALLER provides, not about what
@@ -178,6 +178,23 @@ if [[ -z "$curdef" ]]; then
 #   - an uncommented package line names a cursor package
 elif grep -qF "/$curdef" lib/*.sh 2>/dev/null; then
     printf '\033[38;5;114mok\033[0m  %s (the installer places it)\n' "$curdef"
+# ⚠️ THE THIRD ANSWER, AND IT IS A MEASUREMENT RATHER THAN A GUESS.
+# The installer no longer places any cursor directory: the phase that fetched a
+# third-party tarball is gone, and the pointer comes from the KDE base like
+# everything else. So the branch above can never be true again, and the branch
+# below would fail a default that is genuinely installed.
+#
+# What can be said honestly is which names a package is KNOWN to provide, and
+# the note under this block already records it, measured on the machine:
+# breeze-cursor-theme contains Breeze_Light and breeze_cursors.
+#
+# ⚠️ TWO NAMES, AND IT STAYS TWO. A general "a cursor package is installed"
+# rule is what version two of this check did, and it passed Breeze_Dark — a
+# name that package does not contain. Every entry here has to name both the
+# theme and the package, and be something somebody actually looked at.
+elif [[ "$curdef" == "breeze_cursors" || "$curdef" == "Breeze_Light" ]] \
+     && grep -qxF "breeze-cursor-theme" packages/*.txt 2>/dev/null; then
+    printf '\033[38;5;114mok\033[0m  %s (breeze-cursor-theme provides it)\n' "$curdef"
 # ⚠️ AND "A CURSOR PACKAGE IS INSTALLED" WAS NOT GOOD ENOUGH EITHER — that was
 # the second version of this check and the control caught it too. packages/
 # does list `breeze-cursor-theme`, so the test went green for `Breeze_Dark`
@@ -190,7 +207,7 @@ else
     printf '\033[38;5;203m%s is installed by nothing under lib/ or packages/\033[0m\n' "$curdef"
     printf '      Naming it in a comment is not installing it. That is exactly how\n'
     printf '      Breeze_Dark shipped as the default to machines that never had it,\n'
-    printf '      where niri fell back to its own pointer at its own size.\n'
+    printf '      where the compositor fell back to its own pointer at its own size.\n'
     exit 1
 fi
 

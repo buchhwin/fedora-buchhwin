@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # The generated compositor config parses, and a second run writes nothing.
 #
-# Replaces the niri-era config test, which drove a generator that was deleted.
+# Replaces the config test of the previous compositor, whose generator was deleted.
 #
 # Three questions, in order of what they cost to get wrong:
 #

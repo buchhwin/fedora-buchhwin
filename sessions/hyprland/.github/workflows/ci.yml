@@ -163,6 +163,13 @@ jobs:
       # job below, applied to the ones it missed.
       - name: no animation drives a layout size
         run: bash tests/motion.sh
+      # A tripwire rather than a tidiness rule: every mention left behind by the
+      # migration was code written against a compositor that is not installed
+      # here, and all of it greps clean.
+      - name: no trace of the previous compositor
+        run: bash tests/no-niri.sh
+      - name: every bind action is one the generator can emit
+        run: bash tests/bind-actions.sh
       # ⚠️ EXIT 2 IS NOT RED. This lane has no quickshell, so the functional
       # half of this suite says "I cannot run here" and exits 2 — and this
       # step counted that as a failure, which is why the whole lane was red

@@ -38,7 +38,7 @@ cd "$(dirname "$0")/.." || exit 2
 command -v python3 >/dev/null || { echo "python3 not installed"; exit 2; }
 
 out="$(python3 - <<'PY'
-import re, sys
+import glob, re, sys
 
 def strip_comments(text):
     # Whole comment lines only. A trailing `// …` after code stays: a key named
@@ -177,7 +177,18 @@ def keys_in(src):
             found |= table.get(prop, set())
     return found
 
-readers = keys_in(read("shell/tools/hypr.qml")) | keys_in(read("shell/tools/render.qml"))
+# ⚠️ THE GENERATOR IS A DIRECTORY NOW, NOT ONE FILE, AND THIS LINE DID NOT KNOW.
+# tools/hypr.qml is only the entry point; the settings and the bindings are
+# emitted by tools/hypr/EmitSettings.qml and tools/hypr/EmitBinds.qml, which is
+# where every Config.* read actually lives. Reading the entry alone made sixteen
+# keys look unread — including input.keyboard.layout and binds, both of which
+# the generator plainly uses — and the obvious reading of that report was
+# "delete them from the fingerprint", which would have stopped a keyboard layout
+# change from ever reaching the compositor again.
+readers = keys_in(read("shell/tools/render.qml"))
+for _tool in sorted(glob.glob("shell/tools/hypr.qml")
+                    + glob.glob("shell/tools/hypr/*.qml")):
+    readers |= keys_in(read(_tool))
 
 # ------------------------------------------------------------ the fingerprint
 fp_src = read("shell/services/Theming.qml")

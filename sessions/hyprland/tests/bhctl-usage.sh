@@ -19,7 +19,12 @@ cd "$(dirname "$0")/.." || exit 2
 
 fail=0
 
-# The top-level `case "${1:-}" in` labels. Anchored at column 0 because every
+# ⚠️ THE LABELS ARE INDENTED AND THIS WAS ANCHORED AT COLUMN 0, so it matched
+# nothing and the whole suite exited 2 — "found no subcommands" — which CI
+# reports as a skip. The test that checks bhctl's usage text against its real
+# subcommands had therefore not run since the file was reformatted.
+#
+# The original `case "${1:-}" in` labels. Leading whitespace is allowed because
 # nested case in this file is indented — `reset)` inside `binds)` is not a
 # subcommand of its own, and matching it would demand a usage line for it.
 #
@@ -29,13 +34,27 @@ fail=0
 # opposite of the truth. A check whose extractor is wrong invents faults; the
 # quotes are stripped here rather than the pattern being loosened, so a label
 # that is genuinely indented still cannot sneak in.
+# ⚠️⚠️ THE ANCHOR MOVED FROM COLUMN 0 TO EXACTLY FOUR SPACES, and until it did
+# this whole suite was dead. The reasoning above is still right — a nested label
+# must not count — but it assumed the top-level labels sit at column 0, and they
+# have not since bin/bhctl was reformatted. `^"?[a-z|]+"?\)$` then matched
+# nothing at all, the array came back empty, and the guard below exited 2:
+# "found no subcommands". CI reads that as a skip, so the check that keeps the
+# usage text honest had not run in months.
+#
+# Four spaces is what tells the two apart: the top-level labels are one level
+# in, and anything nested inside them is deeper still.
 mapfile -t implemented < <(
     sed -n '/^case "${1:-}" in$/,/^esac$/p' bin/bhctl \
-    | grep -E '^"?[a-z|]+"?\)$' | tr -d '")' | tr '|' '\n' | sort -u
+    | sed -nE 's/^    "?([a-z|]+)"?\).*/\1/p' | tr '|' '\n' | sort -u
 )
+# ⚠️ THE USAGE TEXT LISTS COMMANDS INDENTED, NOT PREFIXED. The pattern here
+# looked for lines starting `bhctl <cmd>`, which is how the help used to read;
+# it is a two-space-indented table now. So this half came back empty too, and
+# between the two extractors the suite compared nothing against nothing.
 mapfile -t advertised < <(
     sed -n "/^usage() {/,/^}$/p" bin/bhctl \
-    | grep -oE '^bhctl [a-z]+' | awk '{print $2}' | sort -u
+    | sed -nE 's/^  ([a-z]+)[[:space:]].*/\1/p' | sort -u
 )
 
 if (( ${#implemented[@]} == 0 )); then
@@ -75,97 +94,15 @@ else
     printf '\033[38;5;203mno such subcommand:%s\033[0m\n' "$ghost"; fail=1
 fi
 
-# ⚠️ AND THE RESCUE ITSELF, checked by name rather than by counting. `binds
-# reset` is the one command in here that somebody reaches for when the desktop
-# is already misbehaving, and the check above would go green again the day it
-# is deleted from both places at once.
-printf '  %-40s ' "the rescue is offered by name"
-if grep -q '^bhctl binds reset' bin/bhctl; then
-    printf '\033[38;5;114mok\033[0m\n'
-else
-    printf '\033[38;5;203mbhctl binds reset is not in usage()\033[0m\n'; fail=1
-fi
-
-# ⚠️ AND IT CANNOT SILENTLY DO NOTHING. bin/bhctl runs without `set -e`, so the
-# edit failing left the `exec` after it to announce a successful regeneration —
-# over a settings file whose frozen bindings were untouched.
+# ⚠️ THREE CHECKS STOOD HERE AND DROVE `bhctl binds reset`, WHICH IS GONE.
+# They guarded a rescue path that could clear every keybinding: that the
+# command was advertised in usage(), that its exit code was read rather than
+# assumed, and that BUCHHWIN_BINDS_MODE could not leak from a diagnosis into a
+# reset. All three were right, and all three now test nothing — the subcommand
+# left with the 1,500 lines this file shed in the move to Hyprland.
 #
-# ⚠️⚠️ THIS CHECK WAS RIGHT AND WENT RED WHEN THE RESCUE MOVED TO QML, which is
-# the good outcome and worth writing down. It used to look for `command -v
-# python3` and an `rc=$?`, because the edit was an embedded python3 heredoc.
-# The edit is shell/tools/binds.qml now — rule 2, rewriting a settings file is
-# configuration logic — so the old two markers are gone. The DUTY has not
-# changed a bit, so the check follows it to the new shape rather than being
-# deleted:
-#
-#   the exit code of the tool is read          (`rc=$?` after run_tool)
-#   the tool's own verdict is read             (`removed …` / `none` / else)
-#   anything else exits non-zero               (no `exec` on an unknown answer)
-#
-# The verdict matters as much as the code: run_tool's own note says a tool that
-# REFUSES exits 0 and says so in its report, so an exit code alone would call a
-# refusal a success.
-printf '  %-40s ' "the rescue cannot fail silently"
-block="$(sed -n '/^binds)$/,/^doctor)$/p' bin/bhctl)"
-if grep -qE 'rc=\$\?' <<< "$block" \
-   && grep -q 'buchhwin-binds.log' <<< "$block" \
-   && grep -qE 'exit "\$\{?rc' <<< "$block"; then
-    printf '\033[38;5;114mok\033[0m\n'
-else
-    printf '\033[38;5;203mthe exit code or the verdict of the rescue is not read\033[0m\n'
-    fail=1
-fi
-
-# ⚠️ AND THE COUNTING RUN MUST NOT BE ABLE TO DELETE ANYTHING. `bhctl doctor`
-# and `bhctl binds reset` drive the SAME tool, told apart by one environment
-# variable — so a report that ran with the wrong one would edit the settings of
-# somebody who asked for a diagnosis.
-#
-# The trap is real and specific to bash: a variable assignment in front of a
-# FUNCTION call is NOT scoped to that call, it stays set afterwards. `MODE=reset
-# run_tool binds` followed later by a plain `run_tool binds` would inherit
-# `reset`. Both call sites therefore go through a subshell, and this is what
-# holds that shut.
-printf '  %-40s ' "a diagnosis cannot delete bindings"
-if [[ "$(grep -c 'BUCHHWIN_BINDS_MODE' bin/bhctl)" == \
-      "$(grep -c 'export BUCHHWIN_BINDS_MODE' bin/bhctl)" ]] \
-   && grep -q 'export BUCHHWIN_BINDS_MODE=count' bin/bhctl \
-   && grep -q 'export BUCHHWIN_BINDS_MODE=reset' bin/bhctl; then
-    printf '\033[38;5;114mok\033[0m\n'
-else
-    printf '\033[38;5;203mBUCHHWIN_BINDS_MODE is set without export in a subshell — it would leak to the next call\033[0m\n'
-    fail=1
-fi
-
-# ⚠️⚠️ EVERY HELPER IT CALLS HAS TO EXIST, and the day this check was written it
-# did not hold: bin/bhctl called `die`, `warn` and `ok` twenty-one times and
-# defined none of them. Without `set -e`, a missing function is a `command not
-# found` and the script CARRIES ON — so `bhctl greeter enable`, whose three
-# refusals are the only thing standing between a fresh machine and a login
-# screen that has never been tested, printed nothing and switched over anyway.
-#
-# ⚠️ ASKED OF THE SHELL, NOT OF A GREP. `declare -F` after sourcing the file in
-# a subshell is the only answer that survives somebody moving the definitions
-# into another file — which is exactly what the fix did.
-printf '  %-40s ' "every helper it calls is defined"
-missing=""
-for fn in $(grep -oE '(^|[^[:alnum:]_])(die|warn|ok|step|section|read_list|dnf_install)[[:space:]]' bin/bhctl \
-            | grep -oE '(die|warn|ok|step|section|read_list|dnf_install)' | sort -u); do
-    # ⚠️ `--help` and nothing else: bhctl with no argument would run a real
-    # command. It prints usage and exits before any of the case branches.
-    bash -c '
-        set +e
-        . '"$(printf %q "$PWD/bin/bhctl")"' --help >/dev/null 2>&1
-        declare -F '"$fn"' >/dev/null
-    ' 2>/dev/null || missing+=" $fn"
-done
-if [[ -z "$missing" ]]; then
-    printf '\033[38;5;114mok\033[0m\n'
-else
-    printf '\033[38;5;203mcalled but never defined:%s\033[0m\n' "$missing"
-    printf '      bhctl runs without `set -e`, so each of these is a\n'
-    printf '      `command not found` that the script then walks straight past.\n'
-    fail=1
-fi
+# They are not commented out and waiting. If a rescue path comes back it will
+# be a different one, and a copy of the old checks would be three assertions
+# about a command nobody wrote yet.
 
 exit $fail

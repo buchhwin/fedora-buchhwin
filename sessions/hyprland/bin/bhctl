@@ -56,6 +56,37 @@ doctor() {
         || { printf '  MISSING  Hyprland configuration\n'; failed=1; }
     [[ -r /usr/share/wayland-sessions/buchhwin-hyprland.desktop ]] \
         || { printf '  MISSING  SDDM session entry\n'; failed=1; }
+
+    # ⚠️ A NULL SECTION IS WHY A SWITCH SPRINGS BACK, and this check went
+    # missing when bhctl was rewritten. The symptom is specific and impossible
+    # to guess at: a top-level block in shell.json set to `null` makes
+    # JsonAdapter hand back a null object, every write into it is dropped, and
+    # the control in the settings window snaps back to where it was with
+    # nothing in any log. It was reported once, in exactly those words, and the
+    # check that found it was lost with the 1,500 lines this file shed.
+    #
+    # ⚠️ `null` AS A VALUE IS NOT ONE. A palette genuinely called "null" is a
+    # string and is fine; only a section whose whole value is null is broken.
+    # That is why this asks jq for the type instead of grepping for the word.
+    printf 'Settings file\n'
+    local settings="$CONFIG_HOME/buchhwin/shell.json"
+    if [[ ! -r "$settings" ]]; then
+        printf '  ok       no shell.json yet — the defaults are the settings\n'
+    elif ! command -v jq >/dev/null 2>&1; then
+        printf '  SKIP     jq is not installed, cannot check for a null section\n'
+    else
+        local nulls
+        nulls="$(jq -r 'to_entries[] | select(.value == null) | .key' \
+                 "$settings" 2>/dev/null | paste -sd' ' -)"
+        if [[ -n "$nulls" ]]; then
+            printf '  BROKEN   null section: %s\n' "$nulls"
+            printf '           Every setting in it silently refuses to save. Take the\n'
+            printf '           line out of %s and log in again.\n' "$settings"
+            failed=1
+        else
+            printf '  ok       no null section\n'
+        fi
+    fi
     return "$failed"
 }
 

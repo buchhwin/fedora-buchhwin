@@ -20,7 +20,7 @@
 #
 # A click needs a screen coordinate, and under Wayland neither side has one:
 #
-#   * the compositor knows where the WINDOW is    — niri msg -j windows
+#   * the compositor knows where the WINDOW is    — hyprctl -j clients
 #   * the shell knows where the ROW is inside it  — ipc call settings probe <key>
 #
 # Neither is guessed and neither is hardcoded, so this file does not rot when a
@@ -38,7 +38,7 @@ bad() { printf '  %-46s %sFAIL%s %s\n' "$1" "$red" "$off" "${2:-}"; fail=1; }
 skip() { echo "$1"; exit 2; }
 
 command -v ydotool  >/dev/null || skip "ydotool is not installed"
-command -v niri     >/dev/null || skip "niri is not installed"
+command -v the compositor     >/dev/null || skip "the compositor is not installed"
 command -v qs       >/dev/null || skip "quickshell (qs) is not installed"
 command -v jq       >/dev/null || skip "jq is not installed"
 
@@ -59,15 +59,15 @@ export YDOTOOL_SOCKET="${YDOTOOL_SOCKET:-/run/ydotool.sock}"
 # BESIDE IT, which is rule 6 broken by the very comment explaining rule 6. The
 # retyped version knew only the systemd unit: no /proc fallback for a shell
 # started by hand, and no BUCHHWIN_MODE=lock filter. It is sourced now.
-# ⚠️ `niri msg` NEEDS ITS SOCKET, AND OVER SSH NOTHING SETS IT. Without it every
+# ⚠️ `hyprctl` NEEDS ITS SOCKET, AND OVER SSH NOTHING SETS IT. Without it every
 # call answers as if the compositor were dead, which looks exactly like a broken
 # desktop. WAYLAND_DISPLAY and XDG_RUNTIME_DIR have to be right as well — this
 # project has already lost ten minutes to that combination once.
-if [[ -z "${NIRI_SOCKET:-}" ]]; then
-    NIRI_SOCKET="$(ls "${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"/niri.*.sock 2>/dev/null | head -1)"
-    [[ -n "$NIRI_SOCKET" ]] && export NIRI_SOCKET
+if [[ -z "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]]; then
+    HYPRLAND_INSTANCE_SIGNATURE="$(ls "${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"/the compositor.*.sock 2>/dev/null | head -1)"
+    [[ -n "$HYPRLAND_INSTANCE_SIGNATURE" ]] && export HYPRLAND_INSTANCE_SIGNATURE
 fi
-niri msg -j windows >/dev/null 2>&1 || skip "niri does not answer (NIRI_SOCKET/WAYLAND_DISPLAY?)"
+hyprctl -j clients >/dev/null 2>&1 || skip "the compositor does not answer (HYPRLAND_INSTANCE_SIGNATURE/WAYLAND_DISPLAY?)"
 
 . "$(dirname "$0")/shell-ipc.sh"
 bh_shell_pid >/dev/null || skip "buchhwin-shell is not running"
@@ -75,7 +75,7 @@ ipc() { bh_ipc call "$@" 2>/dev/null; }
 ipc settings state >/dev/null || skip "the shell does not answer on ipc"
 
 # ⚠️ A LOCKED SESSION MAKES EVERY RESULT A LIE — the click lands on the lock
-# face, niri refuses screenshots, and the readings come back unchanged, which
+# face, the compositor refuses screenshots, and the readings come back unchanged, which
 # reads as "the press does nothing". Refuse instead of measuring that.
 if [[ "$(systemctl --user is-active buchhwin-lock 2>/dev/null)" == "active" ]]; then
     skip "the session is locked — unlock it first, this measures clicks"
@@ -88,11 +88,11 @@ CFG="${XDG_CONFIG_HOME:-$HOME/.config}/buchhwin/shell.json"
 # and swallows every press, so a run started with it open would report every
 # control in this window as dead. Ask, close it, and say so — rather than
 # measuring through it.
-if [[ "$(niri msg -j overview-state 2>/dev/null | jq -r '.is_open')" == "true" ]]; then
-    niri msg action close-overview >/dev/null 2>&1 || niri msg action toggle-overview >/dev/null 2>&1
+if [[ "$(hyprctl -j overview-state 2>/dev/null | jq -r '.is_open')" == "true" ]]; then
+    hyprctl dispatch close-overview >/dev/null 2>&1 || hyprctl dispatch toggle-overview >/dev/null 2>&1
     sleep 0.6
-    [[ "$(niri msg -j overview-state 2>/dev/null | jq -r '.is_open')" == "true" ]] \
-        && skip "niri's overview is open and would swallow every click"
+    [[ "$(hyprctl -j overview-state 2>/dev/null | jq -r '.is_open')" == "true" ]] \
+        && skip "the compositor's overview is open and would swallow every click"
 fi
 
 # ---------------------------------------------------------------- the aiming
@@ -101,13 +101,13 @@ fi
 # is where the tile sits on this output; `window_offset_in_tile` is the window
 # inside it, and it is not always zero.
 win_json() {
-    niri msg -j windows 2>/dev/null \
+    hyprctl -j clients 2>/dev/null \
         | jq -c 'map(select(.app_id == "org.quickshell" and .title == "Settings"))[0] // empty'
 }
 
 # ⚠️⚠️ BRING THE WINDOW INTO VIEW FIRST, AND THIS IS NOT POLITENESS. Opening a
 # page over ipc does not move the workspace: measured here, the Settings window
-# sat on workspace 1 while workspace 2 was in front, `niri msg -j windows` still
+# sat on workspace 1 while workspace 2 was in front, `hyprctl -j clients` still
 # reported a perfectly good position for it, the pointer went exactly where the
 # arithmetic said — onto bare wallpaper — and every reading came back unchanged.
 # That reads as "the press does nothing", which is the very fault this file is
@@ -117,7 +117,7 @@ focus_settings() {
     local id
     id="$(win_json | jq -r '.id // empty')"
     [[ -n "$id" ]] || return 1
-    niri msg action focus-window --id "$id" >/dev/null 2>&1
+    hyprctl dispatch focus-window --id "$id" >/dev/null 2>&1
     sleep 0.5
 }
 
@@ -127,7 +127,7 @@ win_origin() {
     local w ws focused
     w="$(win_json)"; [[ -n "$w" ]] || return 1
     ws="$(jq -r '.workspace_id' <<< "$w")"
-    focused="$(niri msg -j workspaces 2>/dev/null | jq -r 'map(select(.is_active))[].id' | tr '\n' ' ')"
+    focused="$(hyprctl -j workspaces 2>/dev/null | jq -r 'map(select(.is_active))[].id' | tr '\n' ' ')"
     grep -qw "$ws" <<< "$focused" || {
         echo "the Settings window is on workspace $ws, which is not in front" >&2
         return 1
@@ -148,7 +148,7 @@ win_origin() {
 # says on stderr WHICH half failed.
 #
 # ⚠️ THE TWO HALVES REPORT SEPARATELY, and the first draft did not. It answered
-# "could not locate the dock.enabled row" when the truth was that `niri msg` had
+# "could not locate the dock.enabled row" when the truth was that `hyprctl` had
 # no socket — sending the reader to look at a page that was perfectly fine. Rule
 # 4: a checker that reads the wrong place invents work, which is worse than one
 # that misses something.
@@ -198,8 +198,8 @@ yd() { sudo -n "YDOTOOL_SOCKET=$YDOTOOL_SOCKET" ydotool "$@" >/dev/null 2>&1; }
 
 #
 # ⚠️⚠️ AND THE CORNER IT SLAMS INTO IS THE BOTTOM-RIGHT ONE, WHICH IS NOT A
-# DETAIL. The obvious choice is the top-left — and niri has a HOT CORNER there
-# that opens the overview. Measured with a control, `niri msg -j overview-state`
+# DETAIL. The obvious choice is the top-left — and the compositor has a HOT CORNER there
+# that opens the overview. Measured with a control, `hyprctl -j overview-state`
 # before and after one move: `is_open` false -> true. The overview then eats the
 # next click, so the pattern was "the first press works and every press after it
 # does nothing" — which reads as a control that only responds once, and would
@@ -224,10 +224,10 @@ win_output() {
     w="$(win_json)"; [[ -n "$w" ]] || return 1
     ws="$(jq -r '.workspace_id' <<< "$w")"
     local name
-    name="$(niri msg -j workspaces 2>/dev/null \
+    name="$(hyprctl -j workspaces 2>/dev/null \
             | jq -r --argjson ws "$ws" 'map(select(.id == $ws))[0].output // empty')"
     [[ -n "$name" ]] || return 1
-    niri msg -j outputs 2>/dev/null \
+    hyprctl -j monitors 2>/dev/null \
         | jq -r --arg n "$name" '.[$n].logical
                  | ((.x | floor | tostring) + " " + (.y | floor | tostring) + " "
                     + (.width | floor | tostring) + " " + (.height | floor | tostring))'
@@ -239,7 +239,7 @@ screen_size() {
         printf '%s %s\n' "$ow" "$oh"
         return 0
     fi
-    niri msg -j outputs 2>/dev/null \
+    hyprctl -j monitors 2>/dev/null \
         | jq -r '[.[] | select(.logical != null)][0].logical
                  | ((.width | floor | tostring) + " " + (.height | floor | tostring))'
 }
@@ -248,10 +248,10 @@ screen_size() {
 # ⚠️⚠️ AND IT SLAMS INTO A CORNER EXACTLY ONCE, WHICH IS THE WHOLE TRICK. Every
 # corner of this screen does something:
 #
-#   top-left      niri's own hot corner, opens the overview. Measured with a
+#   top-left      the compositor's own hot corner, opens the overview. Measured with a
 #                 control: `overview-state.is_open` false -> true after ONE move.
 #   right corners this desktop's own hot corner — the Bar & Island page shows it
-#                 set to "Right", and its own hint says niri already owns the
+#                 set to "Right", and its own hint says the compositor already owns the
 #                 top-left one.
 #
 # Whatever opens then eats the NEXT press, so re-cornering before every click
@@ -272,8 +272,8 @@ calibrate() {
     yd mousemove -x -20000 -y 20000 || return 1
     POS_X=0; POS_Y=$(( sh_ - 1 ))
     sleep 0.4
-    if [[ "$(niri msg -j overview-state 2>/dev/null | jq -r '.is_open')" == "true" ]]; then
-        niri msg action close-overview >/dev/null 2>&1
+    if [[ "$(hyprctl -j overview-state 2>/dev/null | jq -r '.is_open')" == "true" ]]; then
+        hyprctl dispatch close-overview >/dev/null 2>&1
         sleep 0.4
     fi
 }

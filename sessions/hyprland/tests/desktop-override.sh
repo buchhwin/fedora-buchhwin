@@ -45,9 +45,9 @@ bad()  { printf '  \033[38;5;203mFAIL\033[0m %s\n' "$*"; fail=1; }
 
 tmp="$(mktemp -d)"
 trap 'rm -rf "$tmp"' EXIT
-mkdir -p "$tmp/cfg/buchhwin" "$tmp/cfg/niri" "$tmp/cfg/environment.d" "$tmp/share"
+mkdir -p "$tmp/cfg/buchhwin" "$tmp/cfg/buchhwin/hyprland/generated" "$tmp/cfg/environment.d" "$tmp/share"
 
-rm -f /tmp/buchhwin-niri.log
+rm -f /tmp/buchhwin-the compositor.log
 XDG_CONFIG_HOME="$tmp/cfg" XDG_DATA_HOME="$tmp/share" \
     BUCHHWIN_TOOL=hypr QT_QPA_PLATFORM=offscreen \
     timeout 60 qs -p shell >/dev/null 2>&1
@@ -55,7 +55,7 @@ XDG_CONFIG_HOME="$tmp/cfg" XDG_DATA_HOME="$tmp/share" \
 APPS="$tmp/share/applications"
 
 # The generator's own report is the truth; it exits 0 even when it gives up.
-if grep -q ABORT /tmp/buchhwin-niri.log 2>/dev/null; then
+if grep -q ABORT /tmp/buchhwin-the compositor.log 2>/dev/null; then
     bad "generator aborted"
     exit 1
 fi
@@ -123,7 +123,7 @@ while read -r label; do
     [[ -z "$label" ]] && continue
     [[ -f "$APPS/$label" ]] && continue
     bad "log says it wrote $label, but the file is not there"
-done < <(grep -oE 'wrote  [a-z-]+\.desktop' /tmp/buchhwin-niri.log 2>/dev/null | awk '{print $2}')
+done < <(grep -oE 'wrote  [a-z-]+\.desktop' /tmp/buchhwin-the compositor.log 2>/dev/null | awk '{print $2}')
 
 [[ $fail == 0 ]] && ok "report and disk agree"
 exit $fail

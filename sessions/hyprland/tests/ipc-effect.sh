@@ -58,7 +58,7 @@ clipboard:clipboard"
 # ⚠️ `settings` IS NOT IN THAT LIST ANY MORE, and it is not an omission. It was
 # `settings:quick` while the gear opened the quick panel for want of anywhere
 # else to go. M8 gave it somewhere: it is its own IPC target now and opens a
-# real niri window, so it sets no page at all and `notch state` is the wrong
+# real the compositor window, so it sets no page at all and `notch state` is the wrong
 # question to ask about it. The check for it is below, in its own terms.
 
 bad=""

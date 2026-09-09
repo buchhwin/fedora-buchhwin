@@ -4,8 +4,8 @@
 # and never measured — there was no suite for it at all, which is how a
 # milestone stays half done without anybody noticing.
 #
-# ⚠️ THE OBVIOUS TEST DOES NOT EXIST, AND THAT IS THE FIRST FINDING. niri 26.04
-# does not say whether a window is X11: `niri msg -j windows` gives id, title,
+# ⚠️ THE OBVIOUS TEST DOES NOT EXIST, AND THAT IS THE FIRST FINDING. The compositor 26.04
+# does not say whether a window is X11: `hyprctl -j clients` gives id, title,
 # app_id, pid, workspace_id, is_focused, is_floating, is_urgent, layout and
 # focus_timestamp — measured against a real window rather than hoped for. An
 # XWayland window arrives with WM_CLASS in `app_id` and is indistinguishable
@@ -22,12 +22,11 @@ cd "$(dirname "$0")/.." || exit 2
 
 fail=0
 
-# ⚠️ THE ALLOWLIST IS ONE ENTRY AND IT IS NOT INSTALLED EITHER. docs/CITRIX.md
-# is the standing exception: Citrix Workspace has no Wayland client, and if it
-# is ever needed it needs XWayland with it. Nothing here ships it — the point of
-# naming it is that a future "just add xwayland-satellite" has to come past this
-# line and say which program needed it.
-allow="citrix"
+# ⚠️ THE ALLOWLIST IS EMPTY, AND THAT IS THE POINT. Nothing this profile
+# installs needs XWayland. The list exists so that a future "just add
+# xwayland-satellite" has to come past this line and name the program that
+# needed it, rather than arriving as a dependency nobody chose.
+allow=""
 
 # ---------------------------------------------------------------- static half
 printf '  %-38s ' "no package list installs XWayland"
@@ -75,15 +74,26 @@ fi
 effective() {
     grep -vE '^[[:space:]]*(//|#)' "$1" | grep -v '"#[[:space:]]'
 }
-printf '  %-38s ' "the four borderless mechanisms exist"
+printf '  %-38s ' "both borderless mechanisms exist"
 missing=""
-niri_eff="$(effective shell/tools/hypr.qml)"
+hypr_eff="$(effective shell/tools/hypr.qml)"
+emit_eff="$(effective shell/tools/hypr/EmitSettings.qml)"
 render_eff="$(effective shell/tools/render.qml)"
-grep -q 'prefer-no-csd'   <<< "$niri_eff"   || missing+=" prefer-no-csd"
+# ⚠️ TWO OF THE FOUR WERE FROM THE PREVIOUS COMPOSITOR AND FROM A PROGRAM THIS
+# PROFILE NO LONGER INSTALLS.
+#
+#   prefer-no-csd        a KDL setting the previous compositor had. Hyprland
+#                        has no equivalent: asking applications not to draw
+#                        their own frames is the Qt variable below, and
+#                        nothing else.
+#   vscode-titleBarStyle VS Code is neither installed nor themed any more.
+#
+# The Qt variable also MOVED. It is what the `windows.noCsd` setting writes,
+# so it comes out of the generator now instead of being spelled into the
+# shipped config unconditionally — which is why this looks at EmitSettings.
 grep -q 'gtk-decoration-layout' <<< "$render_eff" || missing+=" gtk-decoration-layout"
-grep -q 'QT_WAYLAND_DISABLE_WINDOWDECORATION' <<< "$niri_eff" \
+grep -q 'QT_WAYLAND_DISABLE_WINDOWDECORATION' <<< "$emit_eff" \
     || missing+=" QT_WAYLAND_DISABLE_WINDOWDECORATION"
-grep -q 'titleBarStyle'   <<< "$render_eff" || missing+=" vscode-titleBarStyle"
 if [[ -z "$missing" ]]; then
     printf '\033[38;5;114mok\033[0m\n'
 else
@@ -96,7 +106,7 @@ fi
 # ⚠️ IT SKIPS RATHER THAN PASSES WITHOUT A SESSION. A check that reports "ok"
 # because it could not look is the exact shape this project has been burned by
 # four times — a green from a mute instrument.
-if ! command -v niri >/dev/null || [[ -z "${WAYLAND_DISPLAY:-}" ]]; then
+if ! command -v the compositor >/dev/null || [[ -z "${WAYLAND_DISPLAY:-}" ]]; then
     printf '  %-38s \033[38;5;179mskipped\033[0m (no session)\n' "no X server on this machine"
     exit $fail
 fi
@@ -120,7 +130,7 @@ else
     if grep -qi "$allow" <<< "$running"; then
         printf '      \033[38;5;114mallowed\033[0m — matches the documented exception (%s)\n' "$allow"
     else
-        printf '      \033[38;5;203mnot in the allowlist\033[0m — see docs/CITRIX.md\n'
+        printf '      \033[38;5;203mnot in the allowlist\033[0m\n'
         fail=1
     fi
 fi

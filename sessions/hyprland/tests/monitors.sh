@@ -7,7 +7,7 @@
 # menü zwischen den workspaces wechseln können".                                 # english-ok: the request, quoted
 #
 # ⚠️⚠️ THE FAULT THIS GUARDS IS AN AMBIGUITY, NOT A MISDRAW. Workspace indices
-# count PER OUTPUT in niri — measured on the lab VM once it had two heads, idx=1
+# count PER OUTPUT in the compositor — measured on the lab VM once it had two heads, idx=1
 # exists on Virtual-1 AND on Virtual-2. A column that picks "the workspace with
 # index 1" out of a global list therefore shows the wrong screen's windows, and
 # it does it silently: the picture is plausible, it is just somebody else's.

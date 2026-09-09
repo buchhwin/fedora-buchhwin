@@ -11,7 +11,7 @@
 # It was this: a `Behavior` on a size that a WAYLAND LAYER SURFACE is sized
 # from. Animating that property re-sizes the surface once per frame, and a
 # surface re-size is not drawing — it is a `set_size` plus an `ack_configure`
-# round trip with niri, a buffer of a new size (so the swapchain is discarded
+# round trip with the compositor, a buffer of a new size (so the swapchain is discarded
 # every frame), a fresh corner-radius and blur calculation, and a new input
 # region. Measured on the VM at 60 Hz, ONE opening of the quick panel:
 #
