@@ -73,7 +73,7 @@ FocusScope {
     // (`source: "ui/Shell.qml"`). A wrong path is now loud: Loader.status goes
     // to Error and says so on screen, instead of drawing an empty page.
     //
-    // ⚠️ TEN PAGES BECAME TWENTY-ONE, and `section` is why that is an
+    // ⚠️ TEN PAGES BECAME TWENTY-FIVE, and `section` is why that is an
     // improvement rather than a longer list. Appearance carried 55 rows and
     // System 43 — two pages holding two thirds of every setting, each an
     // unstructured column. Nothing here is longer than seventeen rows, and the
@@ -187,14 +187,29 @@ FocusScope {
         { id: "system", section: "System", icon: "memory",
           title: "System", source: "pages/SystemPage.qml",
           blurb: "What this machine is, and the button that puts every setting back." }
-    ].filter(function(page) {
-        // Fedora KDE's System Settings owns hardware configuration. The old
-        // compositor-specific editors are intentionally not exposed until a
-        // Hyprland writer exists for them; showing controls that do not apply
-        // would be worse than sending the user to the working KDE module.
-        return ["displays", "keyboard", "keys", "pointing", "windows", "machine"]
-               .indexOf(page.id) < 0
-    })
+    ]
+    // ⚠️ SIX PAGES USED TO BE FILTERED OUT OF THIS LIST HERE, and the filter is
+    // gone because the condition it named has been met.
+    //
+    // The migration hid Displays, Keyboard, Shortcuts, Mouse & Touchpad, Windows
+    // and This Machine "until a Hyprland writer exists for them" — honest at the
+    // time, because the same commit deleted the config generator instead of
+    // porting it, and a control that writes to nothing is worse than no control.
+    // tools/hypr/EmitSettings.qml is that writer: `mode`, `position`, `scale`,
+    // `transform` and `vrr` through `hl.monitor()`, `kb_layout`, `kb_variant`,
+    // `kb_options`, `repeat_delay`, `repeat_rate`, every touchpad and mouse
+    // field, `follow_mouse`, `no_warps` and the window rules. EmitBinds.qml is
+    // the one behind Shortcuts.
+    //
+    // ⚠️ SHORTCUTS IS THE ONE THAT MATTERED. Rebinding was the whole point of
+    // rebuilding the generator, and the editor for it was sitting behind this
+    // filter the entire time — reachable by nothing, from anywhere.
+    //
+    // ⚠️ AND THE FILTER WAS INVISIBLE TO EVERY CHECK BUT ONE. It hid 33 of the
+    // 185 rows the schema declares, which is exactly the gap tests/pages.sh
+    // reported as "152 built, 185 declared". That number was the only thing in
+    // the suite that could see it: tests/setting-rows.sh greps the page files
+    // and they were all still there, being greppable and unreachable.
 
     // ---------------------------------------------------------------- history
     // Back and forward, which the reference puts at the top of the content.
