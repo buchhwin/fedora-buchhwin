@@ -288,74 +288,72 @@ step before the adapter applies them, so a one-shot read in the same tick
 returns the defaults — silently. That deferral lives in `common/WaitFor.qml`;
 wait on it rather than on `loaded`.
 
-## The calendar, and Google
+## The calendar, and KDE
 
-Appointments come from your Google account over CalDAV, using the account that
-lives in `gnome-online-accounts` — the same one that puts Google Drive in
-Nautilus. There is deliberately **no setting for it in `shell.json`**: the
-account IS the setting.
+Appointments come from **Akonadi**, KDE's own store, read with
+`konsolekalendar`. Whatever calendars you set up in KDE's account settings —
+Google included — are what the month shows. There is deliberately **no setting
+for it in `shell.json`**: the account IS the setting, and it is KDE's.
 
 ```
-gnome-online-accounts-gtk        # add the account, switch the calendar on
-bhctl calendar                   # check that it arrived
+systemsettings kcm_akonadi          # or: KDE Settings → Personal Information
+konsolekalendar --view --export-type CSV    # check that it arrived
 ```
 
 `Super+C` shows the month. A dot under a day means something is on; the
 appointments of the day you tap are listed under the grid. The **+** creates one
-— on the day you are looking at, not on today.
+— on the day you are looking at, not on today — through
+`konsolekalendar --add`, so it lands in the calendar KDE is set up with and
+syncs from there like anything else in it.
 
-**What is written here goes to Google, and therefore to your phone.** This is
-real CalDAV, not a local scratch copy.
+### Why this and not what came before
 
-### Why not evolution-data-server
+Until 09.09.2026 this went to Google over CalDAV, through **GNOME Online
+Accounts**: a token over DBus, a calendar discovered by PROPFIND, events fetched
+as ICS and expanded by a 548-line RRULE parser of our own in
+`services/Ical.qml`.
 
-EDS is the usual route. It was measured and it cannot work from here: EDS ties
-an opened calendar to the **calling D-Bus connection**, and since Quickshell
-ships no DBus module the only door is `busctl` — where every invocation is a new
-connection, so the object is gone before it can be queried
-(`Object does not exist at path …`). Rescuing that would take a permanently
-running helper in C, with a build step. GOA hands out a token in **one** short
-call instead, and Google's CalDAV endpoint is already baked into GOA. The
-difference is 32 packages and a build system.
+⚠️ **It was dead out of the box.** Every step of it needed a package this
+profile does not install and never will, so on a fresh machine the panel said
+"No account set up" and there was no way from there to a calendar. And a second
+account manager beside KDE's own is exactly the duplication the whole profile
+is built against — the same fault as the network panel opening System Settings.
+
+The desktop is Fedora KDE. Akonadi is already running and the KDE PIM packages
+are already installed (`akonadi-calendar-tools` is what carries
+`konsolekalendar`). `sessions/dwl/` has read the store that way since it was
+written; this is now the same source, reached the same way, in both sessions.
+
+### What went with it
+
+- **`services/Ical.qml`**, 548 lines. It expanded recurrence rules because
+  CalDAV hands over the rule and not the occurrences. konsolekalendar is asked
+  for a date range and returns the instances, so a second implementation of
+  RRULE would be two answers to one question.
+- **The `curl` transport**, and with it the whole question of keeping a bearer
+  token off a command line. There is no token any more.
+- **`tests/caldav-transport.sh`** and **`shell/tools/ical-check.qml`**. What
+  replaces them is `tests/calendar.sh`, which runs the CSV parser against a
+  fixture: a comma inside a quoted summary, a doubled quote, `float` in the time
+  column for an all-day event, and a short line that is not an event at all.
+
+⚠️ **No Python, which is why this is not simply the dwl script.**
+`sessions/dwl/scripts/calendar_events.py` does the same job in 62 lines, and
+`tests/no-python.sh` forbids it here. The CSV is four dates and a summary;
+parsing it in QML costs one function and no extra process.
 
 ### Limits, stated plainly
 
-- **Time zones come from the `VTIMEZONE` inside the appointment**, not from the
-  system. Quickshell's JS engine has **no `Intl`** — measured, `typeof Intl` is
-  `undefined` — so there is no way to ask what offset a named zone had on a
-  given day. Reading VTIMEZONE has the side benefit of not depending on this
-  machine's zone database agreeing with Google's.
-- **Recurrences** are expanded for `FREQ=DAILY|WEEKLY|MONTHLY|YEARLY` with
-  `INTERVAL`, `COUNT`, `UNTIL` and `BYDAY`, plus `EXDATE` and moved instances.
-  Anything more exotic (`BYSETPOS`, `BYWEEKNO`) is **not** expanded rather than
-  half-guessed.
+- **`LC_ALL=C.UTF-8` is passed to every call**, and it is load-bearing rather
+  than tidy: konsolekalendar writes its dates through the locale, so under a
+  German locale the CSV carries "Montag, 2. März 2026" and a parser reading
+  `yyyy-MM-dd` matches nothing. An empty calendar and a calendar nobody could
+  read look identical on screen, so the parser **refuses** a date it does not
+  recognise rather than guessing at one.
 - No invitations, no attendees, no reminders, no attachments.
-- **No offline queue.** With no network the page says so. Collecting changes to
-  send later is the worse promise.
-
-### ⚠️ The transport is `curl`, and the account still has to be reconnected
-
-There were two walls and only one is down.
-
-**Down (10.08.2026):** QML's `XMLHttpRequest` has no `REPORT` method —
-`open("REPORT", …)` throws "Unsupported HTTP method type" — and REPORT is the
-only way CalDAV asks for events. So the calendar could never have fetched an
-appointment however good the token was, and `PUT`/`DELETE` had the same ceiling.
-Every request now goes through `curl`, measured against a real server.
-
-⚠️ **The token never touches a command line.** It is a bearer credential and
-`/proc/<pid>/cmdline` is world-readable, so the whole request — headers and body
-— is fed to `curl --config -` on standard input. `tests/caldav-transport.sh`
-measures that with a control that can fail: the same token passed as `-H` is
-found in argv, passed through the config it is not.
-
-**⚠️ Still standing, and only you can take it down:** the Google token carries
-**no calendar scope**. `bhctl calendar` prints exactly `email, profile,
-userinfo.email, userinfo.profile, openid`, so Google answers 403 — the correct
-answer to the question being asked. **Remove the account in Online Accounts and
-add it again with Calendar ticked.** Until then every surface that asks says the
-403 on screen rather than showing an empty month.
-
+- Deleting is not offered here. `konsolekalendar --delete` needs the uid and the
+  right calendar, and a delete that picks the wrong one is worse than opening
+  KOrganizer.
 
 ## The notch has three states
 

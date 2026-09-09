@@ -30,7 +30,6 @@ singleton Brightness 1.0 Brightness.qml
 singleton Nightlight 1.0 Nightlight.qml
 singleton Themes 1.0 Themes.qml
 singleton Wallpaper 1.0 Wallpaper.qml
-singleton Ical 1.0 Ical.qml
 singleton Calculator 1.0 Calculator.qml
 singleton Countdown 1.0 Countdown.qml
 singleton Calendar 1.0 Calendar.qml

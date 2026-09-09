@@ -397,12 +397,12 @@ Scope {
             root.service("Clipboard", Services.Clipboard)
             root.service("Theming", Services.Theming)
 
-            // ⚠️ NO EXCEPTION ANY MORE. Ical used to be waved through here as
-            // "a parser rather than a device", while services/qmldir said every
-            // service carries `available` "without exception". One of the two
-            // was wrong, and it was cheaper to give the parser an honest flag
-            // than to keep a rule with a hole in it.
-            root.service("Ical", Services.Ical)
+            // ⚠️ Ical WAS LISTED HERE AND IS GONE, with the file itself. It
+            // parsed iCalendar for the CalDAV calendar; konsolekalendar returns
+            // expanded instances, so a second implementation of RRULE would be
+            // two answers to one question. The rule the note here used to carry
+            // still holds for everything below: every service carries
+            // `available`, without exception.
             root.service("Calculator", Services.Calculator)
             root.service("Countdown", Services.Countdown)
 

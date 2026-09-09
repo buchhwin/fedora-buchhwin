@@ -157,6 +157,7 @@ notch-frame|shell/ui/surface/OverlaySurface.qml|s/^        anchors.fill: parent$
 motion|shell/ui/surface/ShellSurface.qml|s/^    implicitHeight: Math.max(1, root.maxIslandHeight)$/    implicitHeight: Math.max(1,\n                            root.islandH)/|a surface following an animated size across TWO lines, which a line-by-line read cannot see
 no-fetch-animation|shell/tools/render.qml|s/+ Math.max(0, root.fetchTextLines - root.fetchLogoLines) + ", "/+ 6 + ", "/|the fastfetch logo padding typed as a number again, right on one machine at most
 notch-frame|shell/ui/surface/OverlaySurface.qml|s/^            anchors.top: parent.top$/            anchors.verticalCenter: parent.verticalCenter/|the page centred in the card again, so every height change slides it by half
+calendar|shell/services/Calendar.qml|s/^            } else if (c === ",") {$/            } else if (false) {/|a CSV split that stops splitting, so every event becomes one field
 netpanel|shell/ui/quick/NetworkList.qml|s/^        model: Services.Net.*$/        model: []/|the network panel drawing no rows at all, which is what a Repeater over an empty model looks like
 monitors|shell/common/WorkspaceGeometry.qml|s/^            var want = wanted$/            var want = 1/|every monitor column pinned to the first workspace, so paging one column does nothing
 workspaces|shell/common/WorkspaceGeometry.qml|s/^                x: Number.*$/                x: 0,/|the window row packed against the left edge again, with all the slack on the right

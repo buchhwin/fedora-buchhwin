@@ -2,11 +2,12 @@ pragma ComponentBehavior: Bound
 
 // A new appointment, as a page of the island.
 //
-// This is the page that writes. What it produces goes to Google over CalDAV and
-// is therefore on the phone a moment later — which is the whole point, and also
-// the reason it is deliberately plain: four fields, no repetition rules, no
-// guests, no reminders. Anything more belongs in a calendar application, and
-// the island is not one.
+// This is the page that writes. What it produces goes to Akonadi through
+// `konsolekalendar --add`, which means it lands in whichever calendar KDE is
+// set up with — and on the phone a moment later if that calendar syncs. It is
+// deliberately plain: four fields, no repetition rules, no guests, no
+// reminders. Anything more belongs in a calendar application, and the island is
+// not one.
 //
 // Typed with the keyboard from start to finish: Tab moves on, Enter saves,
 // Escape leaves. Reaching for the mouse to type a date is how a quick note
