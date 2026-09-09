@@ -68,7 +68,20 @@ ColumnLayout {
 
         SettingRow {
             Layout.fillWidth: true
+            key: "notch.shape"
+            label: "Shape"
+            hint: "A notch hangs from the top edge; a pill floats below it with a gap of its own."
+            kind: "choice"
+            choices: [
+                { value: "notch", label: "Notch" },
+                { value: "pill",  label: "Pill" }
+            ]
+        }
+
+        SettingRow {
+            Layout.fillWidth: true
             key: "notch.enabled"
+            advanced: true
             label: "Island"
             hint: "The pill at the top of the screen, and every page that opens under it."
         }

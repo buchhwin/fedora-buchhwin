@@ -214,6 +214,21 @@ Scope {
     // it guarantees that switching colour ↔ neutral always produces a
     // difference write() can see, even for a palette whose colours happen to
     // be grey already.
+    // The picture for the fetch, if one is set and looks like a picture.
+    // Empty means Fedora's built-in mark — see the note at the `logo` block.
+    function fetchImage() {
+        var p = (Config.fetch && Config.fetch.fetchImage)
+                ? String(Config.fetch.fetchImage).trim() : ""
+        if (!p.length)
+            return ""
+        var low = p.toLowerCase()
+        var ok = [".png", ".jpg", ".jpeg", ".webp", ".bmp"]
+        for (var i = 0; i < ok.length; i++)
+            if (low.lastIndexOf(ok[i]) === low.length - ok[i].length)
+                return p
+        return ""
+    }
+
     function head(hash, mode) {
         var c = hash ? "#" : " *"
         return (hash ? "" : "/*\n") +
@@ -674,7 +689,23 @@ Scope {
              + "  " + s("$schema") + ": "
              + s("https://github.com/fastfetch-cli/fastfetch/raw/master/doc/json_schema.json") + ",\n"
              + "  " + s("logo") + ": {\n"
-             + "    " + s("type") + ": " + s("builtin") + ",\n"
+             // ⚠️ A PICTURE IF HE CHOSE ONE, the built-in mark otherwise.
+             // `kitty-direct` is the type dwl uses and the one that draws a real
+             // image in a terminal that can; fastfetch falls back to text by
+             // itself in one that cannot, which is the honest outcome and needs
+             // no detection here.
+             //
+             // ⚠️ THE SUFFIX IS CHECKED, AND THAT IS AS FAR AS IT GOES. dwl's
+             // script reads the file's magic bytes, which needs a synchronous
+             // read this generator does not have. What the check is really for
+             // is the case that matters — a path pointing at something that is
+             // plainly not a picture — and beyond that fastfetch refuses what it
+             // cannot decode and prints text, which is a visible outcome rather
+             // than a broken one.
+             + "    " + s("type") + ": "
+             + s(root.fetchImage().length > 0 ? "kitty-direct" : "builtin") + ",\n"
+             + (root.fetchImage().length > 0
+                ? "    " + s("source") + ": " + s(root.fetchImage()) + ",\n" : "")
              // ⚠️⚠️ THE SMALL MARK, ON HIS REPORT: "fastfetch ist noch nicht     // english-ok: the report, quoted
              // schön, das logo links ist zu groß, mach ein schöneres kleineres". // english-ok: the report, quoted
              //
@@ -841,6 +872,84 @@ Scope {
     // 21 entries, in QPalette::ColorRole order up to PlaceholderText. qt6ct
     // appends Accent itself by copying Highlight when the list stops one short
     // of NColorRoles, so 21 is the intended length rather than an oversight.
+    // ⚠️⚠️ kdeglobals — THE HALF OF KDE THAT qt6ct NEVER REACHED.
+    //
+    // qt6ct hands Qt a QPalette, and that is what colours a button, a menu and a
+    // window frame. It is NOT what colours Dolphin's view, Kate's editor, the
+    // selection in either of them, or any of the dozen roles KDE's own
+    // KColorScheme reads — those come from `kdeglobals`, which qt6ct does not
+    // write. So a themed desktop had Dolphin's chrome in the palette and
+    // Dolphin's file list on Breeze's default white-on-grey, which is the sort
+    // of half-applied theme that reads as a bug in the theme.
+    //
+    // ⚠️ IT IS SAFE BECAUSE IT IS SESSION-LOCAL. This goes to
+    // $XDG_CONFIG_HOME/kdeglobals, and this session sets its own
+    // XDG_CONFIG_HOME (bin/buchhwin-hyprland-session). Plasma's kdeglobals is a
+    // different file under the user's real config home and is never touched —
+    // which is the same rule the whole profile follows: nothing outside our own
+    // directory.
+    //
+    // ⚠️ AND IT RIDES ON THE `qt` TARGET rather than getting one of its own.
+    // KDE applications ARE the Qt applications; a second switch would let
+    // somebody set Qt to neutral and KDE to colour and get a Dolphin whose
+    // chrome and contents disagree. One question, one answer.
+    //
+    // The sections are the ones KColorScheme actually reads. Values are
+    // "r,g,b" — KDE's own format, not hex.
+    function rgbOf(hex) {
+        var c = Qt.color(hex)
+        return Math.round(c.r * 255) + "," + Math.round(c.g * 255) + ","
+             + Math.round(c.b * 255)
+    }
+
+    function kdeglobalsIni(m) {
+        var text = rgbOf(col(m, "text"))
+        var dim = rgbOf(col(m, "subtext0"))
+        var base = rgbOf(col(m, "base"))
+        var view = rgbOf(col(m, "mantle"))
+        var win = rgbOf(col(m, "base"))
+        var button = rgbOf(col(m, "surface0"))
+        var accent = rgbOf(accentOf(m))
+        var accentFg = rgbOf(accentFgOf(m))
+        var neg = rgbOf(col(m, "red"))
+        var pos = rgbOf(col(m, "green"))
+        var neu = rgbOf(col(m, "yellow"))
+        var link = rgbOf(col(m, "blue"))
+
+        function block(name, bg, fg) {
+            return "[Colors:" + name + "]\n"
+                 + "BackgroundNormal=" + bg + "\n"
+                 + "BackgroundAlternate=" + rgbOf(col(m, "surface0")) + "\n"
+                 + "ForegroundNormal=" + fg + "\n"
+                 + "ForegroundInactive=" + dim + "\n"
+                 + "ForegroundActive=" + accent + "\n"
+                 + "ForegroundLink=" + link + "\n"
+                 + "ForegroundVisited=" + rgbOf(col(m, "mauve")) + "\n"
+                 + "ForegroundNegative=" + neg + "\n"
+                 + "ForegroundNeutral=" + neu + "\n"
+                 + "ForegroundPositive=" + pos + "\n"
+                 + "DecorationFocus=" + accent + "\n"
+                 + "DecorationHover=" + accent + "\n"
+                 + "\n"
+        }
+
+        return head(true, m)
+             + "\n"
+             + block("Window", win, text)
+             + block("View", view, text)
+             + block("Button", button, text)
+             + block("Selection", accent, accentFg)
+             + block("Tooltip", rgbOf(col(m, "surface1")), text)
+             + block("Complementary", rgbOf(col(m, "crust")), text)
+             + block("Header", rgbOf(col(m, "mantle")), text)
+             + "[General]\n"
+             + "ColorScheme=Buchhwin\n"
+             + "AccentColor=" + accent + "\n"
+             + "\n"
+             + "[KDE]\n"
+             + "widgetStyle=Breeze\n"
+    }
+
     function qtColors(m) {
         var fg = col(m, "text"), bg = col(m, "base"), surface = col(m, "surface0")
         var dim = col(m, "mantle"), disabled = col(m, "overlay2")
@@ -1121,6 +1230,9 @@ Scope {
     FileView { id: f18; blockLoading: true; printErrors: false }
     FileView { id: f19; blockLoading: true; printErrors: false }
     FileView { id: f20; blockLoading: true; printErrors: false }
+    // kdeglobals. Its own view, for the reason spelled out above f18: a
+    // FileView hands back what it already holds for a path it already has.
+    FileView { id: f25; blockLoading: true; printErrors: false }
     // Vesktop's theme and spicetify's colour set — one view each, for the
     // reason spelled out above f18.
     FileView { id: f21; blockLoading: true; printErrors: false }
@@ -1524,6 +1636,11 @@ Scope {
                      kittyTheme, offText("#", "kitty"), "kitty", "kitty")
             emitFile(mQt, f7, root.cfg + "/qt6ct/colors/buchhwin.conf",
                      qtColors, offText("#", "qt"), "qt6ct", "qt")
+            // On the `qt` state as well — KDE applications ARE the Qt
+            // applications, and two switches would let their chrome and their
+            // contents disagree. See the note on kdeglobalsIni.
+            emitFile(mQt, f25, root.cfg + "/kdeglobals",
+                     kdeglobalsIni, offText("#", "qt"), "kdeglobals", "qt")
             // ⚠️ THE ONE FILE THAT REACHES THE COMPOSITOR. Its predecessor was
             // written for the compositor and then left uncalled through the move to
             // Hyprland, so a palette change stopped arriving there entirely —

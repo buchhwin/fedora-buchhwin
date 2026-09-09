@@ -340,6 +340,13 @@ PanelWindow {
         // apart from what is behind it — panelBg sat so close to the desktop
         // backdrop that the shape was invisible on screen.
         fill: Theme.bgDeep
+        // ⚠️ THE SHAPE IS A SETTING NOW — `notch.shape`, on Bar & Island. Both
+        // silhouettes are the same window at the same size with the same
+        // contents; what changes is whether the island hangs from the top edge
+        // or floats below it. Guarded because `Config.notch` is null for a
+        // moment while JsonAdapter builds, and a null read there is the crash
+        // this project knows by heart.
+        pill: Config.notch ? Config.notch.shape === "pill" : false
     }
 
     // The clickable region: the bar strip plus the island. Kept as plain items

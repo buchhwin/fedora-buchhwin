@@ -50,6 +50,25 @@ Item {
     property real cornerRadius: Theme.radiusLg
     property color fill: Theme.panelBg
 
+    // ⚠️ THE SECOND SHAPE, his request: a notch or a pill, switchable.
+    //
+    // A notch is CUT OUT of the top edge — it hangs from it, sharing its
+    // material, which is what the shoulders below are for. A pill is a separate
+    // piece FLOATING below the edge, rounded all round with a gap of its own
+    // above it. They are two silhouettes of one surface, not two surfaces: same
+    // window, same size, same contents.
+    //
+    // ⚠️ AND THE SHOULDERS ARE THE WHOLE DIFFERENCE. Everything the Shape below
+    // does — the concave arcs, the flare, the clamping that stops them crossing
+    // — exists to join the island to the top edge. A pill is joined to nothing,
+    // so it is a rounded rectangle and drawing it through that path would be
+    // arithmetic spent to produce a shape with no curve in it.
+    property bool pill: false
+
+    // How far a pill floats below the bar. Small on purpose: enough to read as
+    // separate, not enough to look like it came loose.
+    readonly property real pillGap: Theme.space1
+
     readonly property real cx: width / 2
     readonly property real halfW: islandWidth / 2
 
@@ -74,7 +93,35 @@ Item {
     // lower edge, so bar and island read as one piece of material.
     readonly property real shoulderTop: barHeight
 
+    // ---------------------------------------------------------------- the pill
+    //
+    // Two plain rectangles, and that is the point: with nothing to join, there
+    // is no curve to compute. The bar keeps its square edges because it still
+    // runs to both screen edges; only the island is rounded.
+    Rectangle {
+        visible: root.pill && root.barHeight > 0
+        width: parent.width
+        height: root.barHeight
+        color: root.fill
+    }
+
+    Rectangle {
+        visible: root.pill
+        x: root.cx - root.halfW
+        y: root.shoulderTop + root.pillGap
+        width: root.islandWidth
+        height: Math.max(0, root.islandBottom - root.shoulderTop - root.pillGap)
+        // ⚠️ CLAMPED THE SAME WAY `r` IS, and for the same reason: a radius
+        // larger than half the height renders as a shape with a waist rather
+        // than as a pill. Asking for more than that is what "rounded all round"
+        // means at any size, so it is taken rather than refused.
+        radius: Math.min(root.cornerRadius, width / 2, height / 2)
+        color: root.fill
+    }
+
+    // -------------------------------------------------------------- the notch
     Shape {
+        visible: !root.pill
         anchors.fill: parent
         // Antialiased curves without a multisample buffer — what keeps an
         // animated shape affordable.

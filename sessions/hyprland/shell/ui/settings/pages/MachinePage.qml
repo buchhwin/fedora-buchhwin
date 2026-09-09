@@ -171,6 +171,19 @@ ColumnLayout {
         // the only reason removing half of something is safe here.
         SettingRow {
             Layout.fillWidth: true
+            // ⚠️ TAKEN FROM THE dwl SESSION, DECISIONS #12 — the SETTING, not
+            // that session's static fastfetch.jsonc. This one generates the whole
+            // fastfetch config on every palette change, so a checked-in file
+            // would be overwritten and a script editing it would be fighting the
+            // generator.
+            key: "fetch.fetchImage"
+            label: "Picture instead of the logo"
+            hint: "PNG, JPEG, WebP or BMP. Empty leaves Fedora's own mark. A terminal that cannot draw images falls back to text by itself."
+            kind: "image"
+        }
+
+        SettingRow {
+            Layout.fillWidth: true
             key: "fetch.onNewTerminal"
             label: "Greet every new terminal"
             hint: "Runs fastfetch when a terminal opens, not only on the ff command."

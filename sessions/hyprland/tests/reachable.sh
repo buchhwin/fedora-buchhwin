@@ -77,7 +77,8 @@ for pair in \
     "gtk3 settings|$cfg/gtk-3.0/settings.ini" \
     "gtk4 css|$cfg/gtk-4.0/gtk.css" \
     "kitty theme|$cfg/kitty/theme.conf" \
-    "qt6ct colours|$cfg/qt6ct/colors/buchhwin.conf"
+    "qt6ct colours|$cfg/qt6ct/colors/buchhwin.conf" \
+    "kdeglobals|$cfg/kdeglobals"
 do
     label="${pair%%|*}"; path="${pair##*|}"
     if [[ -s "$path" ]]; then pass "written: $label"
@@ -96,6 +97,37 @@ if grep -q 'colors/buchhwin\.conf' "$cfg/qt6ct/qt6ct.conf" 2>/dev/null; then
     pass "qt6ct.conf selects the generated colours"
 else
     bad "qt6ct.conf does not select colors/buchhwin.conf — Qt apps keep their own"
+fi
+
+# ⚠️ kdeglobals IS THE HALF qt6ct NEVER REACHED, and it is checked separately
+# because the two answer different questions. qt6ct hands Qt a QPalette, which
+# is what colours a button, a menu and a window frame; KDE's own applications
+# read `kdeglobals` for the rest — Dolphin's view, Kate's editor scheme, the
+# selection in either. A desktop with only the first has themed chrome around
+# Breeze-white contents, which reads as a bug in the theme rather than a missing
+# file.
+#
+# ⚠️ AND THE SECTION NAMES ARE THE CHECK. A file that exists proves nothing:
+# KColorScheme reads [Colors:View] and [Colors:Selection] by those exact names,
+# and a typo in either is a section nothing ever looks at.
+if [[ -s "$cfg/kdeglobals" ]] \
+   && grep -q '^\[Colors:View\]' "$cfg/kdeglobals" \
+   && grep -q '^\[Colors:Selection\]' "$cfg/kdeglobals" \
+   && grep -qE '^BackgroundNormal=[0-9]+,[0-9]+,[0-9]+$' "$cfg/kdeglobals"; then
+    pass "kdeglobals carries the KDE sections, in r,g,b"
+else
+    bad "kdeglobals is missing or does not carry [Colors:View] and [Colors:Selection]"
+fi
+
+# ⚠️ AND IT IS THIS SESSION'S, NOT PLASMA'S. The whole reason writing kdeglobals
+# is safe at all is that this session sets its own XDG_CONFIG_HOME; a write to
+# the user's real one would recolour Plasma, which is the fallback session and
+# has to stay exactly as it was.
+if [[ ! -e "$HOME/.config/kdeglobals" ]] \
+   || ! grep -q 'buchhwin' "$HOME/.config/kdeglobals" 2>/dev/null; then
+    pass "the user's own kdeglobals was not touched"
+else
+    bad "something wrote buchhwin into ~/.config/kdeglobals — that is Plasma's file"
 fi
 
 # ⚠️ VS CODE WAS CHECKED HERE AND IS NOT ANY MORE, because the thing it checked
@@ -358,6 +390,7 @@ set_one() {      # target state
 # and "enabled=false takes everything back" cannot drift apart from the list.
 generated=(gtk-3.0/gtk.css gtk-3.0/settings.ini gtk-4.0/gtk.css gtk-4.0/settings.ini
            kitty/theme.conf buchhwin/hyprland/generated/colors.lua qt6ct/colors/buchhwin.conf
+           kdeglobals
            btop/themes/buchhwin.theme alacritty/buchhwin.toml tmux/buchhwin.conf
            git/buchhwin-delta.gitconfig lazygit/buchhwin.yml)
 

@@ -1108,6 +1108,18 @@ Singleton {
                 // that already has it on turns it off with the switch. Saying so
                 // here rather than letting the next round wonder why the default
                 // "did not work".
+                // ⚠️ A PICTURE INSTEAD OF THE BUILT-IN MARK, taken from the
+                // dwl session (DECISIONS #12). Empty means Fedora's own logo,
+                // which is what ships.
+                //
+                // ⚠️ THE SETTING, NOT dwl'S STATIC fastfetch.jsonc. That session
+                // keeps a hand-written config file and a script that edits it;
+                // this one GENERATES the whole config in tools/render.qml on
+                // every palette change, so a checked-in file would be overwritten
+                // on the next render and a script that edited it would be
+                // fighting the generator. One value in shell.json, read by the
+                // generator, is the same feature without the argument.
+                property string fetchImage: ""
                 property bool onNewTerminal: false
             }
 
@@ -1558,6 +1570,21 @@ Singleton {
             }
 
             property JsonObject notch: JsonObject {
+                // ⚠️ THE SHAPE OF THE THING AT THE TOP, his request: a notch or a
+                // pill, switchable.
+                //
+                //   "notch"  it hangs from the top edge — square shoulders up
+                //            there, rounded corners underneath, the way a
+                //            hardware notch is cut out of a screen
+                //   "pill"   it floats below the edge, rounded all round, with a
+                //            gap of its own above it
+                //
+                // ⚠️ IT IS A SHAPE, NOT A SECOND SURFACE. Both are the same
+                // PanelWindow at the same size with the same contents; what
+                // changes is the top corners and the gap. Building two would be
+                // two things to keep in step, which is the rule this project
+                // spends most of its comments on.
+                property string shape: "notch"
                 property bool enabled: true
                 property int flare: 7             // the concave shoulder radius
                 property int collapsedWidth: 150

@@ -222,6 +222,20 @@ Singleton {
                 // drag of that slider was paying for a full render over
                 // thirteen foreign config files to produce identical output.
                 Config.keys.mod,
+                // ⚠️ `fetch.fetchImage` IS HERE AND `notch.shape` IS NOT, and
+                // the difference is the rule this string exists for: only a key
+                // a GENERATOR reads belongs in it. render.qml writes the chosen
+                // picture into the fastfetch config, so changing it has to
+                // trigger a render. `notch.shape` changes the silhouette our own
+                // shell draws, and our own surfaces follow the Theme singleton
+                // live — putting it here would cost a full render over thirteen
+                // foreign files plus a `Hyprland --verify-config` for a result
+                // that is byte-identical by construction.
+                //
+                // It was in this list for about ten minutes; tests/fingerprint.sh
+                // caught it, which is the half of that check nobody expects to
+                // need.
+                Config.fetch ? Config.fetch.fetchImage : "",
                 // The terminal's behaviour, written into the file the renderer
                 // already produces. tests/fingerprint.sh asked for these the
                 // moment they existed, which is what it is for.

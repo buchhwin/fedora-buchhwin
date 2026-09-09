@@ -69,11 +69,40 @@ if grep -q '^\s*fastfetch$' dotfiles/zsh/zshrc; then
 else
     bad "dotfiles/zsh/zshrc no longer runs fastfetch"
 fi
-# The logo has to be fastfetch's own — `builtin`, not a file we stopped writing.
-if grep -q 's("builtin")' shell/tools/render.qml; then
-    ok "the logo is fastfetch's builtin one"
+# ⚠️ THE DEFAULT LOGO IS fastfetch'S OWN — `builtin` — AND THE ALTERNATIVE IS A
+# PICTURE HE CHOSE, not a file we generate. Those are different things and the
+# distinction is the whole point of this suite: what was deleted is the ANIMATED
+# logo, a spinning mark this project rendered into frames, wrote to logo.txt and
+# played from a script. `fetch.fetchImage` is a path the user picks, drawn by
+# fastfetch itself with `kitty-direct`, and nothing here generates or animates
+# it. Taken from the dwl session, DECISIONS #12.
+# ⚠️ THE STRING, NOT THE CALL. This used to grep for `s("builtin")` — the exact
+# text of a call that no longer exists, because the type is now chosen between
+# two: `s(... ? "kitty-direct" : "builtin")`. A checker anchored on the shape of
+# a line rather than on the fact it is about goes stale the first time the line
+# is touched, which is the failure tests/tripwires.sh exists to find.
+if grep -q '"builtin"' shell/tools/render.qml; then
+    ok "the default logo is fastfetch's builtin one"
 else
     bad "the generated config does not ask for the builtin logo"
+fi
+# ⚠️ AND THE PICTURE PATH MUST STAY A PLAIN FILE REFERENCE. `kitty-direct` hands
+# fastfetch a path and nothing else; a type that implies frames, or a source we
+# write ourselves, is the fault this file exists for coming back under a new
+# name.
+# ⚠️ CODE, NOT COMMENTS. render.qml TALKS about logo.txt in two places — the
+# history of the animation is written down there on purpose, and deleting the
+# explanation with the code is how a project forgets why something is forbidden.
+# What must not come back is a line that WRITES one.
+# ⚠️ THE TEXT GOES INTO A VARIABLE FIRST, which is tests/pipefail-grep.sh's own
+# rule and it caught this line the minute it was written: `grep -q` at the head
+# of a pipe exits on its first match, the writer takes SIGPIPE, and under
+# `set -o pipefail` the whole pipeline reports failure.
+code="$(grep -vE '^[[:space:]]*//' shell/tools/render.qml || true)"
+if grep -q 'logo\.txt' <<< "$code"; then
+    bad "render.qml writes a logo file again — that is the animated logo returning"
+else
+    ok "no logo file is generated; the picture is the user's own path"
 fi
 
 # ⚠️⚠️ B61 · THE TOP PADDING IS MEASURED, NEVER TYPED. His request was "mach das  # english-ok: the request, quoted
