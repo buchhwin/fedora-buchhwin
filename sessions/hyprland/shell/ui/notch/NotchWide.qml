@@ -164,17 +164,16 @@ Item {
         }
 
     // ------------------------------------------------------------------ media
-    // ⚠️ STILL HERE, AND OFF BY DEFAULT rather than deleted. `media.showInIsland`
-    // is a key with exactly one reader, and this is it — removing the card would
-    // leave the switch pointing at nothing, which rule 5 forbids and
-    // tests/key-readers.sh catches. Turning its default around is what "swap it
-    // out" means without taking the way back with it: switch it on and the card
-    // returns to this slot while something is playing.
+    // ⚠️ ALWAYS, WHENEVER SOMETHING IS PLAYING. `media.showInIsland` was cut
+    // with the Media page on 09.09.2026, and this is the value it actually
+    // shipped as: `true`. The comment that stood here said "off by default",
+    // which had been untrue since the schema was last changed — a note that
+    // contradicts the file three lines below it is worse than none, and it is
+    // recorded here rather than quietly corrected.
         RowLayout {
             id: media
             Layout.alignment: Qt.AlignVCenter
             visible: Services.Media.available
-                   && (Config.media ? Config.media.showInIsland : false)
             spacing: Theme.space2
 
             // ⚠️⚠️ A FIXED WIDTH, AND IT IS THE REAL WORK OF MOVING THIS. A card

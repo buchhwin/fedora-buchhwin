@@ -216,7 +216,7 @@ else
             bad "Installed never answered — its scan hung or died, so every list below is empty for that reason"
         fi
 
-        required=(keyboardOptions durations)
+        required=(keyboardOptions)
         if [[ "$onscreen" == yes ]]; then
             required+=(monitors)
         else
@@ -251,30 +251,11 @@ else
         else
             printf '       %s\n' "programs not measured: this machine has no visible .desktop entry at all (appCount=$(v appCount)), so an empty program list is a fact rather than a fault"
         fi
-        # ⚠️⚠️ SOUNDS ARE ONLY REQUIRED WHERE THERE ARE SOUNDS, and that is not a
-        # softened check — it is the same distinction the screens line above
-        # already makes. The list is built from /usr/share/sounds and
-        # ~/.local/share/sounds; the CI runs in a bare `fedora:44` container,
-        # which ships no sound theme at all. So this said "sounds is EMPTY — the
-        # row shows a box and says nothing" and turned the lane red over a
-        # machine rather than over the code, exactly as tests/greeter.sh did
-        # until it was given a fixture.
-        #
-        # ⚠️ AND IT IS STILL A CHECK WHERE IT CAN BE ONE. On any machine with a
-        # sound theme installed — every developer machine, the lab VM — the list
-        # must be non-empty and its entries must carry readable labels. What is
-        # dropped is the claim that a container without sounds is broken.
-        sound_files=0
-        for d in /usr/share/sounds "$HOME/.local/share/sounds"; do
-            [[ -d "$d" ]] || continue
-            n="$(find "$d" -type f \( -name '*.oga' -o -name '*.ogg' -o -name '*.wav' \) 2>/dev/null | wc -l)"
-            sound_files=$(( sound_files + n ))
-        done
-        if [[ "$sound_files" -gt 0 ]]; then
-            required+=(sounds)
-        else
-            printf '       %s\n' "sounds not measured: this machine has no sound theme installed at all, so an empty list is a fact rather than a fault"
-        fi
+        # ⚠️ THE SOUND LIST IS GONE, and with it the block that decided when an
+        # empty one was a fault. `timer.soundFile` was cut with the Control
+        # Center page on 09.09.2026 — the chime is a fixed path now — so nothing
+        # asks Installed for the sounds on the machine any more, and the scan it
+        # used to do on every start went with it.
         for key in "${required[@]}"; do
             n="$(v "$key")"
             if [[ "${n:-0}" -gt 0 ]]; then ok "$key has $n entries"
@@ -288,16 +269,7 @@ else
         else
             bad "programs(cats) is filtering: $(v networkFirst) of $(v allPrograms) survive"
         fi
-        # Same reasoning as above: a label check over an empty list measures
-        # nothing, and reporting it as a fault points at the wrong thing.
-        if [[ "$sound_files" -eq 0 ]]; then
-            printf '       %s\n' "sound labels not measured: there are no sounds on this machine to label"
-        elif [[ "$(v soundsLabelled)" == "yes" ]]; then
-            ok "sounds are offered by name, not by 55 characters of path"
-        else
-            bad "sounds carry no readable label"
-        fi
-        printf '       %s\n' "not required to be non-empty here: players=$(v players), workspaceNames=$(v workspaceNames)"
+        printf '       %s\n' "not required to be non-empty here: workspaceNames=$(v workspaceNames)"
     fi
     rm -f "$probe"
 fi

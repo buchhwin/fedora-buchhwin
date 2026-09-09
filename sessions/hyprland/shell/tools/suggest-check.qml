@@ -10,10 +10,8 @@
 //
 // So this asks the services themselves and prints what they hand back, and the
 // shell script decides which of them are allowed to be empty here. That split
-// matters: on the test machine `players` is legitimately empty (nothing is
-// playing) and `workspaceNames` is empty until somebody names a workspace,
-// while `monitors` being empty would mean a desktop that cannot see its own
-// screen.
+// matters: `workspaceNames` is empty until somebody names a workspace, while
+// `monitors` being empty would mean a desktop that cannot see its own screen.
 import QtQuick
 import Quickshell
 import Quickshell.Io
@@ -51,12 +49,7 @@ Item {
             // program it hides will be one that carries no category.
             "networkFirst=" + s.programs(["Network"]).length,
             "keyboardOptions=" + Services.Installed.keyboardOptions.length,
-            "sounds=" + s.sounds.length,
-            "soundsLabelled=" + (s.sounds.length
-                ? (s.sounds[0].label !== s.sounds[0].value ? "yes" : "no") : ""),
-            "players=" + s.players.length,
-            "workspaceNames=" + s.workspaceNames.length,
-            "durations=" + s.durations.length
+            "workspaceNames=" + s.workspaceNames.length
         ]
         log.setText(lines.join("\n") + "\n")
         Qt.callLater(Qt.quit)
@@ -85,7 +78,7 @@ Item {
         //
         // So the numbers are written either way and the script judges them
         // against what this machine can supply, the same way it already does for
-        // sounds and for screens. A genuine hang is still loud: `installed=no`
+        // the screens. A genuine hang is still loud: `installed=no`
         // says so, and every list it feeds comes out empty and fails there.
         onTimedOut: root.report(true)
     }

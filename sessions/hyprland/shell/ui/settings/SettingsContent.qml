@@ -73,11 +73,18 @@ FocusScope {
     // (`source: "ui/Shell.qml"`). A wrong path is now loud: Loader.status goes
     // to Error and says so on screen, instead of drawing an empty page.
     //
-    // ⚠️ TEN PAGES BECAME TWENTY-FIVE, and `section` is why that is an
-    // improvement rather than a longer list. Appearance carried 55 rows and
-    // System 43 — two pages holding two thirds of every setting, each an
-    // unstructured column. Nothing here is longer than seventeen rows, and the
-    // sidebar gathers them under three headings.
+    // ⚠️ TEN PAGES BECAME TWENTY-FIVE AND ARE NOW SEVENTEEN, and the two moves
+    // are opposites for the same reason. The split happened because Appearance
+    // carried 55 rows and System 43 — two pages holding two thirds of every
+    // setting, each an unstructured column. The cut back is his: eight pages
+    // held settings nobody changes, so their defaults are the behaviour now and
+    // the keys went with the pages. `section` is what keeps either count
+    // navigable, and it gathers these under three headings.
+    //
+    // ⚠️ ONE PAGE IS LONG AGAIN, and deliberately: Appearance carries the 31
+    // rows of the three pages it replaces. What stops it being the wall the
+    // split was made to end is `advanced: true` — six rows are open and the
+    // rest are behind "Show more", which tests/setting-rows.sh enforces at six.
     //
     // ⚠️ Every icon name goes through tests/icons.sh, which MEASURES THE GLYPH
     // rather than trusting the name: "Material Icons Round" is missing more
@@ -90,36 +97,18 @@ FocusScope {
         { id: "wallpaper", section: "Look", icon: "wallpaper",
           title: "Wallpaper", source: "pages/WallpaperSettingsPage.qml",
           blurb: "Which picture, from where, and how it is fitted." },
-        { id: "shape", section: "Look", icon: "straighten",
-          title: "Size & Shape", source: "pages/ShapePage.qml",
-          blurb: "One number for the size of everything, the corner radius, the gaps, the per-monitor scale." },
-        { id: "effects", section: "Look", icon: "blur_on",
-          title: "Effects", source: "pages/EffectsPage.qml",
-          blurb: "Blur, shadows, and how much you can see through." },
-        { id: "type", section: "Look", icon: "text_fields",
-          title: "Type & Pointer", source: "pages/TypePage.qml",
-          blurb: "The fonts, their size, and the mouse cursor." },
+        { id: "appearance", section: "Look", icon: "straighten",
+          title: "Appearance", source: "pages/AppearancePage.qml",
+          blurb: "Size and shape, transparency and effects, the fonts and the pointer." },
         { id: "theming", section: "Look", icon: "format_paint",
           title: "App Theming", source: "pages/AppThemingPage.qml",
           blurb: "One state per program we colour: follow the scheme, neutral grey, or leave it alone." },
         { id: "bar", section: "Shell", icon: "view_agenda",
           title: "Bar & Island", source: "pages/BarIslandPage.qml",
           blurb: "Shape and size of the island, the notch, and the bar." },
-        { id: "control", section: "Shell", icon: "tune",
-          title: "Control Center", source: "pages/ControlCenterPage.qml",
-          blurb: "Brightness, night light, the work timer and the clipboard." },
-        { id: "launcher", section: "Shell", icon: "apps",
-          title: "Launcher", source: "pages/LauncherPage.qml",
-          blurb: "The program list and how it opens." },
         { id: "notify", section: "Shell", icon: "notifications",
           title: "Notifications", source: "pages/NotifyPage.qml",
           blurb: "Arriving messages, how long they stay, and where." },
-        { id: "clock", section: "Shell", icon: "schedule",
-          title: "Clock & Date", source: "pages/ClockPage.qml",
-          blurb: "How the time and the date are written, everywhere they are." },
-        { id: "media", section: "Shell", icon: "music_note",
-          title: "Media", source: "pages/MediaPage.qml",
-          blurb: "Which player the island follows, and where the track is shown." },
         // B70 · his request for a sound tab. Next to Media because the two are
         // the same subject from two sides: Media is which player the island
         // follows, Sound is where the noise actually goes.
@@ -129,9 +118,6 @@ FocusScope {
         { id: "lock", section: "Shell", icon: "lock",
           title: "Lock Screen", source: "pages/LockPage.qml",
           blurb: "What the screen shows while the session is locked." },
-        { id: "motion", section: "Shell", icon: "speed",
-          title: "Motion", source: "pages/MotionPage.qml",
-          blurb: "Whether things move, and how much else is drawn." },
         // ⚠️ `desktop_windows`, AND THE TWO OBVIOUS NAMES DO NOT EXIST. Fedora
         // ships "Material Icons Round", the older set; `monitor` measures 600 px
         // and `display_settings` 891 px against ~70 for a real glyph, which is

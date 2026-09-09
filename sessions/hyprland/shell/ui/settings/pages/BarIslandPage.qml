@@ -94,6 +94,7 @@ ColumnLayout {
         SettingRow {
             Layout.fillWidth: true
             key: "notch.collapsedHeight"
+            advanced: true
             label: "Collapsed height"
             kind: "slider"
             from: 20; to: 64; step: 1; unit: "px"
@@ -199,6 +200,50 @@ ColumnLayout {
             kind: "slider"
             from: 0; to: 1000; step: 10; unit: "ms"
             usable: Config.surfaces.hotCorners !== "off"
+        }
+    }
+
+    // ⚠️ TWO ROWS ARRIVED FROM THE DELETED CONTROL CENTER PAGE. Both are about
+    // OUR OWN surfaces, which is what the rest of this page is about — the
+    // readouts that slide in over the desktop, and how much the quick panel
+    // shows before you ask it for more. The page they came from was cut because
+    // everything else on it was tuning for machinery that has one sensible
+    // setting; these two are choices about what you see.
+    SettingGroup {
+        Layout.fillWidth: true
+        title: "Panels and readouts"
+
+        SettingRow {
+            Layout.fillWidth: true
+            // ⚠️ ADVANCED, and not because it is obscure. The panel carries its
+            // own fold — this row is the same switch reached the long way round,
+            // and on the simple level it pushed this page to seven open rows.
+            // A "Show more" in front of a wall is still a wall.
+            //
+            // ⚠️ AND THE MARK GOES DIRECTLY UNDER THE KEY, with nothing between
+            // them. tests/setting-rows.sh insists on that and it is right: the
+            // level belongs to the ROW, and anywhere else it is a property of
+            // nothing. It caught this comment sitting in the gap.
+            // ⚠️ B74 · THE WORDING CHANGED WITH THE MEANING. The key used to BE
+            // the fold, so "Show every tile" described what you would see. It is
+            // now the fold's STARTING position — the panel's own button moves a
+            // runtime value and the setting is only consulted when the panel is
+            // built. A label that still promised "show every tile" would be a
+            // switch that appears not to work the moment he folds the panel by
+            // hand, which is the class of report this whole round is made of.
+            key: "quick.showMore"
+            advanced: true
+            label: "Start with every tile shown"
+            hint: "Off opens the panel folded. The panel's own Show more button is not remembered."
+        }
+        SettingRow {
+            Layout.fillWidth: true
+            key: "surfaces.osd"
+            label: "Show volume and brightness"
+            // Why it is this way: It hides the island while it is up and gives
+            // it back afterwards — that is the macOS behaviour asked for, not
+            // a bug.
+            hint: "The pill that appears under the island when a hardware key is pressed."
         }
     }
 }

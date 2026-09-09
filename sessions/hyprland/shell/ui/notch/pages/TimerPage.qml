@@ -100,7 +100,9 @@ ColumnLayout {
         spacing: Theme.space2
 
         Repeater {
-            model: Config.timer.presets
+            // `timer.presets` was cut with the Control Center page on
+            // 09.09.2026; these are the four it shipped with.
+            model: ["5", "15", "25", "60"]
 
             Pill {
                 id: preset

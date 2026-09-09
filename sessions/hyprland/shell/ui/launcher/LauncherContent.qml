@@ -28,8 +28,14 @@ FocusScope {
     // A fixed size, unlike the notch pages. Those are as big as their content
     // because their content is short; a program list is not, and a launcher
     // that changes shape while you type is a moving target.
-    implicitWidth: Config.launcher.width
-    implicitHeight: Config.launcher.height
+    // ⚠️ FIXED, AND THAT IS THE POINT OF A FIXED SIZE. These were
+    // `launcher.width` and `launcher.height` until the Launcher page was cut on
+    // 09.09.2026; they are the numbers it shipped with. The size is deliberate
+    // rather than content-driven — a launcher that changes shape while you type
+    // is a moving target, which is why LauncherSurface.qml carries a
+    // `motion-ok` note about exactly these two lines.
+    implicitWidth: 720
+    implicitHeight: 460
 
     property string query: ""
     property string category: "all"

@@ -47,11 +47,6 @@ Singleton {
     // The compositor passes the string to xkb, xkb ignores what it does not know, and the
     // key you rebound simply does not change.
     property var keyboardOptions: []
-    // ⚠️ FULL PATHS, because that is what the setting holds. The label is
-    // shortened for reading; the value has to stay the path or the timer plays
-    // nothing. Sorted so alarm-clock-elapsed — the default — is near the top of
-    // its own theme rather than wherever the filesystem put it.
-    property var soundFiles: []
     // The render nodes this machine has, stable form first. Feeds the one row
     // that can stop the compositor from starting if it is given a path that does not
     // resolve, so offering the real ones is not a convenience here.
@@ -95,12 +90,6 @@ Singleton {
             echo "--options"
             awk '/^! option/{f=1;next} /^!/{f=0} f&&NF{print $1}' \\
                 /usr/share/X11/xkb/rules/base.lst 2>/dev/null | sort -u
-            echo "--sounds"
-            for d in /usr/share/sounds "$HOME/.local/share/sounds"; do
-                [ -d "$d" ] || continue
-                find "$d" -type f \\( -name '*.oga' -o -name '*.ogg' \\
-                     -o -name '*.wav' \\) 2>/dev/null
-            done | sort -u
             echo "--drm"
             for n in /dev/dri/renderD*; do
                 [ -e "$n" ] || continue
@@ -137,7 +126,7 @@ Singleton {
             root._running = false
             var buckets = { "cursors": [], "fonts": [], "mono": [],
                             "layouts": [], "variants": [], "options": [],
-                            "sounds": [], "drm": [] }
+                            "drm": [] }
             var cur = ""
             var lines = String(collected.text || "").split("\n")
             for (var i = 0; i < lines.length; i++) {
@@ -155,7 +144,6 @@ Singleton {
             root.keyboardLayouts = buckets.layouts
             root.keyboardVariants = buckets.variants
             root.keyboardOptions = buckets.options
-            root.soundFiles = buckets.sounds
             // ⚠️ The driver name rides along on the same line, separated by a
             // tab, because "which of these is the NVIDIA" is the only question
             // anybody has when they open this list — and answering it here

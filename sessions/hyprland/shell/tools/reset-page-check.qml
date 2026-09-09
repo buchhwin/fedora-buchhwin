@@ -261,7 +261,13 @@ Item {
             // A key the file never had. Not a failure: it means the page is
             // already at its defaults, and saying "reset" would be a lie about
             // work that did not happen.
-            Backup.resetPaths(["media.preferredPlayer"], "Media")
+            // ⚠️ A KEY THE FIXTURE NEVER SET, and it has to be one the SCHEMA
+            // still declares — the check below is "already at the defaults",
+            // not "there is no such setting". This was `media.preferredPlayer`
+            // until the Media page was cut on 09.09.2026 and the key went with
+            // it, at which point the probe was asking about nothing and the
+            // answer changed from "nothing to do" to "no default declared".
+            Backup.resetPaths(["look.fontIcon"], "Appearance")
             break
 
         case 7:

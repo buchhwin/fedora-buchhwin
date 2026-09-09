@@ -205,8 +205,12 @@ Singleton {
                             "Timer finished", root.clock(root.total) + " is up"]
         announce.running = true
 
-        if (!Config.timer.sound) return
-        chime.command = ["pw-play", Config.timer.soundFile]
+        // ⚠️ ALWAYS, AND ALWAYS THIS FILE. `timer.sound` and `timer.soundFile`
+        // were cut with the Control Center page on 09.09.2026; this is the sound
+        // that was their default. A timer that finishes silently because of a
+        // switch nobody remembers setting is the fault, not the feature.
+        chime.command = ["pw-play",
+                         "/usr/share/sounds/freedesktop/stereo/alarm-clock-elapsed.oga"]
         chime.running = true
     }
 

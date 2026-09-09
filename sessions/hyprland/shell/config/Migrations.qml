@@ -43,7 +43,7 @@ Singleton {
     // joining three fields with it can never collide with their contents.
     readonly property string sep: "\u0000"
 
-   readonly property int current: 16
+   readonly property int current: 17
 
     // step[n] upgrades a config at version n to version n+1.
     // Each is a pure function: take the parsed object, return it changed.
@@ -473,6 +473,39 @@ Singleton {
             delete cfg.dock
             if (cfg.surfaces && typeof cfg.surfaces === "object")
                 delete cfg.surfaces.dock
+            return cfg
+        },
+        // ---------------------------------------------------------- 16 -> 17
+        //
+        // Eight settings pages were cut on 09.09.2026 and three were merged into
+        // one. What went is what nobody changes: the timer's presets and chime,
+        // how many clipboard rows are visible, whether a stick mounts itself,
+        // the launcher's size and which screens it appears on, how the clock
+        // writes the time and the date, which media player the island prefers,
+        // and three animation durations. Their defaults are the behaviour now.
+        //
+        // ⚠️ WHAT SURVIVED THE CUT SURVIVED FOR A REASON, and it is worth
+        // recording which: `motion.reduce` and `look.profile` moved to
+        // Appearance because one is an accessibility switch and the other is the
+        // lever for a slow machine; `nightlight.*` and `brightness.external*`
+        // moved to Displays, and `nightlight.on` could not have been deleted at
+        // all — services/Nightlight.qml WRITES it when the tile is pressed, so
+        // it is runtime state as much as a setting.
+        //
+        // ⚠️ A REMOVAL NEEDS A MIGRATION. JsonAdapter carries an unknown key
+        // forward for ever, so without this every shell.json on the machine
+        // would keep six objects describing pages that no longer exist.
+        function (cfg) {
+            for (var i = 0; i < ["timer", "clipboard", "disks", "launcher",
+                                 "clock", "media"].length; i++)
+                delete cfg[["timer", "clipboard", "disks", "launcher",
+                            "clock", "media"][i]]
+            if (cfg.motion && typeof cfg.motion === "object") {
+                delete cfg.motion.durMove
+                delete cfg.motion.durFade
+                delete cfg.motion.durHover
+                delete cfg.motion.bounce
+            }
             return cfg
         },
     ]

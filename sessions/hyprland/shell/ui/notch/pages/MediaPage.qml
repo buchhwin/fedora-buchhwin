@@ -55,7 +55,7 @@ ClippingRectangle {
     // surface colour; the cover still exists, it simply is not the background.
     readonly property bool hasArt:
         Services.Media.artUrl.length > 0
-        && (Config.media ? Config.media.artworkAsBackground : true)
+        // `media.artworkAsBackground` was cut on 09.09.2026; it shipped on.
 
     Image {
         anchors.fill: parent

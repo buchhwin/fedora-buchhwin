@@ -243,10 +243,13 @@ Scope {
                 ? Config.notch.enabled && root.wants(Config.notch.monitors, modelData)
                 : false
 
-            readonly property bool launcherHere: Config.launcher
-                ? Config.launcher.enabled
-                  && root.wants(Config.launcher.monitors, modelData)
-                : false
+            // ⚠️ ON EVERY SCREEN, AND NO LONGER A QUESTION. The Launcher page
+            // was cut on 09.09.2026 and `launcher.enabled`, `width`, `height`
+            // and `monitors` went with it. It shipped enabled on every monitor,
+            // and a launcher you cannot open is a keybinding that does nothing.
+            // It costs nothing while closed — the surface is behind a
+            // LazyLoader and `openedHere` is what actually opens it.
+            readonly property bool launcherHere: true
 
             // Was this the screen the user opened something on?
             readonly property bool openedHere: root.opensHere(modelData)

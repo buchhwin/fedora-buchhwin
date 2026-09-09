@@ -113,26 +113,6 @@ Singleton {
 
     readonly property var allPrograms: root.programs([])
 
-    // -------------------------------------------------------------- players
-    //
-    // ⚠️ THE RUNNING ONES, and only those. services/Media.qml matches this
-    // setting loosely against a player's own `identity` — "Spotify", "Brave" —
-    // so those are the strings to offer. There is no list of players that could
-    // run; MPRIS only knows about the ones that are on the bus.
-    readonly property var players: {
-        var out = []
-        var seen = ({})
-        var list = Mpris.players ? Mpris.players.values : []
-        for (var i = 0; i < list.length; i++) {
-            var c = list[i]
-            var id = c ? String(c.identity || "") : ""
-            if (!id.length || seen[id])
-                continue
-            seen[id] = true
-            out.push(id)
-        }
-        return out
-    }
 
     // ----------------------------------------------------------- workspaces
     //
@@ -164,66 +144,4 @@ Singleton {
         return out
     }
 
-    // --------------------------------------------------------------- sounds
-    //
-    // The path is the value because the path is what plays; the label is the
-    // file name and its theme, because 55 characters of directory in a pill is
-    // a pill nobody can read.
-    readonly property var sounds: {
-        var out = []
-        var list = Services.Installed.soundFiles
-        for (var i = 0; i < list.length; i++) {
-            var p = String(list[i])
-            var parts = p.split("/")
-            var file = parts[parts.length - 1].replace(/\.(oga|ogg|wav)$/, "")
-            // …/sounds/<theme>/<profile>/<file>
-            var theme = parts.length > 4 ? parts[parts.length - 3] : ""
-            out.push({
-                value: p,
-                label: theme.length > 0 ? file + " · " + theme : file
-            })
-        }
-        return out
-    }
-
-    // --------------------------------------------------------- date formats
-    //
-    // ⚠️ THE LABEL IS TODAY, WRITTEN OUT. A date pattern is a row of letter
-    // codes — "dddd, d MMMM" — and nobody can tell "ddd" from "dddd" by reading
-    // it. The suggestion shows what the clock will actually say, which is the
-    // only question anybody has here, and the VALUE stays the pattern.
-    //
-    // ⚠️ Qt's formatter, not JavaScript's. Quickshell's engine has no `Intl`, so
-    // toLocaleDateString comes back in a format nobody asked for —
-    // common/Clock.qml carries the same note and formats these exact patterns
-    // the same way, which is what makes the preview honest rather than close.
-    //
-    // ⚠️ AND IT IS A FUNCTION, NOT A BINDING. A property computed once would
-    // freeze yesterday's date into the list on a shell that has been running
-    // overnight — a preview that is quietly a day old.
-    function dateFormats(now) {
-        var patterns = [
-            "dddd, d MMMM", "dddd d MMMM yyyy", "d MMMM yyyy", "ddd, d MMM",
-            "d MMM", "dd.MM.yyyy", "dd.MM.", "yyyy-MM-dd", "MMMM d", "d/M/yyyy"
-        ]
-        var out = []
-        for (var i = 0; i < patterns.length; i++)
-            out.push({ value: patterns[i], label: Qt.formatDate(now, patterns[i]) })
-        return out
-    }
-
-    // ------------------------------------------------------------ durations
-    //
-    // Not a fact about the machine — the one list here that is a suggestion in
-    // the ordinary sense. A working day is made of quarter hours and pomodoros,
-    // and the row still takes anything you type.
-    readonly property var durations: [
-        { value: "5",  label: "5 min" },
-        { value: "10", label: "10 min" },
-        { value: "15", label: "15 min" },
-        { value: "25", label: "25 min · pomodoro" },
-        { value: "45", label: "45 min" },
-        { value: "60", label: "1 h" },
-        { value: "90", label: "1½ h" }
-    ]
 }

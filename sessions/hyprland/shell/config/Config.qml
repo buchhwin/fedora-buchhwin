@@ -34,20 +34,14 @@ Singleton {
     readonly property alias cursor: adapter.cursor
     readonly property alias gpu: adapter.gpu
     readonly property alias brightness: adapter.brightness
-    readonly property alias clock: adapter.clock
     readonly property alias motion: adapter.motion
-    readonly property alias media: adapter.media
     readonly property alias lock: adapter.lock
     readonly property alias fetch: adapter.fetch
     readonly property alias drive: adapter.drive
     readonly property alias power: adapter.power
     readonly property alias terminal: adapter.terminal
-    readonly property alias timer: adapter.timer
-    readonly property alias clipboard: adapter.clipboard
-    readonly property alias disks: adapter.disks
     readonly property alias notch: adapter.notch
     readonly property alias bar: adapter.bar
-    readonly property alias launcher: adapter.launcher
     readonly property alias session: adapter.session
 
     // Everything below feeds the generated compositor config.
@@ -651,7 +645,7 @@ Singleton {
             // only the migration chain quietly papering over it. Both now write
             // no version at all: a file without one reads as 0 and is migrated
             // forward, which is exactly the path a genuinely old file takes.
-            property int version: 16
+            property int version: 17
 
             property JsonObject theme: JsonObject {
                 property string palette: "everforest-dark"
@@ -767,46 +761,6 @@ Singleton {
                 // theme is a CSS file in a directory we may write.
             }
 
-            // The work timer's presets, in minutes. A working day is made of
-            // particular lengths rather than round numbers, and anybody whose
-            // are different says so once, here.
-            property JsonObject timer: JsonObject {
-                // ⚠️ STRINGS, AND THAT IS NOT A STYLE CHOICE — it is the only
-                // list type JsonAdapter can actually read. Measured on the
-                // machine, one type at a time, with a config supplying the key:
-                //
-                //   list<string> nested (windows.blurred)   0 warnings
-                //   list<string> top level (autostart)      0 warnings
-                //   list<int>    nested (this)              1 warning
-                //   list<int>    top level                  1 warning
-                //   list<real>   nested                     1 warning
-                //
-                // So it is the TYPE, not the depth: "Failed to deserialize
-                // property presets: expected QList<int> but got QVariantList".
-                // A JSON array of numbers arrives as a QVariantList and the
-                // adapter will not convert it — for a VALID list, not only for
-                // a null one. The consequence was silent and total: whatever
-                // presets anybody wrote in shell.json were ignored and the
-                // defaults won, with one line in the journal to say so.
-                //
-                // ⚠️ tests/config-shape.sh SAID THE OPPOSITE — "list<string> and
-                // list<int> are safe at any depth". That was measured against
-                // CRASHING, which is true: list<int> does not segfault. It just
-                // does not work. The check now covers this too.
-                //
-                // The reader turns them back into numbers; see
-                // ui/notch/pages/TimerPage.qml.
-                property list<string> presets: ["5", "15", "25", "60"]
-                // ⚠️ A timer that ends silently is a timer you miss, which is
-                // the only thing it had to do. Off is still a setting, because
-                // a shared office is a real place.
-                property bool sound: true
-                // The freedesktop sound theme's own name for this, so it
-                // follows whatever theme is installed rather than pointing at
-                // one file that a later package might move.
-                property string soundFile:
-                    "/usr/share/sounds/freedesktop/stereo/alarm-clock-elapsed.oga"
-            }
 
             // Night light, over gammastep — quickshell has no gamma API, and
             // this is one of the five programs the plan names as staying
@@ -934,51 +888,6 @@ Singleton {
                 property bool externalLive: false
             }
 
-            // How the time and the date are written, everywhere they are.
-            //
-            // ⚠️ THE POINT OF THIS BLOCK IS THAT THERE IS ONE OF IT. Before it,
-            // four places built the time by hand with their own copy of a
-            // two-line `p(n)` pad helper — the collapsed island, the widened
-            // island, the bar and the lock screen. Four copies of one format is
-            // how three of them end up right and one does not, and the fourth
-            // is on the screen you look at most. common/Clock.qml is the single
-            // reader, and every one of those four goes through it now.
-            property JsonObject clock: JsonObject {
-                // "24h" or "12h". Anything else is read as 24h rather than
-                // being an error: a clock is not a thing to fail to draw.
-                property string format: "24h"
-
-                // ⚠️ IT COSTS A REDRAW EVERY SECOND, and off is not timidity.
-                // Every SystemClock in the shell asks for MINUTE precision, so
-                // it wakes on the minute boundary and sleeps in between; turning
-                // this on switches all of them to second precision. On a laptop
-                // with the lid shut that is the difference between a clock that
-                // sleeps and one that does not. The row in the settings window
-                // says so rather than leaving it to be discovered.
-                property bool showSeconds: false
-
-                // A Qt format pattern, not a locale enum. Qt's own formatter is
-                // used because quickshell's JS engine has no `Intl`, so anything
-                // through toLocaleDateString comes back in a shape nobody asked
-                // for — and the enums were renamed between Qt 5 and 6 and a
-                // wrong one fails silently to an empty string. The day and month
-                // NAMES still come from the system locale.
-                property string dateFormat: "dddd, d MMMM"
-
-                // ⚠️ A SECOND ONE, AND IT IS NOT A DUPLICATE. The lock screen
-                // has a whole screen; the widened island has a pill. "Freitag,
-                // 7. August" in there would push the shape wider than the
-                // reference every day of the week with a long month name. Two
-                // places, two amounts of room, two settings — each with one
-                // reader, which is the test of whether a second key is honest.
-                property string dateFormatShort: "ddd, d MMM"
-
-                // "monday" or "sunday". ⚠️ It moves the column headings AND the
-                // number of blank cells before the 1st together — they are one
-                // decision, and changing one without the other is the off-by-one
-                // that puts every date on the wrong weekday.
-                property string weekStart: "monday"
-            }
 
             // How quickly the shell moves.
             //
@@ -1012,54 +921,15 @@ Singleton {
                 // Size and position: an island opening, a panel growing, a
                 // window sliding. The slowest of the three because it is the
                 // one the eye follows.
-                property int durMove: 400
                 // Fades and colour changes — a hover tint, a card appearing.
-                property int durFade: 200
                 // The response to the pointer arriving. Deliberately the
                 // shortest: anything above about 200 ms reads as lag rather
                 // than as motion.
-                property int durHover: 150
 
                 // How much a movement overshoots and settles back, as a
                 // percentage. 0 is the plain curve; his picture asks for 79.
-                property int bounce: 79
             }
 
-            // What is playing, and where it is shown.
-            property JsonObject media: JsonObject {
-                // Which player wins when several are on the bus. Empty means the
-                // built-in rule: whatever is actually playing, and otherwise
-                // whatever was chosen last. A name here is matched against the
-                // MPRIS identity, so "Spotify" or "Brave" rather than a bus
-                // address nobody can type.
-                property string preferredPlayer: ""
-
-                // Whether the widened island carries the track at all. Off
-                // leaves the clock and the status pill, which is the right
-                // answer for anyone who does not want a music player in the
-                // corner of their eye.
-                // ⚠️⚠️ OFF NOW, and the key survives because of it. His
-                // instruction was to swap the media card on the left of the
-                // hovered island for the week strip — "kannst du links das      // english-ok: the request, quoted
-                // medien dings mit sowas wie im screenshot austauschen".        // english-ok: the request, quoted
-                // Deleting the card would have left this switch reading nothing,
-                // which is the debt rule 5 is about; turning it around is the
-                // same swap with the way back still in it.
-                // ⚠️ BACK ON, BECAUSE THE REASON FOR TURNING IT OFF IS GONE.
-                // It was switched off when the week strip took the left half of
-                // the hovered notch — two things wanting one slot. He has since
-                // moved the card to the RIGHT ("soll rechts neben de[m]          // english-ok: the request, quoted
-                // medi[en] play sein hinkommen der davor links war"), so the     // english-ok: the request, quoted
-                // collision does not exist and the switch has no reason to
-                // start life pointing away from what he asked for.
-                property bool showInIsland: true
-
-                // The cover art filling the card behind the words, as the
-                // reference draws it. Off puts the cover back in its corner and
-                // leaves the card its own colour — the honest choice on a cover
-                // that is bright enough to fight the text.
-                property bool artworkAsBackground: true
-            }
 
             // The terminal's BEHAVIOUR, not its colours.
             //
@@ -1732,46 +1602,8 @@ Singleton {
                 property list<string> monitors: ["@primary"]
             }
 
-            // The launcher, which is the one surface that opens in the MIDDLE
-            // of the screen rather than at the notch — so the notch stays where
-            // it is while it is open.
-            //
-            // A fixed size, unlike the notch pages: those are as big as their
-            // content because their content is short, and a program list is
-            // not. A launcher that changes shape while you type is a moving
-            // target.
-            property JsonObject launcher: JsonObject {
-                property bool enabled: true
-                property int width: 720
-                property int height: 460
-                property list<string> monitors: []
-            }
 
-            // The clipboard history page. Counts belong here rather than in the
-            // page: a token decides what a row LOOKS like, a setting decides
-            // how many of them you want to see. Anything that is a matter of
-            // taste gets a key — see the plan's second promise, "alles  english-ok: quoted brief
-            // einstellbar, und zwar aus demselben Satz".  // english-ok: his own words, quoted
-            property JsonObject clipboard: JsonObject {
-                // How tall the page opens, in rows. Six fits a laptop screen
-                // without the island covering half of it.
-                property int visibleRows: 6
-            }
 
-            // Removable drives — the stick you just plugged in.
-            property JsonObject disks: JsonObject {
-                // ⚠️ OFF BY DEFAULT, and that is a decision rather than caution.
-                // lib/70-services.sh has said so since udisks2 was installed:
-                // mounting whatever appears is a choice, not a courtesy — a disk
-                // that mounts itself is a disk that can be written to by
-                // anything running, and on a machine you carry around, "what did
-                // that USB stick just do" is a question worth being able to
-                // answer with "nothing, I had not mounted it yet".
-                //
-                // The tile is there either way; this only decides whether it
-                // happens without asking.
-                property bool automount: false
-            }
 
             // ---------------------------------------------------------------
             // Programs the key bindings point at.

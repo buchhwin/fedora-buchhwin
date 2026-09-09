@@ -100,11 +100,14 @@ Singleton {
                     return
                 }
 
-                var appeared = root._newSince(out)
+                // ⚠️ NOTHING IS MOUNTED BY ITSELF, and that is now the rule
+                // rather than the default. `disks.automount` was cut with the
+                // Control Center page on 09.09.2026 and it shipped as false: a
+                // stick that mounts on its own answers "what did that noise
+                // do?" with something the user did not ask for. The tile is
+                // there either way; mounting is a press.
+                root._newSince(out)
                 root._drives = out
-                if (Config.disks.automount)
-                    for (var k = 0; k < appeared.length; k++)
-                        root.mount(appeared[k])
             }
         }
     }

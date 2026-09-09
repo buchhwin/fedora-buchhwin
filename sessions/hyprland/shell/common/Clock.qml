@@ -27,13 +27,13 @@ import "../config"
 Singleton {
     id: root
 
-    // ⚠️ Guarded, like every other reader of a config block. During shell
-    // construction `Config.clock` is briefly NULL — not "still the defaults",
-    // null — and dereferencing it there is the crash this project knows by
-    // heart. Three small guards at the reading end beat one clever one at the
-    // announcing end; see the long note on `settled` in config/Config.qml.
-    readonly property bool twelveHour: Config.clock ? Config.clock.format === "12h" : false
-    readonly property bool seconds: Config.clock ? Config.clock.showSeconds === true : false
+    // ⚠️ FOUR SETTINGS BECAME FOUR FACTS on 09.09.2026, when the Clock & Date
+    // page was cut. These are the values that page shipped: a 24-hour clock
+    // without seconds, the long and short date spellings below, and a week that
+    // starts on Monday. A seconds hand on a bar clock is a repaint a second for
+    // a digit nobody reads, which is why it defaulted off and stays off.
+    readonly property bool twelveHour: false
+    readonly property bool seconds: false
 
     // What every SystemClock in the shell should ask for.
     readonly property int precision: root.seconds ? SystemClock.Seconds : SystemClock.Minutes
@@ -68,12 +68,12 @@ Singleton {
     // renamed between Qt 5 and 6 and a wrong one fails silently to an empty
     // string. The day and month NAMES still come from the system locale.
     function date(d) {
-        return root._formatted(d, Config.clock ? Config.clock.dateFormat : "", "dddd, d MMMM")
+        return root._formatted(d, "", "dddd, d MMMM")
     }
 
     // The short form, for the widened island — a pill rather than a screen.
     function dateShort(d) {
-        return root._formatted(d, Config.clock ? Config.clock.dateFormatShort : "", "ddd, d MMM")
+        return root._formatted(d, "", "ddd, d MMM")
     }
 
     // An empty pattern falls back rather than drawing nothing: a date field
@@ -89,5 +89,5 @@ Singleton {
     // headings AND the blank cells before the 1st together — they are one
     // decision, and changing either alone puts every date on the wrong weekday.
     readonly property bool mondayFirst:
-        Config.clock ? Config.clock.weekStart !== "sunday" : true
+        true
 }

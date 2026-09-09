@@ -45,13 +45,16 @@ PanelWindow {
     exclusionMode: ExclusionMode.Ignore
     color: "transparent"                    // literal-ok: absence of colour
 
-    // motion-ok: the chain ends in CONFIG, not in content. LauncherContent
-    // declares `implicitWidth: Config.launcher.width` and the same for height,
-    // so this surface is a fixed size that happens to be expressed through the
-    // card. Typing filters the list inside a box that does not change — which is
-    // what the check cannot see from the text, and why it is said here.
-    implicitWidth: Math.max(1, card.implicitWidth)    // motion-ok: ends in Config.launcher.width
-    implicitHeight: Math.max(1, card.implicitHeight)  // motion-ok: ends in Config.launcher.height
+    // motion-ok: the chain ends in a CONSTANT, not in content. LauncherContent
+    // declares `implicitWidth: 720` and `implicitHeight: 460`, so this surface
+    // is a fixed size that happens to be expressed through the card. Typing
+    // filters the list inside a box that does not change — which is what the
+    // check cannot see from the text, and why it is said here.
+    //
+    // They were `launcher.width` and `launcher.height` until the Launcher page
+    // was cut on 09.09.2026. Fixed numbers make this note MORE true, not less.
+    implicitWidth: Math.max(1, card.implicitWidth)    // motion-ok: ends in a constant
+    implicitHeight: Math.max(1, card.implicitHeight)  // motion-ok: ends in a constant
 
     mask: Region { item: card }
 

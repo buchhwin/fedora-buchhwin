@@ -34,7 +34,9 @@ Item {
     // line is belongs to the design system, how many you want to see at once is
     // a matter of taste and gets a key of its own.
     readonly property int rowHeight: Theme.fontSize + Theme.space2 * 2
-    readonly property int visibleRows: Math.max(1, Config.clipboard.visibleRows)
+    // Six, which is what `clipboard.visibleRows` shipped as before the Control
+    // Center page was cut on 09.09.2026.
+    readonly property int visibleRows: 6
 
     implicitHeight: field.implicitHeight + Theme.space2 * 2 + Theme.space2
                     + rowHeight * visibleRows

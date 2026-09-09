@@ -1,14 +1,29 @@
-// Effects — blur, shadows, and how much you can see through.
+// Appearance — size, shape, transparency, effects, type and the pointer.
 //
-// Transparency and effects are one page because they are one question: what is
-// drawn between a surface and what is behind it. They were two groups on a page
-// with six others, which is how "the menus have a strange gradient" took a
-// session to track down — the two halves of the answer were never on screen
-// together.
+// ⚠️ THIS IS THREE PAGES IN ONE, and the merge is his decision rather than a
+// tidy-up: Size & Shape, Effects and Type & Pointer became one page, the way
+// the dwl session has a single Appearance area. Nothing was dropped in the
+// move — every row that was on the three pages is below, under the heading it
+// already had.
+//
+// ⚠️ IT IS THE LONGEST PAGE IN THE WINDOW, AND THAT IS THE COST. The note at
+// the top of SettingsContent.qml says nothing should be longer than seventeen
+// rows, because two pages holding two thirds of every setting is what
+// "unübersichtlich und echt schlecht" was about. This page has thirty-one. The  // english-ok: the brief, quoted
+// five SettingGroups below are what keeps it navigable — the fault back then
+// was an unstructured column, not a long one.
+//
+// ⚠️ TWO ROWS ARRIVED FROM THE DELETED MOTION PAGE, and they are here rather
+// than gone because each answers a question the rest of this page cannot.
+// `look.profile` is the one lever for a machine that would rather have the
+// frames — docs/CONFIG.md calls it the first thing to reach for on a slow
+// machine — and `motion.reduce` is an accessibility switch. The three duration
+// keys and the bounce went with the page; those were tuning.
 import QtQuick
 import QtQuick.Layouts
 import ".."
 import "../../../config"
+import "../../../services" as Services
 import "../../../theme"
 
 ColumnLayout {
@@ -18,11 +33,73 @@ ColumnLayout {
 
     SettingGroup {
         Layout.fillWidth: true
+        title: "Size and shape"
+
+        // ⚠️ THE SCREEN SCALE USED TO BE HERE AND HAS MOVED TO Displays. It is
+        // per monitor, and so are the resolution and the refresh rate it belongs
+        // beside; here it was the only control on the page that was not a
+        // SettingRow, sitting above four that were. `look.uiScale` below stays,
+        // because it is one number for our own surfaces and genuinely is a
+        // matter of size and shape.
+        SettingRow {
+            Layout.fillWidth: true
+            key: "look.uiScale"
+            label: "Interface scale"
+            hint: "Multiplies our own grid and type together, on top of the screen scale above. The fine adjustment, not the 4K lever."
+            kind: "slider"
+            from: 0.75; to: 2.0; step: 0.05; decimals: 2; unit: "×"
+        }
+        SettingRow {
+            Layout.fillWidth: true
+            key: "look.rounding"
+            label: "Corner radius"
+            hint: "Every other radius in the shell is a proportion of this one."
+            kind: "slider"
+            from: 0; to: 32; step: 1; unit: "px"
+        }
+        SettingRow {
+            Layout.fillWidth: true
+            key: "look.borderWidth"
+            advanced: true
+            label: "Window border"
+            kind: "slider"
+            from: 0; to: 8; step: 1; unit: "px"
+        }
+        SettingRow {
+            Layout.fillWidth: true
+            key: "look.panelBorderWidth"
+            advanced: true
+            label: "Panel edge"
+            hint: "The optional rim on our own surfaces."
+            kind: "slider"
+            from: 0; to: 8; step: 1; unit: "px"
+        }
+        SettingRow {
+            Layout.fillWidth: true
+            key: "look.gapsIn"
+            advanced: true
+            label: "Gap between windows"
+            kind: "slider"
+            from: 0; to: 48; step: 1; unit: "px"
+        }
+        SettingRow {
+            Layout.fillWidth: true
+            key: "look.gapsOut"
+            advanced: true
+            label: "Gap at the screen edge"
+            kind: "slider"
+            from: 0; to: 64; step: 1; unit: "px"
+        }
+    }
+
+    SettingGroup {
+        Layout.fillWidth: true
         title: "Transparency"
 
         SettingRow {
             Layout.fillWidth: true
             key: "look.opacityActive"
+            advanced: true
             label: "Focused window"
             // Why it is this way: That is why the default is 0.95 and not
             // lower.
@@ -88,6 +165,7 @@ ColumnLayout {
         SettingRow {
             Layout.fillWidth: true
             key: "look.opacityTerminal"
+            advanced: true
             label: "Terminal"
             hint: "The terminal's own background opacity, which leaves the text sharp — not the compositor's."
             kind: "slider"
@@ -102,6 +180,7 @@ ColumnLayout {
         SettingRow {
             Layout.fillWidth: true
             key: "look.blur"
+            advanced: true
             label: "Blur"
         }
         SettingRow {
@@ -145,12 +224,14 @@ ColumnLayout {
         SettingRow {
             Layout.fillWidth: true
             key: "look.glass"
+            advanced: true
             label: "Glass sheen"
             hint: "The light lying over the top of a pane."
         }
         SettingRow {
             Layout.fillWidth: true
             key: "look.shadows"
+            advanced: true
             label: "Shadows"
         }
         SettingRow {
@@ -194,5 +275,100 @@ ColumnLayout {
         // an opaque window; Hyprland always does, and its decoration.shadow
         // block has no key for it. A switch that writes into shell.json and
         // reaches nothing is worse than no switch.
+    }
+
+    SettingGroup {
+        Layout.fillWidth: true
+        title: "Type"
+
+        SettingRow {
+            Layout.fillWidth: true
+            key: "look.fontUi"
+            label: "Interface font"
+            kind: "pick"
+            options: Services.Installed.fonts
+            placeholder: "Inter"
+        }
+        SettingRow {
+            Layout.fillWidth: true
+            key: "look.fontMono"
+            advanced: true
+            label: "Monospace font"
+            hint: "Only the fixed-width families, asked of fontconfig rather than kept in a list here."
+            kind: "pick"
+            options: Services.Installed.monoFonts
+            placeholder: "JetBrainsMono Nerd Font"
+        }
+        SettingRow {
+            Layout.fillWidth: true
+            key: "look.fontIcon"
+            advanced: true
+            label: "Icon font"
+            hint: "\"Material Icons Round\", not the Symbols name — the wrong one renders every icon as a box."
+            kind: "pick"
+            options: Services.Installed.fonts
+            placeholder: "Material Icons Round"
+        }
+        SettingRow {
+            Layout.fillWidth: true
+            key: "look.fontSize"
+            advanced: true
+            label: "Font size"
+            kind: "slider"
+            from: 7; to: 18; step: 1; unit: "pt"
+        }
+    }
+
+    SettingGroup {
+        Layout.fillWidth: true
+        title: "Pointer"
+
+        SettingRow {
+            Layout.fillWidth: true
+            key: "cursor.theme"
+            advanced: true
+            label: "Cursor theme"
+            hint: "The themes on this machine — a directory under /usr/share/icons or ~/.icons that actually contains cursors."
+            kind: "pick"
+            options: Services.Installed.cursorThemes
+            placeholder: "Adwaita"
+        }
+        SettingRow {
+            Layout.fillWidth: true
+            key: "cursor.size"
+            advanced: true
+            label: "Cursor size"
+            kind: "slider"
+            from: 12; to: 64; step: 1; unit: "px"
+        }
+    }
+
+    SettingGroup {
+        Layout.fillWidth: true
+        title: "Motion"
+
+        SettingRow {
+            Layout.fillWidth: true
+            key: "look.profile"
+            label: "Effects and motion"
+            // Why it is this way: one setting for a machine that would rather
+            // have the frames.
+            hint: "Minimal switches off every animation, the blur, the shadows and the glass sheen together."
+            kind: "choice"
+            choices: [
+                { value: "full",    label: "Full" },
+                { value: "minimal", label: "Minimal" }
+            ]
+        }
+        SettingRow {
+            Layout.fillWidth: true
+            key: "motion.reduce"
+            label: "Reduce motion"
+            // Why it is separate from Minimal: Minimal is a machine decision —
+            // it also switches off blur, shadows and the glass sheen. This one
+            // keeps the desktop looking exactly as it does and only stops it
+            // moving.
+            hint: "Everything appears where it belongs, without travelling there."
+        }
     }
 }

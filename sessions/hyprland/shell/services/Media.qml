@@ -85,7 +85,12 @@ Singleton {
         // from the music to an advert and back. Matched loosely against the
         // player's own identity, because that is the string a person can
         // actually type: "Spotify", "Brave".
-        var want = Config.media ? String(Config.media.preferredPlayer).trim().toLowerCase() : ""
+        // ⚠️ NO PREFERRED PLAYER ANY MORE. `media.preferredPlayer` was cut with
+        // the Media page on 09.09.2026 and it shipped empty, which means "the
+        // one that is playing". The matching below is kept whole rather than
+        // deleted: an empty want falls through to exactly that answer, and the
+        // day a preference comes back it is one line.
+        var want = ""
         if (want.length > 0) {
             for (var w = 0; w < list.length; w++) {
                 var c = list[w]

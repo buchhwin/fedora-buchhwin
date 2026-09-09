@@ -436,4 +436,55 @@ ColumnLayout {
             wrapMode: Text.WordWrap
         }
     }
+
+    // ⚠️ FOUR ROWS ARRIVED FROM THE DELETED CONTROL CENTER PAGE, and this is
+    // where they belonged all along: night light is the colour temperature of
+    // these screens, and the two brightness rows are about the ones that are
+    // driven over DDC rather than by a backlight. They were on a page called
+    // Control Center because that page was where anything to do with the quick
+    // panel went, which is a fact about the old menu rather than about them.
+    //
+    // ⚠️ `nightlight.on` IS RUNTIME STATE AS WELL AS A SETTING — services/
+    // Nightlight.qml writes it when the tile is pressed — so it is not a key
+    // that could simply have been deleted with the page. A key with a writer
+    // and no row is a control that changes something nothing admits to.
+    SettingGroup {
+        Layout.fillWidth: true
+        title: "Colour and brightness"
+
+        SettingRow {
+            Layout.fillWidth: true
+            key: "nightlight.on"
+            label: "Night light"
+        }
+        SettingRow {
+            Layout.fillWidth: true
+            key: "nightlight.temperature"
+            advanced: true
+            label: "Colour temperature"
+            hint: "Lower is warmer. 6500 K is daylight; below about 3000 K everything goes orange."
+            kind: "slider"
+            from: 1000; to: 6500; step: 100; unit: "K"
+            usable: Config.nightlight.on
+        }
+        SettingRow {
+            Layout.fillWidth: true
+            key: "brightness.external"
+            label: "External monitors over DDC/CI"
+            // Why it is this way: The package brings its own udev rule with
+            // TAG+=uaccess, so this needs no group and no permission change.
+            hint: "Talks to the monitor over the graphics cable."
+        }
+        SettingRow {
+            Layout.fillWidth: true
+            key: "brightness.externalLive"
+            advanced: true
+            label: "Follow the slider live"
+            // Why it is this way: DDC/CI is slow, and a value per frame queues
+            // up behind itself — this has never been measured on a real
+            // monitor, so off is the honest default.
+            hint: "Off sends one value when you let go."
+            usable: Config.brightness.external
+        }
+    }
 }

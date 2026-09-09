@@ -647,15 +647,10 @@ Singleton {
         }
         function colours(): void { root.showSettingsPage("colours") }
         function wallpaper(): void { root.showSettingsPage("wallpaper") }
-        function shape(): void { root.showSettingsPage("shape") }
-        function effects(): void { root.showSettingsPage("effects") }
-        function type(): void { root.showSettingsPage("type") }
+        function appearance(): void { root.showSettingsPage("appearance") }
         function theming(): void { root.showSettingsPage("theming") }
         function bar(): void { root.showSettingsPage("bar") }
-        function control(): void { root.showSettingsPage("control") }
-        function launcher(): void { root.showSettingsPage("launcher") }
         function notify(): void { root.showSettingsPage("notify") }
-        function clock(): void { root.showSettingsPage("clock") }
         // ⚠️ B70 · A NEW PAGE NEEDS A VERB IN THE SAME COMMIT. The verbs here are
         // a hand-written list, not generated from the pages, and the System page
         // shipped without one — `ipc call settings system` answered "Function
@@ -663,9 +658,7 @@ Singleton {
         // Noticed then by trying it, not by reading; tests/ipc-names.sh is why
         // it cannot be noticed that way twice.
         function sound(): void { root.showSettingsPage("sound") }
-        function media(): void { root.showSettingsPage("media") }
         function lock(): void { root.showSettingsPage("lock") }
-        function motion(): void { root.showSettingsPage("motion") }
         function keyboard(): void { root.showSettingsPage("keyboard") }
         function keys(): void { root.showSettingsPage("keys") }
         function pointing(): void { root.showSettingsPage("pointing") }

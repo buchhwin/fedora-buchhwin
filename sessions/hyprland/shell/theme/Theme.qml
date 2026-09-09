@@ -356,12 +356,19 @@ Singleton {
 
     readonly property bool reduceMotion: Config.motion ? Config.motion.reduce === true : false
 
-    readonly property int durSlow: (animate && !reduceMotion)
-                                   ? _ms(Config.motion ? Config.motion.durMove : 400, 400) : 0
-    readonly property int durBase: (animate && !reduceMotion)
-                                   ? _ms(Config.motion ? Config.motion.durFade : 200, 200) : 0
-    readonly property int durFast: (animate && !reduceMotion)
-                                   ? _ms(Config.motion ? Config.motion.durHover : 150, 150) : 0
+    // ⚠️ THREE NUMBERS, NOT THREE SETTINGS ANY MORE. The Motion page was cut on
+    // 09.09.2026 and `motion.durMove`, `durFade` and `durHover` went with it, so
+    // these are the values they defaulted to. `motion.reduce` above and
+    // `look.profile` are what remained settable, because those two answer a
+    // question — "do not move things" and "this machine would rather have the
+    // frames" — where a duration in milliseconds is a preference nobody has.
+    //
+    // They stay named rather than being written into each animation: the
+    // compositor's own `slowdown` is derived from durSlow below, and one tempo
+    // in two places is what rule 6 forbids.
+    readonly property int durSlow: (animate && !reduceMotion) ? 400 : 0
+    readonly property int durBase: (animate && !reduceMotion) ? 200 : 0
+    readonly property int durFast: (animate && !reduceMotion) ? 150 : 0
 
     // ⚠️ KEPT, because tools/hypr.qml writes the compositor's `slowdown` from it and the
     // compositor has one number, not three. Derived from the movement duration
@@ -408,8 +415,11 @@ Singleton {
     // OutCubic rather than to OutBack with overshoot 0 — the two are not the
     // same shape, and "no bounce" should be the curve the rest of the shell
     // uses, not a special case of the bouncy one.
-    readonly property int bouncePercent:
-        Config.motion ? Math.max(0, Math.min(100, Number(Config.motion.bounce) || 0)) : 0
+    // 79, which is what `motion.bounce` shipped as before the Motion page was
+    // cut. Kept as a named percentage rather than folded into `easingMove`
+    // because the note above is about what the number MEANS, and a bare 79 in an
+    // easing expression would carry none of it.
+    readonly property int bouncePercent: 79
     readonly property int easingMove:
         bouncePercent > 0 ? Easing.OutBack : easing
     // 100 % maps to Qt's own default overshoot (1.70158), which is the value

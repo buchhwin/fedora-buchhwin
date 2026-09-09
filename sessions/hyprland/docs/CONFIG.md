@@ -24,7 +24,7 @@ groups were settable and undocumented.
 | `surfaces` | `notifications`, `osd`, `wallpaper` — each on its own |
 | `notifications` | `dnd` (silences toasts, never critical ones — the quick panel tile counts what it took), `corner` (`topRight`/`topLeft`/`bottomRight`/`bottomLeft`), `timeoutMs`, `maxVisible`, `monitors` |
 | `nightlight` | `on` and `temperature` in kelvin — 6500 is neutral, lower is warmer |
-| `timer` | `presets` in minutes, `sound`, `soundFile` — the work timer on Mod+Shift+Z (Mod+Shift+T opens the themes) |
+| `motion` | `reduce` — the one thing left of the Motion page. Everything appears where it belongs without travelling there; the three durations and the bounce are fixed numbers in `theme/Theme.qml` now |
 | `quick` | `showMore` — the quick panel keeps four tiles out and folds the other six away. Off by default: all ten on one surface was reported as cluttered and too much. The fold lives in the panel itself; the settings row is the same switch reached the long way round |
 | `bar` / `notch` / `launcher` | geometry, and a monitor list (empty = all) |
 | `programs` | argument **lists**: `terminal`, `browser`, `fileManager`, `editor`, `imageViewer`, `video` |
@@ -41,16 +41,11 @@ groups were settable and undocumented.
 | `cursor` | `theme` and `size`. ⚠️ TWO writers need it: the compositor draws the pointer over the desktop, GTK programs read `org.gnome.desktop.interface` and ignore the compositor. Setting one leaves the other wrong, which shows as a pointer that changes shape at a window edge |
 | `gpu` | `renderDevice` — which GPU the compositor draws with. Empty means the compositor chooses, which is right everywhere except a hybrid laptop with a monitor on the second card. ⚠️ `Hyprland --verify-config` accepts a device that does not exist; see docs/HYPRLAND.md for the way back out |
 | `brightness` | `external` (talk to monitors over DDC/CI at all), `externalLive` (send while dragging, or once on release), `step` |
-| `clock` | `format`, `seconds`, `dateFormat`, `weekStart`, `precision` — read by `shell/common/Clock.qml`, which is the single formatter four places used to each have their own copy of |
-| `motion` | `speed`, one multiplier over `Theme.durFast/durBase/durSlow` so the RATIO between them survives. It reaches the compositor's own window animations too |
-| `media` | `preferred` player, and where the track is shown |
 | `lock` | what the lock screen shows: date, avatar, wallpaper |
 | `drive` | Google Drive through rclone: `remote` (the name of the rclone remote, default `gdrive`) and `mountPoint`. The mount is a user unit, `buchhwin-drive.service`, and the switch reads `systemctl --user is-active` rather than remembering its own position. `bhctl drive setup` opens the browser sign-in |
 | `fetch` | the terminal greeting: `onNewTerminal`. ⚠️ It held four keys until the spinning logo was removed — `spin`, `fps` and `stopAfter` went with the player they configured. fastfetch draws its own builtin logo now |
 | `power` | when the screen goes off, locks and suspends — battery and mains kept apart — plus the lid action, the tuned-ppd profile, and the two battery warning thresholds |
 | `terminal` | the terminal's own cursor: `cursorShape`, `cursorBlinkInterval`, `cursorTrail`, `scrollbackLines`. ⚠️ Not the same thing as `programs.terminal`, which is WHICH terminal |
-| `clipboard` | history length and what is never kept |
-| `disks` | `automount` — whether a removable drive is mounted the moment it appears. **Off by default**, and that is a decision: a disk that mounts itself is a disk anything running can write to, and on a machine you carry around "what did that stick just do" is worth being able to answer with "nothing yet" |
 
 ## One state per program
 
@@ -153,10 +148,6 @@ now because the *surface* goes, so the keys have nothing left to read them.
 
 ## The launcher
 
-```json
-"launcher": { "enabled": true, "width": 720, "height": 460, "monitors": [] }
-```
-
 `Super+D` or `Super+Space`. Type to search, arrow keys to move, Enter to start,
 Escape to close; Tab steps through the categories without leaving the keyboard.
 
@@ -165,9 +156,15 @@ one that leaves the notch where it is — everything else opens at the notch, an
 the notch steps aside for it. That is why it is not a notch page and has its own
 ipc target: `qs -c buchhwin ipc call launcher toggle`.
 
-A fixed size, unlike the notch pages: those are as big as their content because
-their content is short, and a program list is not. A launcher that changes shape
-while you type is a moving target.
+A fixed 720×460, unlike the notch pages: those are as big as their content
+because their content is short, and a program list is not. A launcher that
+changes shape while you type is a moving target.
+
+⚠️ **It has no settings any more.** `launcher.enabled`, `width`, `height` and
+`monitors` were cut with the Launcher page on 09.09.2026; the size above and
+"on every screen" are the values they shipped with. A launcher you can switch
+off is a keybinding that does nothing, and it costs nothing while closed — the
+surface sits behind a LazyLoader.
 
 **Where the list comes from.** Quickshell's `DesktopEntries` — the same
 freedesktop database every desktop reads, so a newly installed program appears
@@ -218,6 +215,33 @@ Wallpapers are **not** in this repository — they are photographs and this
 repository is public. `install.sh --wallpapers <dir>` copies them to
 `~/Bilder/Wallpaper`; without it the installer falls back to
 `/usr/share/backgrounds`, and with no images anywhere it seeds Everforest Dark.
+
+## Eight pages were cut, and what that did to the schema
+
+On 09.09.2026 the settings window went from twenty-five pages to seventeen: the
+dock, Motion, Control Center, Launcher, Clock & Date and Media were removed, and
+Size & Shape, Effects and Type & Pointer became one page called Appearance.
+
+⚠️ **Removing a page means removing its keys, and that is not a style rule.**
+`tests/setting-rows.sh` requires exactly one row per setting in both directions:
+a key with no row is a setting reachable only by editing JSON, with nothing
+recording that fact. So the `timer`, `clipboard`, `disks`, `launcher`, `clock`
+and `media` blocks are gone, along with `motion.durMove`, `durFade`, `durHover`
+and `bounce`. Their defaults are simply the behaviour now, and migration
+16 → 17 deletes them out of a config that still carries them.
+
+⚠️ **Six keys did NOT go with their pages**, each for a reason worth naming:
+
+| key | where it went | why |
+|---|---|---|
+| `look.profile` | Appearance | the one lever for a machine that would rather have the frames |
+| `motion.reduce` | Appearance | an accessibility switch, not a tuning knob |
+| `nightlight.on` | Displays | **written at runtime** by the quick-panel tile — it is state as much as a setting |
+| `nightlight.temperature` | Displays | it belongs beside the screens it warms |
+| `brightness.external` | Displays | about screens driven over DDC rather than by a backlight |
+| `brightness.externalLive` | Displays | the same |
+| `surfaces.osd` | Bar & Island | the readouts are one of our own surfaces |
+| `quick.showMore` | Bar & Island | how much the quick panel shows before you ask |
 
 ## Defaults worth knowing
 
