@@ -521,7 +521,62 @@ ColumnLayout {
     Component { id: micList; SoundList { inputsOnly: true } }
     Component { id: diskList; DiskList {} }
 
+    // ⚠️ THE SLIDERS ARE UNDER HEADINGS NOW, from his screenshot: a small
+    // word on the left and an arrow on the right that goes to the full page.
+    // The arrow is the whole reason the heading earns its line — a quick panel
+    // that cannot hand off is one you end up leaving through the launcher.
+    //
+    // ⚠️ ONE COMPONENT FOR BOTH HEADINGS, because there are two of them and
+    // there will be a third. A second copy would be the place the arrow stops
+    // matching, which is rule 6 in its smallest form.
+    component SectionHead: RowLayout {
+        id: sect
+        property string title: ""
+        property string page: ""
+
+        Layout.fillWidth: true
+        Layout.topMargin: Theme.space2
+        spacing: Theme.space2
+
+        BarText {
+            Layout.fillWidth: true
+            text: sect.title
+            font.pixelSize: Theme.fontSizeSm
+            color: Theme.fgMuted
+        }
+
+        Icon {
+            text: "arrow_forward"
+            size: Theme.fontSizeSm
+            color: arrowHover.hovered ? Theme.accent : Theme.fgDim
+            HoverHandler { id: arrowHover; cursorShape: Qt.PointingHandCursor }
+            // ⚠️ AN EXCLUSIVE GRAB, tests/nested-taps.sh's rule: this sits inside
+            // the panel, which answers presses of its own, and without it the
+            // arrow would open the page AND whatever is underneath.
+            TapHandler {
+                gesturePolicy: TapHandler.WithinBounds
+                onTapped: {
+                    Ipc.collapse()
+                    Ipc.showSettingsPage(sect.page)
+                }
+            }
+        }
+    }
+
+    SectionHead {
+        visible: Services.Brightness.available
+                 || Services.Brightness.externalAvailable
+        title: "Display"
+        page: "displays"
+    }
+
     // ----------------------------------------------------------- the levels
+    SectionHead {
+        visible: Services.Audio.available
+        title: "Sound"
+        page: "sound"
+    }
+
     RowLayout {
         Layout.fillWidth: true
         visible: Services.Audio.available
@@ -637,5 +692,61 @@ ColumnLayout {
         text: "No screen brightness to set here — this display has no backlight"
         color: Theme.fgMuted
         font.pixelSize: Theme.fontSizeSm
+    }
+
+    // ------------------------------------------------------------- the foot
+    //
+    // From his screenshot: a hairline, what the notifications are doing, and one
+    // way into the full settings.
+    //
+    // ⚠️ IT SAYS THE STATE, NOT JUST THE COUNT. "Do not disturb" and "nothing
+    // waiting" look identical as an empty line, and the first is a thing
+    // somebody switched on and can forget about — which is precisely how a
+    // missed message becomes a bug report about notifications not working.
+    Rectangle {
+        Layout.fillWidth: true
+        Layout.topMargin: Theme.space2
+        implicitHeight: 1                 // literal-ok: a hairline is one pixel
+        color: Theme.outline
+        opacity: Theme.dimmed
+    }
+
+    RowLayout {
+        Layout.fillWidth: true
+        spacing: Theme.space2
+
+        BarText {
+            Layout.fillWidth: true
+            text: "Notifications"
+            font.pixelSize: Theme.fontSizeSm
+            color: Theme.fgMuted
+        }
+
+        BarText {
+            text: (Config.notifications && Config.notifications.dnd)
+                  ? "Do not disturb"
+                  : Services.Notifications.count > 0
+                    ? Services.Notifications.count + " waiting"
+                    : "No notifications"
+            font.pixelSize: Theme.fontSizeSm
+            color: (Config.notifications && Config.notifications.dnd)
+                   ? Theme.accent : Theme.fgDim
+        }
+    }
+
+    BarText {
+        Layout.fillWidth: true
+        horizontalAlignment: Text.AlignHCenter
+        text: "Edit in Settings"
+        font.pixelSize: Theme.fontSizeSm
+        color: editHover.hovered ? Theme.accent : Theme.fgDim
+        HoverHandler { id: editHover; cursorShape: Qt.PointingHandCursor }
+        TapHandler {
+            gesturePolicy: TapHandler.WithinBounds
+            onTapped: {
+                Ipc.collapse()
+                Ipc.showSettingsPage("bar")
+            }
+        }
     }
 }
