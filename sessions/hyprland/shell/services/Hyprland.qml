@@ -31,10 +31,101 @@ Singleton {
         return null
     }
 
+    // ⚠️ THE SEAM tests/displays.sh HANDS ITS FIXTURE THROUGH, and it belongs on
+    // this side rather than in the check. Under QT_QPA_PLATFORM=offscreen there
+    // is no compositor to ask and no Wayland output to find, so the displays
+    // page gets built against zero screens: every card hangs off a Repeater over
+    // this map, none of it is instantiated, and tests/pages.sh reports green
+    // over code that has never run once.
+    //
+    // `BUCHHWIN_OUTPUTS_FAKE` carries the monitor map as JSON in exactly the
+    // shape the parser below emits. Read HERE because that shape is this file's
+    // business: a fixture assembled inside the tool could drift away from what
+    // this file produces and nothing would catch it. Same seam Gpu.qml has as
+    // `BUCHHWIN_GPU_FAKE`.
+    //
+    // ⚠️ AND IT SWITCHES THE REAL QUERY OFF ENTIRELY. A fake that races a live
+    // poll is worse than no fake: the fixture lands, the timer fires a second
+    // later, hyprctl answers nothing, and which of the two the page saw comes
+    // down to timing. With the variable set, hyprctl is never asked.
+    readonly property string outputsFake: Quickshell.env("BUCHHWIN_OUTPUTS_FAKE") || ""
+
     function refresh() {
+        if (root.outputsFake.length) { root.loadFakeOutputs(); return }
         if (!query.running) query.running = true
     }
     function refreshOutputs() { refresh() }
+
+    function loadFakeOutputs() {
+        if (root.outputsKnown)
+            return
+        try {
+            root.outputs = JSON.parse(root.outputsFake)
+        } catch (e) {
+            // Loud, and only once: outputsKnown stays false, so a caller can
+            // still tell "no monitors" from "never answered".
+            console.warn("BUCHHWIN_OUTPUTS_FAKE is not valid JSON:", String(e))
+            return
+        }
+        root.outputsKnown = true
+        root.available = true
+    }
+
+    // ⚠️ EVERY MODE THE MONITOR REPORTS, not just the one it is running.
+    //
+    // `hyprctl -j monitors` gives `availableModes` as strings — "3840x2160@
+    // 59.99700Hz" — and this file used to synthesise a one-entry list out of the
+    // CURRENT width, height and refreshRate instead. ui/settings/pages/
+    // DisplaysPage.qml builds its resolution and refresh-rate menus out of this
+    // list, so on real hardware both offered exactly one choice: the mode
+    // already in use. The page looked finished and could not change anything.
+    //
+    // ⚠️ A pure function so it can be checked headless, the same reason
+    // common/WorkspaceGeometry.qml is one. Returns { modes, current }, where
+    // `current` is an INDEX into `modes` — that is what the page reads.
+    //
+    // ⚠️ NOTHING IS MARKED PREFERRED, and that is deliberate. Hyprland does not
+    // report which mode the display prefers; the previous code set the flag on
+    // the only entry it made, which put "(preferred)" beside whatever happened
+    // to be on. A label that is guessed is worse than a label that is absent.
+    function modesFrom(m) {
+        var w = Number(m.width || 0), h = Number(m.height || 0)
+        var hz = Math.round(Number(m.refreshRate || 0) * 1000)
+        var modes = []
+        var raw = m.availableModes || []
+        for (var i = 0; i < raw.length; i++) {
+            var f = /^(\d+)x(\d+)@([0-9.]+)Hz$/.exec(String(raw[i]))
+            if (!f)
+                continue
+            modes.push({ width: Number(f[1]), height: Number(f[2]),
+                         refresh_rate: Math.round(Number(f[3]) * 1000),
+                         is_preferred: false })
+        }
+
+        // ⚠️ WITHIN A HERTZ, because the two numbers come from different places:
+        // `refreshRate` is a float and the mode string is text, and 59.99700Hz
+        // against 59.997 has already rounded apart by one milli-hertz on real
+        // hardware. A stricter match would leave `current` at -1 on exactly the
+        // screens that have several modes at one resolution.
+        var current = -1
+        for (i = 0; i < modes.length; i++)
+            if (modes[i].width === w && modes[i].height === h
+                && Math.abs(modes[i].refresh_rate - hz) <= 1) {
+                current = i
+                break
+            }
+
+        // ⚠️ A LIST THAT LEAVES OUT THE MODE IN USE IS NOT A LIST. If the strings
+        // could not be parsed, or the running mode is somehow not among them,
+        // the measured one goes in front rather than the page offering a set of
+        // choices that excludes what is on the screen right now.
+        if (current < 0) {
+            modes.unshift({ width: w, height: h, refresh_rate: hz,
+                            is_preferred: false })
+            current = 0
+        }
+        return { modes: modes, current: current }
+    }
 
     function run(args) {
         action.command = ["hyprctl", "dispatch"].concat(args)
@@ -80,14 +171,13 @@ Singleton {
 
             for (var i = 0; i < rawMonitors.length; i++) {
                 var m = rawMonitors[i]
-                var refresh = Math.round(Number(m.refreshRate || 0) * 1000)
+                var modes = root.modesFrom(m)
                 outs[String(m.name)] = {
                     name: String(m.name), make: String(m.make || ""),
                     model: String(m.model || ""), serial: String(m.serial || ""),
                     physical_size: [Number(m.physicalWidth || 0), Number(m.physicalHeight || 0)],
-                    modes: [{ width: Number(m.width || 0), height: Number(m.height || 0),
-                              refresh_rate: refresh, is_preferred: true }],
-                    current_mode: 0, vrr_supported: Number(m.vrr || 0) > 0,
+                    modes: modes.modes,
+                    current_mode: modes.current, vrr_supported: Number(m.vrr || 0) > 0,
                     vrr_enabled: Number(m.vrr || 0) > 0,
                     logical: { x: Number(m.x || 0), y: Number(m.y || 0),
                                width: Number(m.width || 0) / Number(m.scale || 1),

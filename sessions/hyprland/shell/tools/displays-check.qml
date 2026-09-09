@@ -199,6 +199,60 @@ Scope {
             }
         }
 
+        // ------------------------------------------- the mode list, at its source
+        //
+        // ⚠️⚠️ EVERYTHING ABOVE THIS POINT RUNS ON THE FIXTURE, and the fixture is
+        // already in the shape services/Hyprland.qml emits. So none of it can
+        // see whether that file BUILDS the shape correctly out of what hyprctl
+        // actually says — and for a while it did not: it synthesised ONE mode
+        // from the current width, height and rate, so both dropdowns above
+        // offered exactly one choice on real hardware. Every check above stayed
+        // green throughout.
+        //
+        // `modesFrom` is a pure function over one raw monitor object, so the
+        // other half is checkable here. The raw shape below is what
+        // `hyprctl -j monitors` returns, field for field.
+        var rawDp = {
+            name: "DP-1", width: 3840, height: 2160, refreshRate: 59.94,
+            availableModes: [
+                "3840x2160@60.00000Hz", "3840x2160@59.94000Hz",
+                "3840x2160@50.00000Hz", "2560x1440@59.95100Hz",
+                "1920x1080@60.00000Hz", "1280x720@60.00000Hz"
+            ]
+        }
+        var got = Services.Hyprland.modesFrom(rawDp)
+        root.ok("every mode the monitor reports survives (got "
+                + got.modes.length + " of 6)", got.modes.length === 6)
+        root.ok("three 4K entries, told apart by their rate",
+                got.modes[0].refresh_rate === 60000
+                && got.modes[1].refresh_rate === 59940
+                && got.modes[2].refresh_rate === 50000)
+        root.ok("the running mode is found among them, by index",
+                got.current === 1)
+
+        // ⚠️ 74.994 AGAIN, and here for a different reason than above: the rate
+        // has to survive the round trip through the mode STRING, where the
+        // trailing zeros of "74.99400Hz" are exactly what a hand-rolled parser
+        // drops.
+        var edp = Services.Hyprland.modesFrom(
+            { name: "eDP-1", width: 1280, height: 800, refreshRate: 74.994,
+              availableModes: ["1280x800@74.99400Hz"] })
+        root.ok("74.994 survives the mode string, not rounded to 75",
+                edp.modes.length === 1 && edp.modes[0].refresh_rate === 74994
+                && edp.current === 0)
+
+        // ⚠️ AND THE LIST MAY NEVER LACK THE MODE IN USE. A monitor reporting no
+        // `availableModes` at all — or nothing this parser understands — must
+        // still offer what is on the screen right now, or the page presents a
+        // set of choices that excludes reality.
+        var bare = Services.Hyprland.modesFrom(
+            { name: "X", width: 1920, height: 1080, refreshRate: 60,
+              availableModes: ["not a mode at all"] })
+        root.ok("an unreadable mode list still yields the running mode",
+                bare.modes.length === 1 && bare.current === 0
+                && bare.modes[0].width === 1920
+                && bare.modes[0].refresh_rate === 60000)
+
         page.destroy()
         root.finish()
     }
