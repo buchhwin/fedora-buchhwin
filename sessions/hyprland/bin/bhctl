@@ -15,6 +15,7 @@ Usage: bhctl <command>
   doctor                         check the KDE/Hyprland session
   reload                         reload Hyprland
   theme <palette> [accent]       select and render a shell theme
+  update                         pull the repository and run the installer
   power apply                    apply the saved lid behaviour to logind
   shell restart|status|logs      manage the Buchhwin Quickshell service
   prune                          remove stale Quickshell runtime directories
@@ -132,6 +133,88 @@ case "${1:-}" in
           '.theme.palette=$palette | if $accent != "" then .theme.accent=$accent else . end' \
           "$STATE" > "$tmp"
         install -m 0600 "$tmp" "$STATE"; render_theme; hyprctl reload >/dev/null 2>&1 || true
+        ;;
+    # ⚠️ RESTORED, NOT WRITTEN. This subcommand existed in full and was lost
+    # when bhctl was cut from 1615 lines to 116 during the KDE-native cleanup —
+    # the same cut that took `doctor`'s null-section check with it. Nothing
+    # noticed, because the only thing that calls it is a button:
+    # services/Update.qml's install() opens a terminal on `bhctl update`, so
+    # "Update and reinstall" in Settings has been opening a terminal that prints
+    # the usage text and exits. tests/update-diverged.sh was red the whole time
+    # and was being read as a failing test rather than a missing feature.
+    update)
+        # ⚠️ REFUSES ON A DIRTY TREE. `git pull` on top of local edits either
+        # conflicts or silently merges, and the person running this is asking
+        # for "make it current", not "resolve my half-finished change". Saying
+        # so costs one line; the other way costs an evening.
+        cd "$REPO_DIR" || exit 2
+        if ! git rev-parse --git-dir >/dev/null 2>&1; then
+            echo "$REPO_DIR is not a git checkout — nothing to pull" >&2
+            echo "  (this is normal on a machine the tree was rsynced to)" >&2
+            exit 1
+        fi
+        if [[ -n "$(git status --porcelain)" ]]; then
+            echo "there are uncommitted changes here — refusing to pull over them" >&2
+            git status --short >&2
+            exit 1
+        fi
+        before="$(git rev-parse --short HEAD)"
+        # ⚠️⚠️ THE DIVERGED CLONE IS NAMED HERE, BECAUSE "pull failed" NAMES
+        # NOTHING. After this repository's history was rewritten with
+        # `git-filter-repo` to get a leaked password out of it, every clone made
+        # before that run shares NO COMMON ANCESTOR with origin any more — git
+        # sees two unrelated histories and `--ff-only` is exactly the form that
+        # refuses them:
+        #
+        #     hint: Diverging branches can't be fast-forwarded
+        #     fatal: Not possible to fast-forward, aborting.
+        #
+        # That happened on a real machine, and the two lines it printed sent
+        # nobody anywhere. The warning had been sitting in a handout the whole
+        # time, which is the lesson: a warning in a document does nothing while
+        # the person is standing in front of the error. The place to say it is
+        # here.
+        #
+        # ⚠️ FETCH FIRST, or there is nothing to compare against — `git pull`
+        # would fetch and fail in the same breath, and the merge-base question
+        # could only be asked after the answer stopped mattering. A fetch that
+        # fails (no network) is not treated as a fault: the pull below gets to
+        # give its own error, which is the right one for being offline.
+        upstream="$(git rev-parse --abbrev-ref --symbolic-full-name '@{u}' 2>/dev/null || true)"
+        if [[ -n "$upstream" ]] && git fetch --quiet 2>/dev/null; then
+            # No merge base at all is the rewritten-history case, and ONLY that
+            # one. A clone that is merely behind, or that carries local commits,
+            # has a merge base — those are ordinary situations with ordinary
+            # answers, and sending them down the recipe below would tell
+            # somebody to throw away work they still have.
+            if ! git merge-base HEAD "$upstream" >/dev/null 2>&1; then
+                echo "this clone and $upstream share no common history" >&2
+                echo "  the history was rewritten; a clone from before it cannot fast-forward" >&2
+                echo "  nothing here is lost — check first, then take origin's side:" >&2
+                echo >&2
+                echo "    git log --oneline $upstream..HEAD   # empty? then nothing of yours is here" >&2
+                echo "    git reset --hard $upstream" >&2
+                echo "    ./install-hyprland.sh" >&2
+                exit 1
+            fi
+        fi
+        git pull --ff-only || { echo "pull failed" >&2; exit 1; }
+        after="$(git rev-parse --short HEAD)"
+        if [[ "$before" == "$after" ]]; then
+            echo "already current at $after"
+            exit 0
+        fi
+        echo "$before → $after"
+        # ⚠️ The installer, not just a shell restart. A pull can change package
+        # lists, units and the generated Hyprland config, and none of those
+        # reach the machine by restarting quickshell — that is the same "a
+        # change with nobody to apply it" fault this project keeps finding.
+        #
+        # ⚠️ install-hyprland.sh, NOT install.sh: the monorepo merge renamed the
+        # session's installer and put a dispatcher at the repository root
+        # instead. That rename has now broken four separate things, all of them
+        # silently.
+        exec bash "$REPO_DIR/install-hyprland.sh"
         ;;
     power) [[ "${2:-}" == apply ]] || { usage; exit 2; }; apply_power ;;
     shell)

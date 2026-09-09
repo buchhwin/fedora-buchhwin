@@ -39,7 +39,7 @@ Singleton {
 
     // --------------------------------------------------------------- what we are
     property string repoDir: ""
-    property bool isRepo: false          // the tree is there (install.sh, bin/bhctl)
+    property bool isRepo: false          // the tree is there (install-hyprland.sh, bin/bhctl)
     property bool isCheckout: false      // …and it is a git checkout
     property string commit: ""
     property string subject: ""
@@ -150,7 +150,27 @@ Singleton {
             sd=$(readlink -f "${Quickshell.shellDir}" 2>/dev/null)
             repo=$(dirname "$sd")
             printf '%s\\n' "--repo" "$repo"
-            if [ -f "$repo/install.sh" ] && [ -f "$repo/bin/bhctl" ]; then
+            # ⚠️ install-hyprland.sh, NOT install.sh — THE SAME RENAME AGAIN, and
+            # this is the fourth place it broke. The monorepo merge gave the
+            # session its own installer name and put a dispatcher called
+            # install.sh at the repository ROOT instead, one level above what
+            # this probe looks at. So the marker never matched, isrepo was never
+            # printed, and since isCheckout is isRepo and-something, every row in
+            # the update card said "not running from a repository folder" on a
+            # machine running from a repository folder.
+            #
+            # ⚠️ AND IT FAILED IN THE OTHER DIRECTION TOO: with canInstall stuck
+            # at false, the button that reinstalls after a pull could not be
+            # pressed at all.
+            #
+            # ⚠️ NO BACKTICKS IN THIS COMMENT EITHER, for the same reason the
+            # note above forbids shell brace syntax: everything between the
+            # backticks up top is one JavaScript template literal, so a backtick
+            # ENDS IT — even inside what looks like a shell comment. Quoting an
+            # identifier the usual way here stopped the whole file from parsing,
+            # and the symptom was every fixture reporting that the tool had
+            # written nothing at all.
+            if [ -f "$repo/install-hyprland.sh" ] && [ -f "$repo/bin/bhctl" ]; then
                 printf '%s\\n' "--isrepo" "yes"
             fi
             if git -C "$repo" rev-parse --git-dir >/dev/null 2>&1; then
