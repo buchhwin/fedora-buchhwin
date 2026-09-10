@@ -20,8 +20,22 @@ phase_preflight() {
     # the single system-wide implementation and leaves Plasma as a fallback.
     rpm -q plasma-desktop >/dev/null 2>&1 \
         || die "Fedora KDE Plasma is required; install the Fedora KDE edition first"
-    rpm -q sddm >/dev/null 2>&1 \
-        || die "SDDM is missing; restore the Fedora KDE desktop group first"
+    # ⚠️⚠️ A DISPLAY MANAGER, NOT SDDM. This used to demand `rpm -q sddm` and
+    # die without it, which was writing one machine's setup into a requirement.
+    # What this session actually needs is something that reads
+    # /usr/share/wayland-sessions — every display manager does, which is the
+    # whole reason a session is installed as a .desktop file there rather than
+    # by configuring a greeter.
+    #
+    # SDDM is what Fedora KDE ships and what the rest of this profile expects,
+    # so it is still preferred and still named in the summary. It is no longer a
+    # condition of installing, because being told "restore the Fedora KDE
+    # desktop group" on a working KDE machine that simply logs in through
+    # something else is a wrong answer delivered with confidence.
+    if ! rpm -q sddm >/dev/null 2>&1 \
+       && [[ ! -e /etc/systemd/system/display-manager.service ]]; then
+        die "no display manager found — this session is a login option, not a login screen"
+    fi
 
     sudo -n true 2>/dev/null || sudo true || die "sudo is required"
     ping -c1 -W3 fedoraproject.org >/dev/null 2>&1 || warn "no route to fedoraproject.org"

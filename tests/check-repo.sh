@@ -54,7 +54,24 @@ if grep -Rqs 'Services\.Niri\|BUCHHWIN_TOOL=niri' \
 fi
 
 grep -q 'rpm -q plasma-desktop' sessions/hyprland/lib/00-preflight.sh
-grep -q 'systemctl enable sddm.service' sessions/hyprland/lib/30-desktop.sh
+
+# ⚠️⚠️ THIS RULE POINTED AT lib/30-desktop.sh AND WAS PINNING A BUG IN PLACE.
+# The line it demanded was `sudo systemctl enable sddm.service || die`, sitting
+# in phase two — a duplicate of what phase_greeter is for. That enable FAILS on
+# every Fedora KDE machine, because sddm.service carries
+# Alias=display-manager.service and systemd will not overwrite a symlink that
+# already exists. So the installer died in phase two on the only kind of machine
+# it installs onto, and this check would have gone red at the fix.
+#
+# A repository-level rule that names a FILE and a LINE is a rule about where
+# code sits, not about what it does. What matters is that the login manager is
+# handled, once, in the phase whose whole job that is.
+grep -q 'systemctl enable sddm.service' sessions/hyprland/lib/65-greeter.sh
+if grep -q 'systemctl enable sddm.service' sessions/hyprland/lib/30-desktop.sh; then
+    echo "the SDDM enable is back in phase desktop — it belongs to phase greeter," >&2
+    echo "and duplicating it there is what aborted the install in phase two" >&2
+    exit 1
+fi
 grep -q 'XDG_CONFIG_HOME="$config_home"' sessions/hyprland/bin/buchhwin-hyprland-session
 grep -q 'overrides.lua' sessions/hyprland/config/hypr/hyprland.lua
 grep -q 'overrides.lua' sessions/hyprland/lib/60-shell.sh

@@ -51,9 +51,42 @@ stub() { printf '#!/bin/sh\n%s\n' "$2" > "$bin/$1"; chmod +x "$bin/$1"; }
 # ⚠️ `cat >/dev/null` rather than a bare `exit 0`: several callers pipe a
 # heredoc into `sudo tee`, and a stub that exits immediately closes the pipe
 # early. The write still goes nowhere — sudo's arguments are never executed.
-stub sudo     'cat >/dev/null 2>&1; exit 0'
+#
+# ⚠️⚠️ EXCEPT systemctl, AND LEAVING THAT OUT HID THE WORST FAULT THIS INSTALLER
+# HAS SHIPPED. A `sudo` that returns 0 without running anything means every
+# privileged command succeeds, always — so `sudo systemctl enable sddm.service
+# || die` could not fail here, and the suite reported the installer running to
+# the end while on a real Fedora KDE machine it aborted in phase two.
+#
+# systemctl is passed through to its own stub, which is safe: the stub is first
+# on PATH and touches nothing. Everything else still goes nowhere.
+stub sudo     'case "$1" in
+  systemctl) shift; exec systemctl "$@" ;;
+esac
+cat >/dev/null 2>&1; exit 0'
 stub dnf      'exit 0'
-stub systemctl 'exit 0'
+# ⚠️ THE STUB ANSWERS THE WAY A FEDORA KDE MACHINE DOES, WHICH IS THE WHOLE
+# POINT. SDDM is already enabled there, and `systemctl enable sddm.service` then
+# FAILS: the unit carries `Alias=display-manager.service`, systemd will not
+# overwrite that symlink, and it exits non-zero. A blanket `exit 0` describes a
+# machine nobody installs onto.
+#
+# So `is-enabled sddm` says yes and `enable sddm` refuses, exactly as measured
+# from the report that came back from a real install. The installer has to reach
+# the end anyway — which means checking before enabling, which is what
+# lib/65-greeter.sh now does. Re-introduce an unconditional enable and this run
+# goes red instead of a laptop doing it.
+stub systemctl 'case " $* " in
+  *" is-enabled "*)
+      case " $* " in *sddm*) exit 0 ;; *) exit 1 ;; esac ;;
+  *" enable "*)
+      case " $* " in
+          *sddm*)
+              echo "Failed to enable unit: File /etc/systemd/system/display-manager.service already exists." >&2
+              exit 1 ;;
+      esac ;;
+esac
+exit 0'
 # ⚠️ `rpm -q sddm` AND `rpm -q plasma-desktop` MUST ANSWER "INSTALLED", and the
 # blanket `exit 1` that stood here is why three phases were never reached.
 # phase_greeter calls `die` when SDDM is missing, which is right on a real

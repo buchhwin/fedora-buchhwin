@@ -25,10 +25,21 @@ phase_desktop() {
             || warn "$pkg could not be installed from $copr"
     done
 
-    # SDDM stays the sole display manager. Plasma remains selectable and no
-    # greetd configuration or custom login surface is installed.
-    sudo systemctl enable sddm.service >/dev/null 2>&1 \
-        || die "SDDM could not be enabled"
+    # ⚠️⚠️ THE SDDM LINE THAT STOOD HERE WAS A DUPLICATE, AND IT WAS THE ONE
+    # THAT KILLED THE INSTALL. phase_greeter owns the login manager — that is
+    # what it is for — and this phase repeated the same `systemctl enable
+    # sddm.service`, four phases earlier, with `|| die` behind it. On Fedora KDE
+    # that enable always fails (the display-manager.service alias already
+    # exists), so the run ended in phase TWO, with the packages installed and
+    # nothing of this session written.
+    #
+    # The visible result was the worst kind: Hyprland's own default session
+    # appearing in the login manager, because the package was in and ours was
+    # not. It looked like the profile had installed and did not work.
+    #
+    # Handling it in one place also means it is handled once, properly: see
+    # lib/65-greeter.sh, which checks before it enables and reports what systemd
+    # actually said when it cannot.
     sudo systemctl set-default graphical.target >/dev/null 2>&1 \
         || warn "could not set graphical.target"
 

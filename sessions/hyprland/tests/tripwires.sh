@@ -159,6 +159,7 @@ notch-frame|shell/ui/surface/OverlaySurface.qml|s/^        anchors.fill: parent$
 motion|shell/ui/surface/ShellSurface.qml|s/^    implicitHeight: Math.max(1, root.maxIslandHeight)$/    implicitHeight: Math.max(1,\n                            root.islandH)/|a surface following an animated size across TWO lines, which a line-by-line read cannot see
 no-fetch-animation|shell/tools/render.qml|s/+ Math.max(0, root.fetchTextLines - root.fetchLogoLines) + ", "/+ 6 + ", "/|the fastfetch logo padding typed as a number again, right on one machine at most
 notch-frame|shell/ui/surface/OverlaySurface.qml|s/^            anchors.top: parent.top$/            anchors.verticalCenter: parent.verticalCenter/|the page centred in the card again, so every height change slides it by half
+install-runs|lib/65-greeter.sh|s#if systemctl is-enabled --quiet sddm.service 2>/dev/null; then#if false; then#|enabling SDDM unconditionally again, which aborts the install on every machine that already has it
 dry-run-truth|lib/common.sh|s#/etc/pam.d/buchhwin-lock  (only if it does not exist yet)#/etc/nowhere/buchhwin.conf#|the dry run promising a file the installer does not write
 dry-run-truth|bin/bhctl|s#/etc/systemd/logind.conf.d/50-buchhwin.conf#/etc/systemd/logind.conf.d/50-lid.conf#|a write that moved in the HELPER the installer runs, one file further out than the checker used to look
 dry-run-truth|lib/30-desktop.sh|s#atim/starship atim/lazygit#atim/starship atim/lazygit atim/bat#|a third-party repository added to the machine without a word in the plan

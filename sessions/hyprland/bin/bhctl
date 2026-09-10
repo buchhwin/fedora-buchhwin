@@ -30,7 +30,11 @@ render_theme() {
 doctor() {
     local failed=0 pkg
     printf 'Fedora KDE base\n'
-    for pkg in plasma-desktop sddm hyprland xdg-desktop-portal-kde \
+    # sddm is NOT in this list any more: the Display manager section below
+    # answers that question properly, and demanding the package named "sddm" on
+    # a machine that logs in through something else reported a fault that is not
+    # one.
+    for pkg in plasma-desktop hyprland xdg-desktop-portal-kde \
                xdg-desktop-portal-hyprland plasma-nm bluedevil dolphin; do
         if rpm -q "$pkg" >/dev/null 2>&1; then
             printf '  ok       %s\n' "$pkg"
@@ -40,14 +44,29 @@ doctor() {
         fi
     done
     printf 'Display manager\n'
-    if systemctl is-enabled --quiet sddm.service; then
+    # ⚠️ WHICH ONE IS NOT THIS SESSION'S BUSINESS. This used to report "ERROR
+    # sddm is not enabled" on a machine whose login screen works perfectly and
+    # happens to be something else. The session is a .desktop file in
+    # /usr/share/wayland-sessions and every display manager reads it, so what
+    # doctor has to answer is whether there IS one — not which.
+    dm=""
+    [[ -L /etc/systemd/system/display-manager.service ]] \
+        && dm="$(basename "$(readlink -f /etc/systemd/system/display-manager.service)")"
+    if [[ -n "$dm" ]]; then
+        printf '  ok       %s\n' "${dm%.service}"
+    elif systemctl is-enabled --quiet sddm.service 2>/dev/null; then
         printf '  ok       sddm enabled\n'
     else
-        printf '  ERROR    sddm is not enabled\n'
+        printf '  ERROR    no display manager is enabled\n'
         failed=1
     fi
-    if systemctl is-enabled --quiet greetd.service 2>/dev/null; then
-        printf '  ERROR    greetd is enabled and conflicts with SDDM\n'
+    # greetd is a fault only when it is a SECOND one. If it is the display
+    # manager this machine actually uses, the line above already said so, and
+    # calling it a conflict would be this session disagreeing with a login
+    # screen that works.
+    if [[ "$dm" != "greetd.service" ]] \
+       && systemctl is-enabled --quiet greetd.service 2>/dev/null; then
+        printf '  ERROR    greetd is enabled alongside %s\n' "${dm:-your display manager}"
         failed=1
     else
         printf '  ok       no competing greetd service\n'
@@ -56,7 +75,7 @@ doctor() {
     [[ -r "$CONFIG_HOME/buchhwin/hyprland/hyprland.lua" ]] \
         || { printf '  MISSING  Hyprland configuration\n'; failed=1; }
     [[ -r /usr/share/wayland-sessions/buchhwin-hyprland.desktop ]] \
-        || { printf '  MISSING  SDDM session entry\n'; failed=1; }
+        || { printf '  MISSING  the wayland-session entry\n'; failed=1; }
 
     # ⚠️ A NULL SECTION IS WHY A SWITCH SPRINGS BACK, and this check went
     # missing when bhctl was rewritten. The symptom is specific and impossible
