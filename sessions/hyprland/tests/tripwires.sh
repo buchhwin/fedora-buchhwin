@@ -163,6 +163,7 @@ dry-run-truth|lib/common.sh|s#/etc/pam.d/buchhwin-lock  (only if it does not exi
 dry-run-truth|bin/bhctl|s#/etc/systemd/logind.conf.d/50-buchhwin.conf#/etc/systemd/logind.conf.d/50-lid.conf#|a write that moved in the HELPER the installer runs, one file further out than the checker used to look
 dry-run-truth|install-hyprland.sh|s/writes four files/writes three files/|the printed help text drifting away from the plan it summarises
 config-shape|docs/CONFIG.md|s/^Targets: `gtk` /Targets: `gtk` `vesktop` /|a theming target documented after the setting behind it was removed
+config-shape|shell/tools/hypr/EmitSettings.qml|s/XCURSOR_THEME/XCURSOR_THEME_X/|the pointer setting reaching GTK and never the compositor, which is two pointers on one desktop
 config-shape|shell/config/Migrations.qml|s/cfg.cursor.theme = "breeze_cursors"/cfg.cursor.theme = "McMojave-cursors"/|a migration handing an existing machine a cursor theme nothing installs
 config-shape|shell/config/Migrations.qml|s/readonly property int current: 19/readonly property int current: 20/|the migration chain and the schema version drifting apart, so a fresh file is stamped newer than the chain
 no-old-compositor|shell/tools/render.qml|s#generated/colors.lua"#generated/colors.kdl"#|the previous compositor's config FORMAT coming back in running code, which the name check cannot see

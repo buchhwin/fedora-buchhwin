@@ -19,12 +19,21 @@ hl.env("QT_QPA_PLATFORMTHEME", "qt6ct")
 -- generated/settings.lua. Setting it in both places would mean switching the
 -- setting off left the variable behind, which reads as the setting not working.
 
--- Cursor: Breeze, the same one Plasma uses. The session deliberately reads
--- KDE's choice instead of imposing its own, so a cursor changed in System
--- Settings applies to both desktops.
-hl.env("XCURSOR_THEME", "breeze_cursors")
-hl.env("XCURSOR_SIZE", "24")
-hl.env("HYPRCURSOR_SIZE", "24")
+-- Cursor: NOT here any more, and the comment that stood here was wrong twice
+-- over. It said the session "deliberately reads KDE's choice instead of
+-- imposing its own" — under three lines that imposed breeze_cursors and 24 as
+-- literals, reading nothing from anywhere.
+--
+-- The real cost was on the other side: shell.json HAS cursor.theme and
+-- cursor.size, with a row in the settings window and a writer that sets GTK
+-- over gsettings, and these literals meant the compositor never heard about
+-- either. Changing the size moved GTK's pointer and left the compositor's
+-- alone — two pointers on one desktop, swapping at a window edge.
+--
+-- It is written by the generator now (tools/hypr/EmitSettings.qml), into
+-- generated/settings.lua, and hyprland.lua carries the same two values as the
+-- fallback for a machine that has not generated one yet. Exactly one of the two
+-- ever runs, so nothing depends on which of two hl.env calls would win.
 
 hl.env("MOZ_ENABLE_WAYLAND", "1")
 hl.env("SDL_VIDEODRIVER", "wayland")

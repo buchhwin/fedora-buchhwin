@@ -39,7 +39,26 @@ require("buchhwin.rules")
 -- Generated values come after the hand-written defaults so a setting changed in
 -- the shell wins over the shipped default without either file knowing about the
 -- other. A fresh checkout has none of these and must still start.
-if present("generated/settings.lua") then require("generated.settings") end
+-- ⚠️ THE ELSE BRANCH IS THE CURSOR, AND IT IS NOT DECORATION. The pointer's
+-- theme and size are settings in shell.json, so the generator writes them —
+-- but the FIRST login happens before any generator has run: the installer
+-- renders the colour files and never the compositor's settings, which is why
+-- the shipped buchhwin/binds.lua exists for the same moment. A session with no
+-- XCURSOR_THEME at all gets Hyprland's own pointer at its own size, and this
+-- project already has that report in writing: "the cursor is far too big".
+--
+-- The two values here are the schema's own defaults. They are HERE rather than
+-- in buchhwin/env.lua so that exactly one writer runs: with a generated file,
+-- the generator's; without one, these. Nothing rests on which of two hl.env
+-- calls for the same variable would win, which is not something this project
+-- has been able to measure.
+if present("generated/settings.lua") then
+    require("generated.settings")
+else
+    hl.env("XCURSOR_THEME", "breeze_cursors")
+    hl.env("XCURSOR_SIZE", "24")
+    hl.env("HYPRCURSOR_SIZE", "24")
+end
 
 -- Keys: exactly one source at a time. The generator writes the COMPLETE set
 -- (defaults with the user's rebinds already resolved), so when it exists the

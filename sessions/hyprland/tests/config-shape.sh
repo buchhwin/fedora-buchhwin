@@ -223,6 +223,41 @@ fi
 # So every cursor theme this repository ASSIGNS is held to the rule the default
 # is held to. Reading the assignments rather than the defaults is the whole
 # point — a name in a comment is not a name anybody gets.
+# ⚠️⚠️ AND THE COMPOSITOR HAS TO BE TOLD, which for a long time it was not.
+# `cursor.theme` and `cursor.size` had a row in the settings window, a place in
+# the theming fingerprint and a writer in tools/render.qml that sets the GTK
+# side over gsettings — and nothing on the compositor's side at all. The shipped
+# module carried breeze_cursors and 24 as literals, so changing the size moved
+# GTK's pointer and left the compositor's where it was. docs/CONFIG.md described
+# the two writers this needs while one of them did not exist.
+#
+# The check is on the EMITTER rather than on a rendered file: a generated config
+# only exists on a machine that has run the shell, and this has to be answerable
+# in CI.
+printf '  %-38s ' "the compositor is told the cursor"
+emit=shell/tools/hypr/EmitSettings.qml
+#
+# ⚠️ THE CALL IS THE PATTERN, NOT THE WORD, and leaving that out made this check
+# blind on its first run. A bare grep for XCURSOR_THEME also matches
+# XCURSOR_THEME_X, so renaming the variable — which is the exact fault, and the
+# mutation in tests/tripwires.sh — kept it green. What has to be there is the
+# emitted hl.env call, not a word that happens to appear near one.
+# The name ENDS there: the character after it may not continue the identifier.
+# That is what tells `XCURSOR_THEME` apart from `XCURSOR_THEME_X`, and quoting
+# the closing quote instead would depend on how the emitter escapes it.
+if grep -qE 'hl[.]env\(.?"XCURSOR_THEME[^A-Z_]' "$emit" \
+   && grep -qE 'hl[.]env\(.?"XCURSOR_SIZE[^A-Z_]' "$emit" \
+   && grep -q 'Config[.]cursor[.]theme' "$emit" \
+   && grep -q 'Config[.]cursor[.]size' "$emit"; then
+    printf '\033[38;5;114mok\033[0m\n'
+else
+    printf '\033[38;5;203mthe generator emits no cursor environment\033[0m\n'
+    printf '      The setting then reaches GTK through render.qml and stops there,\n'
+    printf '      which is two pointers on one desktop: one for the windows and one\n'
+    printf '      for everything the compositor draws itself.\n'
+    exit 1
+fi
+
 printf '  %-38s ' "no migration writes a missing cursor"
 badcur=""
 while read -r name; do

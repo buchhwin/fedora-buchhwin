@@ -111,6 +111,33 @@ QtObject {
         if (Config.windows.noCsd === true)
             out += "hl.env(\"QT_WAYLAND_DISABLE_WINDOWDECORATION\", \"1\")\n"
 
+        // ⚠️⚠️ THE POINTER, WHICH REACHED THE COMPOSITOR THROUGH NOTHING AT ALL.
+        // `cursor.theme` and `cursor.size` have a row in the settings window, a
+        // place in the theming fingerprint and a writer in tools/render.qml that
+        // sets the GTK side over gsettings — and no reader anywhere on this
+        // side. config/hypr/buchhwin/env.lua carried breeze_cursors and 24 as
+        // literals, so changing the size moved GTK's pointer and left the
+        // compositor's where it was: two pointers on one desktop, changing shape
+        // at a window edge, which is exactly what docs/CONFIG.md warns about
+        // while promising that both writers exist.
+        //
+        // ⚠️ ONE WRITER, NOT TWO, AND THAT IS WHY env.lua NO LONGER SETS IT.
+        // Emitting here while the shipped module also set the variable would
+        // depend on which of two hl.env calls wins — something this machine
+        // cannot measure and nothing should rest on. hyprland.lua carries the
+        // fallback in the branch it already has for a missing generated file, so
+        // exactly one of the two runs, always.
+        //
+        // ⚠️ IT TAKES EFFECT AT THE NEXT LOGIN, and saying so is part of the
+        // fix. These are environment variables: they are handed to processes the
+        // compositor starts AFTER them, so `hyprctl reload` re-reads the file
+        // and changes nothing already running.
+        var ctheme = String(Config.cursor.theme || "breeze_cursors")
+        var csize = Math.max(1, Math.round(Number(Config.cursor.size) || 24))
+        out += "hl.env(\"XCURSOR_THEME\", " + Lua.str(ctheme) + ")\n"
+        out += "hl.env(\"XCURSOR_SIZE\", " + Lua.str(String(csize)) + ")\n"
+        out += "hl.env(\"HYPRCURSOR_SIZE\", " + Lua.str(String(csize)) + ")\n"
+
         var device = String(Config.gpu.renderDevice || "")
         if (!device.length)
             return out + "-- No GPU override: Hyprland picks the card, which on a\n"
