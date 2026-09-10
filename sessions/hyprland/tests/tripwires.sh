@@ -163,6 +163,7 @@ dry-run-truth|lib/common.sh|s#/etc/pam.d/buchhwin-lock  (only if it does not exi
 dry-run-truth|bin/bhctl|s#/etc/systemd/logind.conf.d/50-buchhwin.conf#/etc/systemd/logind.conf.d/50-lid.conf#|a write that moved in the HELPER the installer runs, one file further out than the checker used to look
 dry-run-truth|lib/30-desktop.sh|s#atim/starship atim/lazygit#atim/starship atim/lazygit atim/bat#|a third-party repository added to the machine without a word in the plan
 dry-run-truth|lib/70-services.sh|s#udisks2.service systemd-oomd.service#udisks2.service systemd-oomd.service bluetooth.service#|a system service enabled machine-wide that the plan never mentions
+dry-run-truth|lib/common.sh|s#"./install.sh --session hyprland" #"./install.sh --session hyprland --skip base" #|the plan telling somebody to skip the phase that installs jq and dnf-plugins-core
 dry-run-truth|install-hyprland.sh|s/writes four files/writes three files/|the printed help text drifting away from the plan it summarises
 config-shape|docs/CONFIG.md|s/^Targets: `gtk` /Targets: `gtk` `vesktop` /|a theming target documented after the setting behind it was removed
 config-shape|shell/tools/hypr/EmitSettings.qml|s/XCURSOR_THEME/XCURSOR_THEME_X/|the pointer setting reaching GTK and never the compositor, which is two pointers on one desktop

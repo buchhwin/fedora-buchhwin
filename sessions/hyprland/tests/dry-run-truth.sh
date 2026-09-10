@@ -182,7 +182,35 @@ dnf mark user|dnf mark user
 dnf copr enable sachesi/hyprland|copr enable -y sachesi/hyprland
 CHANGES
 
-# ── 6 · and nothing changes the system that the plan has not named ──────────
+# ── 6 · the command the plan tells you to run has to work ──────────────────
+#
+# ⚠️⚠️ IT DID NOT. The last line of the plan is the line somebody copies, and it
+# said `--skip shellenv --skip base`. That was written when `base` also edited
+# /etc/dnf/dnf.conf and installed a hundred and fifty packages, so skipping it
+# meant "leave my dnf alone". The dnf edits went with the cut-back; what `base`
+# installs now is twenty packages the session needs. Two of them decide whether
+# the install works at all:
+#
+#   jq                 bin/bhctl and scripts/buchhwin-browser both refuse to
+#                      run without it, and Fedora KDE does not ship it
+#   dnf-plugins-core   `dnf copr enable` needs it, so on a Fedora release with
+#                      no Hyprland of its own, skipping base means no compositor
+#
+# The check is on the PHASE by name rather than on the packages, because that is
+# what the line says and what a reader would copy. If `base` ever stops
+# installing things the session needs, delete this along with the reason.
+printf ''
+run_cmd="$(sed -n '/section "To run it for real"/,/^}/p' lib/common.sh | grep -v '^[[:space:]]*#')"
+if grep -qE -- '--skip[= ]base' <<< "$run_cmd"; then
+    bad "the plan's own command skips the phase that installs jq"
+    printf '        %s\n' \
+        "bhctl and buchhwin-browser both exit on a missing jq, and dnf-plugins-core" \
+        "is what makes 'dnf copr enable' work at all."
+else
+    ok "the command the plan prints installs what the session needs"
+fi
+
+# ── 7 · and nothing changes the system that the plan has not named ──────────
 #
 # ⚠️⚠️ THREE COPRs AND A BOOT TARGET WERE BEING SET WITHOUT A WORD. The section
 # above is the plan→code direction and it only ever asks about lines somebody

@@ -227,9 +227,24 @@ print_plan() {
         "SDDM stays the only display manager; no greeter is installed"
 
     section "To run it for real"
-    step "drop --dry-run. To leave your shell and dnf alone:"
-    printf '      ./install.sh --session hyprland --skip shellenv --skip base
-'
+    # ⚠️⚠️ THIS LINE USED TO SAY `--skip shellenv --skip base`, AND IT WAS
+    # INSTALL-BREAKING ADVICE. It was written when `base` also edited
+    # /etc/dnf/dnf.conf and pulled in a hundred and fifty packages, so skipping
+    # it meant "leave my dnf alone". The dnf edits went with the cut-back and
+    # what `base` installs now is twenty packages the session NEEDS: `jq`, which
+    # bin/bhctl and scripts/buchhwin-browser both refuse to work without, and
+    # `dnf-plugins-core`, without which `dnf copr enable` cannot run — so on a
+    # machine where Fedora has no Hyprland, skipping base means no compositor
+    # either.
+    #
+    # Fedora KDE already has most of the other eighteen. `jq` is not one of
+    # them. This is the last line of the plan and the command somebody copies.
+    step "drop --dry-run:"
+    printf '      %s\n' \
+        "./install.sh --session hyprland" \
+        "" \
+        "  to leave your zsh setup out of it (the session still works):" \
+        "./install.sh --session hyprland --skip shellenv"
     printf '
 '
 }

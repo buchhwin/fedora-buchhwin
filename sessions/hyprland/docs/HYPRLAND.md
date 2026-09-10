@@ -171,12 +171,24 @@ it names.
 **Installing**
 
 ```bash
-./install.sh --session hyprland --skip shellenv --skip base
+./install.sh --session hyprland --skip shellenv
 ```
 
 ⚠️ `--skip shellenv` leaves your shell alone on the first run. Add it back once
 the session itself works — one new thing at a time is the difference between a
-fault you can name and an evening.
+fault you can name and an evening. The session runs without it: `shellenv`
+installs five command-line tools and links a zsh config into the session's own
+`ZDOTDIR`, and nothing on screen depends on either.
+
+⚠️⚠️ **This line said `--skip base` as well, until 10.09.2026, and that was
+install-breaking advice.** It was written when `base` also edited
+`/etc/dnf/dnf.conf` and installed a hundred and fifty packages, so skipping it
+meant "leave my dnf alone". Those edits are gone and what `base` installs now is
+twenty packages the session needs — including **`jq`**, which `bhctl` and
+`buchhwin-browser` both refuse to run without and which Fedora KDE does not
+ship, and **`dnf-plugins-core`**, without which `dnf copr enable` cannot run at
+all. On a Fedora release where Hyprland is not in the base repositories,
+skipping `base` means there is no compositor either.
 
 **Then, in order**
 
