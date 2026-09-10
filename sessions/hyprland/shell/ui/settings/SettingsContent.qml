@@ -690,7 +690,7 @@ FocusScope {
 
             // ⚠️ THE ONE PLACE A REFUSED SETTING BECOMES VISIBLE, and it is
             // here because this is where the setting was made. The generator
-            // will not install a config.kdl that the compositor rejects — an invalid one
+            // will not install a config the compositor rejects — an invalid one
             // means the compositor does not start at all — so a bad value leaves the
             // desktop working and the change simply not applied. Without this
             // banner that is indistinguishable from a control that does

@@ -242,8 +242,8 @@ Scope {
     // means a stub that overrides nothing — not a deletion.
     //
     // ⚠️ FileView has no delete, and that is not an obstacle but the better
-    // answer: kitty.conf `include`s theme.conf and the compositor's config.kdl includes
-    // colors.kdl. A deleted file is a pointer into nothing; a file of nothing
+    // answer: kitty.conf `include`s theme.conf, and hyprland.lua `require`s
+    // generated/colors.lua. A deleted file is a pointer into nothing; a file of nothing
     // but comments is exactly as ineffective for both readers — and says why.
     // Measured for the one case where "ineffective" was not obvious: qt6ct
     // falls back to the style's palette for a colour file with no
@@ -539,8 +539,9 @@ Scope {
     }
 
     // -------------------------------------------------------------- compositor
-    // COLOURS ONLY. This file is `include`d by the generated config.kdl, and
-    // the split is what lets a palette change leave the keybindings alone.
+    // COLOURS ONLY. This file is `require`d by hyprland.lua, after the shipped
+    // buchhwin/look.lua and next to generated/settings.lua, and the split is what
+    // lets a palette change leave the keybindings alone.
     //
     // ⚠️ Two rules, both from the compositor's own documentation and both easy to break:
     //
@@ -551,9 +552,10 @@ Scope {
     //    Deciding visibility from here would mean deciding it differently
     //    depending on which file happened to be read.
     //
-    //  * An include overrides what came before it, so config.kdl places this
-    //    include after its own layout block. Sections merge property by
-    //    property, so setting only colours leaves gaps and width untouched.
+    //  * A later hl.config() overrides an earlier one, which is why
+    //    hyprland.lua requires this file AFTER buchhwin/look.lua — the order in
+    //    that file is the precedence, and it says so at the top. Only the keys
+    //    written here change, so gaps and width are left where look.lua put them.
     // ⚠️ A SHADOW IS SHADE, NOT A COLOUR — and writing it as one was a real
     // fault, not a nicety. It used to be `crust` at a fixed alpha, `crust`
     // being the palette's darkest tone. On the two LIGHT palettes that tone is

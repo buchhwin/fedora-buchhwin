@@ -1,8 +1,16 @@
 # shell.json — the one place settings live
 
-`~/.config/buchhwin/shell.json`. Everything else is generated from it: the compositor's
-`config.kdl`, the GTK/Qt/kitty themes, `environment.d`. There is no second
-store and no intermediate format.
+`~/.config/buchhwin-sessions/hyprland/buchhwin/shell.json`. Everything else is
+generated from it: the compositor's `generated/*.lua`, the GTK/Qt/kitty themes,
+`environment.d`. There is no second store and no intermediate format.
+
+⚠️ **BOTH HALVES OF THAT LINE WERE WRONG UNTIL 10.09.2026.** It said
+`~/.config/buchhwin/shell.json`, which is not where the session keeps it — the
+session sets its own `XDG_CONFIG_HOME`, so everything lands one level in, under
+`buchhwin-sessions/hyprland`. Somebody following this line edited a file nothing
+reads. And it said the compositor's config is `config.kdl`, which was the
+previous compositor's format; this one is configured in Lua and no `.kdl` file
+is written anywhere.
 
 Every key has a default in `shell/config/Config.qml`. A missing file, a
 truncated file or a key that does not exist yet all resolve to the same working
@@ -315,7 +323,7 @@ systemsettings kcm_akonadi          # or: KDE Settings → Personal Information
 konsolekalendar --view --export-type CSV    # check that it arrived
 ```
 
-`Super+C` shows the month. A dot under a day means something is on; the
+`Super+Shift+K` shows the month. A dot under a day means something is on; the
 appointments of the day you tap are listed under the grid. The **+** creates one
 — on the day you are looking at, not on today — through
 `konsolekalendar --add`, so it lands in the calendar KDE is set up with and

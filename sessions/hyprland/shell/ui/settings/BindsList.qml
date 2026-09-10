@@ -4,9 +4,10 @@ pragma ComponentBehavior: Bound
 // machine.
 //
 // ⚠️ IT EDITS NOW, AND THE CLASH CHECK IS THE REASON IT TOOK A SECOND PASS.
-// Two bindings on one key is a KDL parse error, and the compositor does not start with a
-// config it cannot parse — so a rebinding that is only checked afterwards costs
-// a session, on the machine of somebody who was changing a shortcut. The check
+// Two bindings on one key is not an error at all: Hyprland keeps one of them
+// and says nothing (config/hypr/hyprland.lua spells that out) — so a rebinding
+// that is only checked afterwards costs a shortcut that silently does the wrong
+// thing, on the machine of somebody who was changing a shortcut. The check
 // runs in Config.bindClash BEFORE anything is written, and the row says which
 // binding is in the way rather than just refusing.
 //

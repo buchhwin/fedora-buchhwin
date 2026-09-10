@@ -163,6 +163,9 @@ dry-run-truth|lib/common.sh|s#/etc/pam.d/buchhwin-lock  (only if it does not exi
 dry-run-truth|bin/bhctl|s#/etc/systemd/logind.conf.d/50-buchhwin.conf#/etc/systemd/logind.conf.d/50-lid.conf#|a write that moved in the HELPER the installer runs, one file further out than the checker used to look
 dry-run-truth|install-hyprland.sh|s/writes four files/writes three files/|the printed help text drifting away from the plan it summarises
 config-shape|docs/CONFIG.md|s/^Targets: `gtk` /Targets: `gtk` `vesktop` /|a theming target documented after the setting behind it was removed
+config-shape|shell/config/Migrations.qml|s/cfg.cursor.theme = "breeze_cursors"/cfg.cursor.theme = "McMojave-cursors"/|a migration handing an existing machine a cursor theme nothing installs
+config-shape|shell/config/Migrations.qml|s/readonly property int current: 19/readonly property int current: 20/|the migration chain and the schema version drifting apart, so a fresh file is stamped newer than the chain
+no-niri|shell/tools/render.qml|s#generated/colors.lua"#generated/colors.kdl"#|the previous compositor's config FORMAT coming back in running code, which the name check cannot see
 picker|shell/ui/common/CarouselPicker.qml|s#^    function _moved() {}$#    function _moved() { root.applied(root.currentIndex) }#|a picker that applies on the way past, instead of on Enter
 calendar|shell/services/Calendar.qml|s/^            } else if (c === ",") {$/            } else if (false) {/|a CSV split that stops splitting, so every event becomes one field
 netpanel|shell/ui/quick/NetworkList.qml|s/^        model: Services.Net.*$/        model: []/|the network panel drawing no rows at all, which is what a Repeater over an empty model looks like

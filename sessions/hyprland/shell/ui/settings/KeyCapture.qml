@@ -2,14 +2,19 @@
 //
 // ⚠️ IT REFUSES WHAT IT DOES NOT KNOW, and that is the whole design. The compositor takes
 // XKB key names, Qt hands out Qt key codes, and the two only line up through a
-// table. A guess that gets through here becomes a line in config.kdl, and a
-// config.kdl the compositor cannot parse means the compositor does not start — on the machine of
-// somebody who was in the middle of changing a shortcut. So an unmapped key
-// says so and changes nothing.
+// table. A guess that gets through here becomes a line in generated/binds.lua,
+// and a key name the compositor does not know is a binding that never fires —
+// on the machine of somebody who was in the middle of changing a shortcut. So
+// an unmapped key says so and changes nothing.
+//
+// ⚠️ THIS USED TO SAY "a config.kdl the compositor cannot parse means the
+// compositor does not start". That was the previous compositor's format, and
+// its failure was the loud kind. Do not restore the old sentence to make the
+// stakes sound higher: a key that does nothing is harder to notice than a
+// desktop that does not come up, which is the argument for refusing here.
 //
 // ⚠️ MODIFIERS ALONE ARE NOT A BINDING. Holding Mod sends a key event for Mod
-// itself, and capturing that would write `Mod+` — which is a parse error rather
-// than a shortcut. They are ignored until a real key arrives, which is also what
+// itself, and capturing that would write `Mod+` — which is not a shortcut. They are ignored until a real key arrives, which is also what
 // makes "hold Mod, then press T" work the way anybody expects.
 import QtQuick
 import QtQuick.Layouts

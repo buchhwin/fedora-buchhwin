@@ -33,7 +33,7 @@ PanelWindow {
     property bool barEnabled: true
     property bool notchEnabled: true
 
-    // Public interface: config.kdl attaches the blur rule to this namespace.
+    // Public interface: buchhwin/rules.lua attaches the blur rule to this namespace.
     // Renaming it here without renaming it there loses the blur silently.
     WlrLayershell.namespace: "buchhwin-notch"
 

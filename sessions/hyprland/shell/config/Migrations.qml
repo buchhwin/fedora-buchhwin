@@ -43,7 +43,7 @@ Singleton {
     // joining three fields with it can never collide with their contents.
     readonly property string sep: "\u0000"
 
-   readonly property int current: 18
+   readonly property int current: 19
 
     // step[n] upgrades a config at version n to version n+1.
     // Each is a pure function: take the parsed object, return it changed.
@@ -337,8 +337,13 @@ Singleton {
         // the same reasoning: a transparency you did not ask for is a nuisance,
         // a pointer you cannot read is a desktop you cannot use.
         function (cfg) {
+            // The rescue target is breeze_cursors, and it used to be
+            // "McMojave-cursors" — a theme the installer fetched from a pinned
+            // commit and no longer touches at all. Rescuing a name that
+            // resolves to nothing INTO another name that resolves to nothing is
+            // the same bug wearing the fix's clothes.
             if (cfg.cursor && cfg.cursor.theme === "Breeze_Dark")
-                cfg.cursor.theme = "McMojave-cursors"
+                cfg.cursor.theme = "breeze_cursors"
             if (cfg.look) {
                 if (cfg.look.opacityPanel === 0.78)
                     cfg.look.opacityPanel = 1.0
@@ -411,14 +416,22 @@ Singleton {
         // Step 8 -> 9 already rescued `Breeze_Dark` for exactly this reason and
         // simply did not know about the other two names.
         //
-        // ⚠️ AND IT IS DELIBERATELY NOT A BLANKET RESET. Only the two Breeze
-        // names move. Anything else in there — including a theme somebody chose
-        // from the list in the settings window — is left exactly where it is.
+        // ⚠️⚠️ AND IT DOES NOTHING NOW, WHICH IS THE ONLY HONEST THING LEFT FOR
+        // IT TO DO. Everything above was true while the installer fetched
+        // McMojave-cursors from a pinned commit. That step is gone — it was one
+        // of the account-and-machine-wide things taken out when the profile was
+        // cut back — so this step's rescue target is on no machine, and the two
+        // names it was rescuing FROM are the two `breeze-cursor-theme` really
+        // ships and the one this profile installs. It had been rewriting a
+        // working pointer into a missing one, which is the exact report it
+        // quotes above: "the cursor is far too big".
+        //
+        // The step stays and stays empty. Deleting it would renumber every
+        // migration after it, and a config at version 13 would then be handed
+        // to the wrong function — a far worse trade than one function that
+        // returns what it was given. Step 18 → 19 undoes the damage on the
+        // machines where this already ran.
         function (cfg) {
-            if (cfg.cursor
-                && (cfg.cursor.theme === "breeze_cursors"
-                    || cfg.cursor.theme === "Breeze_Light"))
-                cfg.cursor.theme = "McMojave-cursors"
             return cfg
         },
 
@@ -530,6 +543,31 @@ Singleton {
                 && (!cfg.wallpaper || !cfg.wallpaper.current
                     || String(cfg.wallpaper.current).length === 0))
                 cfg.theme.palette = "black"
+            return cfg
+        },
+        // ---------------------------------------------------------- 18 -> 19
+        //
+        // Give the pointer back.
+        //
+        // ⚠️⚠️ STEP 13 → 14 WROTE A THEME NOTHING INSTALLS, ONTO MACHINES WHERE
+        // THE POINTER WAS FINE. It replaced `breeze_cursors` and `Breeze_Light`
+        // with `McMojave-cursors`, which was right while the installer fetched
+        // that theme from a pinned commit, and wrong from the day that step was
+        // removed with the rest of the account-wide work. A cursor theme that
+        // does not resolve is not a missing decoration: the compositor falls
+        // back to its own pointer at its own size, and this project already has
+        // that report in writing — "the cursor is far too big".
+        //
+        // Step 13 → 14 is empty now, which stops it happening again to anybody
+        // still below version 14. This is for the files where it already did.
+        //
+        // ⚠️ ONLY THE ONE NAME MOVES, and only to the theme the installer really
+        // provides — packages/dnf-desktop.txt ships breeze-cursor-theme and
+        // tests/config-shape.sh holds the default to it. Anything else in there
+        // is somebody's choice from the settings window and stays.
+        function (cfg) {
+            if (cfg.cursor && cfg.cursor.theme === "McMojave-cursors")
+                cfg.cursor.theme = "breeze_cursors"
             return cfg
         },
     ]

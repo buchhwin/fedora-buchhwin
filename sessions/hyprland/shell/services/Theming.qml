@@ -202,7 +202,7 @@ Singleton {
                 //   theming.<target> 1  a theme target added and forgotten
                 //
                 // Measured rather than read, each against a control that DID
-                // regenerate: change the key, wait, ask whether config.kdl was
+                // regenerate: change the key, wait, ask whether the generated config was
                 // rewritten. Four of them, four times "unchanged".
                 //
                 // ⚠️ AND THE OLD NOTE ARGUED `binds` OUT ON COST — "a settings

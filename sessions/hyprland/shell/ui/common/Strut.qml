@@ -26,7 +26,7 @@ PanelWindow {
 
     screen: modelData
     // Named so the generated layer-rule can find it. The buchhwin-* namespaces
-    // are a public interface: config.kdl matches on them, so renaming one here
+    // are a public interface: buchhwin/rules.lua matches on them, so renaming one here
     // silently drops whatever that rule did.
     WlrLayershell.namespace: "buchhwin-strut"
     WlrLayershell.layer: WlrLayer.Top

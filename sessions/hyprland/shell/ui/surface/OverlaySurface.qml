@@ -34,7 +34,7 @@ PanelWindow {
     required property var modelData
     screen: modelData
 
-    // Public interface: config.kdl attaches the blur, shadow and corner radius
+    // Public interface: buchhwin/rules.lua attaches the blur, shadow and corner radius
     // rules to this namespace. Renaming it here without renaming it there
     // loses all three silently.
     WlrLayershell.namespace: "buchhwin-overlay"

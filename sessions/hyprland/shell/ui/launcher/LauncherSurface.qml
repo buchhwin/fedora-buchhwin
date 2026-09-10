@@ -28,7 +28,7 @@ PanelWindow {
     required property var modelData
     screen: modelData
 
-    // Public interface: the blur, shadow and corner rules in config.kdl match
+    // Public interface: the blur, shadow and corner rules in buchhwin/rules.lua match
     // on this name. Renaming it here without renaming it there loses all three
     // without a word.
     WlrLayershell.namespace: "buchhwin-launcher"

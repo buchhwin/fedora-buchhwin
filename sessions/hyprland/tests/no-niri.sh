@@ -36,6 +36,33 @@ hits="$(grep -rIni "$needle" . --exclude-dir=.git         --exclude=no-"$needle"
 
 if [[ -z "$hits" ]]; then
     printf '\033[38;5;114mok\033[0m\n'
+
+    # -----------------------------------------------------------------------
+    printf '  %-42s ' "and no file in its config format"
+    #
+    # ⚠️⚠️ THE NAME WAS THE MARKER AND THE FORMAT WAS NOT, so eighteen places
+    # went on calling the compositor's config `config.kdl` — a file this session
+    # does not write, in a format this compositor cannot read. docs/CONFIG.md
+    # said it in its fourth line, beside a path for shell.json that was also
+    # wrong, so the one document somebody opens in order to change a setting
+    # named two files that do not exist. The check above greps clean over every
+    # one of them: KDL is not the old compositor's NAME, it was its FORMAT.
+    #
+    # ⚠️ CODE ONLY, NOT COMMENTS. Prose may say what the old format was called —
+    # the same allowance the paragraph at the top of this file makes for the
+    # name, and for the same reason. What may not come back is a `.kdl` path in
+    # something that RUNS: a writer, a reader, an installed path.
+    fmt="$(grep -rIn --include='*.qml' --include='*.sh' --include='*.lua' \
+             --exclude=no-"$needle".sh -e '[.]kdl' . 2>/dev/null \
+           | grep -vE ':[[:space:]]*(//|#|--)' || true)"
+
+    if [[ -n "$fmt" ]]; then
+        printf '\033[38;5;203m%s found\033[0m\n' "$(grep -c . <<< "$fmt")"
+        sed 's/^/      /' <<< "$fmt"
+        printf '      %s\n' "A .kdl path in running code reads or writes a file nothing else does."
+        exit 1
+    fi
+    printf '\033[38;5;114mok\033[0m\n'
     exit 0
 fi
 

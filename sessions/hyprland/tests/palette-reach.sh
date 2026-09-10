@@ -149,9 +149,9 @@ if [[ -z "$moved" ]]; then
     printf '\033[38;5;114mok\033[0m\n'
 else
     printf '\033[38;5;203mchanged and should not have:%s\033[0m\n' "$moved"
-    printf '      config.kdl changing means the colors.kdl include has stopped\n'
-    printf '      carrying the colours, so every palette switch now costs a\n'
-    printf '      full the compositor reload.\n'
+    printf '      generated/settings.lua changing means generated/colors.lua has\n'
+    printf '      stopped carrying the colours, so every palette switch now costs\n'
+    printf '      a full compositor reload.\n'
     fail=1
 fi
 

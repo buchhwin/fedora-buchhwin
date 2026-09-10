@@ -61,11 +61,22 @@ sleep 2
 printf '\033[38;5;114mok\033[0m\n'
 
 # The control for the half below: before the shell comes back, the generated
-# config must NOT contain the new value. Without this, "config.kdl has it" could
-# simply mean it always did.
-generated="${XDG_CONFIG_HOME:-$HOME/.config}/buchhwin/hyprland/generated/binds.lua"
-printf '  %-40s ' "config.kdl does not have it yet"
-if grep -q 'xcursor-size 41' "$kdl" 2>/dev/null; then
+# config must NOT contain the new value. Without this, "the generated config has
+# it" could simply mean it always did.
+#
+# ⚠️⚠️ THIS PAIR OF CHECKS WAS BROKEN AND NOTHING COULD SEE IT. Both greps read
+# "$kdl" — a variable this file never assigns, which under the `set -u` at the
+# top is a hard error — and both patterns they carried, `xcursor-size 41` and
+# `layout "fr"`, are the PREVIOUS compositor's syntax. The `generated=` line
+# above them was added during the migration, pointed at binds.lua rather than at
+# the settings, and was then never used by anything. This test needs a running
+# session, so it skips on every machine in CI and on the one this was written
+# on: a check that cannot run cannot go red, and this one had been dead since
+# the migration. Found by the config-format half of the tripwire that watches
+# for traces of the previous compositor.
+generated="${XDG_CONFIG_HOME:-$HOME/.config}/buchhwin/hyprland/generated/settings.lua"
+printf '  %-40s ' "the generated config lacks it yet"
+if grep -q 'kb_layout = "fr"' "$generated" 2>/dev/null; then
     printf '\033[38;5;203mit already did — nothing can be concluded\033[0m\n'
     fail=1
 else
@@ -134,17 +145,24 @@ else
 fi
 
 # ⚠️ AND THE GENERATOR SAW THEM. A value that survives in the file and never
-# reaches config.kdl is the fault tests/fingerprint.sh was written for, one step
-# later: the watcher has to notice the change a restart brought in. Two of the
-# five above are generator keys, so both must be in the compositor's config.
+# reaches the compositor is the fault tests/fingerprint.sh was written for, one
+# step later: the watcher has to notice the change a restart brought in.
+#
+# ⚠️ THE TWO PICKED ARE THE TWO THAT REALLY ARRIVE. It used to be `cursor.size`
+# and `input.keyboard.layout`, and only one of those is a generator key —
+# tools/hypr/EmitSettings.qml writes neither XCURSOR_SIZE nor a cursor theme
+# anywhere, so cursor.size reaches GTK through render.qml and stops there. A
+# check demanding it in the compositor's config was asking for something no code
+# produces. `windows.floating` does arrive, as a window rule named after the
+# application, which is why it stands here instead.
 printf '  %-40s ' "and the generated config caught up"
 missing=""
-grep -q 'xcursor-size 41' "$kdl" 2>/dev/null || missing+=" cursor.size"
-grep -q 'layout "fr"' "$kdl" 2>/dev/null || missing+=" input.keyboard.layout"
+grep -q 'kb_layout = "fr"' "$generated" 2>/dev/null || missing+=" input.keyboard.layout"
+grep -q 'float-buchhwin-probe' "$generated" 2>/dev/null || missing+=" windows.floating"
 if [[ -z "$missing" ]]; then
     printf '\033[38;5;114mok\033[0m\n'
 else
-    printf '\033[38;5;203mnot in config.kdl:%s\033[0m\n' "$missing"
+    printf '\033[38;5;203mnot in the generated config:%s\033[0m\n' "$missing"
     printf '      the setting survived the restart and the generator never ran —\n'
     printf '      that is the catch-up half of services/Theming.qml.\n'
     fail=1

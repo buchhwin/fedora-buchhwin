@@ -211,6 +211,56 @@ else
     exit 1
 fi
 
+# ⚠️⚠️ AND A MIGRATION CAN WRITE ONE TOO, WHICH THE CHECK ABOVE NEVER SAW. It
+# reads the DEFAULT, and a default is only what a fresh machine gets. Migrations
+# .qml overwrites `cursor.theme` on an existing file, and step 13 → 14 set it to
+# `McMojave-cursors` — correct while the installer fetched that theme from a
+# pinned commit, and wrong from the day that step went with the rest of the
+# account-wide work. It was replacing `breeze_cursors`, which IS installed, with
+# a name that is on no machine: the same "the cursor is far too big" the step
+# above it was written to repair, caused by the repair.
+#
+# So every cursor theme this repository ASSIGNS is held to the rule the default
+# is held to. Reading the assignments rather than the defaults is the whole
+# point — a name in a comment is not a name anybody gets.
+printf '  %-38s ' "no migration writes a missing cursor"
+badcur=""
+while read -r name; do
+    [[ -n "$name" ]] || continue
+    if [[ "$name" != "breeze_cursors" && "$name" != "Breeze_Light" ]]; then
+        badcur+=" $name"
+    fi
+done < <(grep -oE 'cursor\.theme[[:space:]]*=[[:space:]]*"[^"]+"' shell/config/Migrations.qml \
+         | grep -oE '"[^"]+"$' | tr -d '"' | sort -u)
+
+if [[ -z "$badcur" ]]; then
+    printf '\033[38;5;114mok\033[0m\n'
+else
+    printf '\033[38;5;203mwrites a theme nothing installs:%s\033[0m\n' "$badcur"
+    printf '      breeze-cursor-theme provides Breeze_Light and breeze_cursors,\n'
+    printf '      measured with rpm -ql, and the installer places no other.\n'
+    exit 1
+fi
+
+# ⚠️ THE TWO NUMBERS THAT HAVE TO AGREE, AND NOTHING WAS CHECKING THEM. If
+# Config's `version` default is higher than Migrations.current, a fresh file is
+# stamped with a version the chain refuses to migrate — needed() calls it
+# "newer than this build". If it is lower, a step never runs. And the array has
+# to hold one function per step or a config lands on the wrong one: steps[n]
+# upgrades n to n+1, so nineteen versions means nineteen functions.
+printf '  %-38s ' "the migration chain lines up"
+mig_cur="$(grep -oE 'property int current: [0-9]+' shell/config/Migrations.qml | grep -oE '[0-9]+')"
+cfg_ver="$(grep -oE 'property int version: [0-9]+' "$file" | grep -oE '[0-9]+')"
+steps="$(awk '/readonly property var steps: \[/,/^    \]/' shell/config/Migrations.qml \
+         | grep -cE '^        function \(cfg')"
+if [[ "$mig_cur" == "$cfg_ver" && "$steps" == "$mig_cur" ]]; then
+    printf '\033[38;5;114mok\033[0m  %s versions, %s steps\n' "$cfg_ver" "$steps"
+else
+    printf '\033[38;5;203mversion %s, Migrations.current %s, %s steps\033[0m\n' \
+           "$cfg_ver" "$mig_cur" "$steps"
+    exit 1
+fi
+
 printf '  %-38s ' "every config group is in docs/CONFIG.md"
 undoc=""
 while read -r g; do

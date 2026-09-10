@@ -1,10 +1,17 @@
 // Rebinding: does the override resolve, and does the clash check hold?
 //
-// ⚠️ THE CLASH CHECK IS WHY THIS FILE EXISTS. Two bindings on one key is a KDL
-// parse error and the compositor does not start with a config it cannot parse — so a
-// clash check that quietly stopped working would not show up as a wrong colour
-// or a dead button. It would show up as a laptop that boots to nothing, once,
-// on the day somebody moved a shortcut.
+// ⚠️⚠️ THE CLASH CHECK IS WHY THIS FILE EXISTS, AND THE REASON GIVEN HERE WAS
+// THE PREVIOUS COMPOSITOR'S. It said two bindings on one key is "a KDL parse
+// error and the compositor does not start", which was true of a format this
+// session no longer uses. Hyprland keeps one of the two and says nothing —
+// config/hypr/hyprland.lua writes it down where it chooses between the shipped
+// binds and the generated ones: "two binds on one key is a conflict Hyprland
+// resolves by silently keeping one of them".
+//
+// So the check matters MORE than the old note claimed, not less. The old
+// failure was a laptop that boots to nothing: loud, immediate, impossible to
+// miss, and fixed in one sitting. This one is a shortcut that quietly does
+// somebody else's job, with nothing anywhere saying which of the two won.
 //
 // ⚠️ AND THE OVERRIDE SHAPE IS THE OTHER HALF. `binds` is all-or-nothing, so a
 // rebinding written as the resolved list freezes every other binding at what it

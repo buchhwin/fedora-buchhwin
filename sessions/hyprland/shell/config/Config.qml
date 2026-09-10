@@ -4,7 +4,7 @@ pragma Singleton
 //
 // One file, one writer. The settings window writes through this adapter and
 // nothing else touches the file, so there is no second format to keep in sync
-// and no daemon in the middle. the compositor's own config.kdl is GENERATED from these
+// and no daemon in the middle. the compositor's own Lua config is GENERATED from these
 // values (see tools/hypr.qml) — it is an output, never an input, and editing
 // it by hand is editing something that will be overwritten.
 //
@@ -94,7 +94,7 @@ Singleton {
     // same tick still returns the default. A binding survives that (it
     // re-evaluates); a generator that reads inside a function does not, and
     // writes the default into a file with no error anywhere — gapsOut 24 in
-    // shell.json, `gaps 10` in config.kdl.
+    // shell.json, `gaps_out = 10` in generated/settings.lua.
     //
     // The one-step deferral therefore lives in common/WaitFor.qml, so that
     // every consumer gets it instead of each rediscovering it. (`adapterUpdated`
@@ -645,7 +645,7 @@ Singleton {
             // only the migration chain quietly papering over it. Both now write
             // no version at all: a file without one reads as 0 and is migrated
             // forward, which is exactly the path a genuinely old file takes.
-            property int version: 18
+            property int version: 19
 
             property JsonObject theme: JsonObject {
                 // ⚠️ BLACK IS THE SHIPPED DEFAULT SINCE 09.09.2026, his
@@ -1712,7 +1712,7 @@ Singleton {
             }
 
             // ---------------------------------------------------------------
-            // Key bindings. Written to config.kdl, never handled by the shell:
+            // Key bindings. Written to generated/binds.lua, never handled by the shell:
             // The compositor has no protocol for shell-owned shortcuts, and keys that
             // live in the compositor keep working when the shell is dead.
             //
@@ -1816,10 +1816,14 @@ Singleton {
                 // `false`, Vorgabe 12 keeps it — and then the switch in Windows &
                 // Behaviour is the way, not the update.
                 //
-                // Measured with a control, both directions, on the lab VM:
-                //   forced false → `focus-follows-mouse` appears 0 times in the
-                //   generated config.kdl; forced true → 1 time, and
-                //   `Hyprland --verify-config` calls the result valid.
+                // ⚠️ THE MEASUREMENT THAT STOOD HERE WAS THE PREVIOUS
+                // COMPOSITOR'S. It said `focus-follows-mouse` appears 0 times in
+                // the generated config.kdl when this is forced false and 1 time
+                // when forced true. This generator writes neither that key nor
+                // that file: tools/hypr/EmitSettings.qml emits `follow_mouse`
+                // into generated/settings.lua as 0 or 1, so the key is always
+                // there and it is the VALUE that moves. A control nobody can
+                // re-run is a claim wearing a measurement's clothes.
                 property bool focusFollowsMouse: true
                 property bool warpMouseToFocus: false
             }

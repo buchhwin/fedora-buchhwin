@@ -201,7 +201,7 @@ fault you can name and an evening.
    Qt applications, Dolphin's file list, the terminal and the compositor's own
    borders should all follow. Dolphin's list is the new part — that is
    `kdeglobals`.
-9. **The calendar shows real appointments** (`Super+C`). If it says "No
+9. **The calendar shows real appointments** (`Super+Shift+K`). If it says "No
    calendars found", set one up in KDE Settings first — this session reads
    KDE's store and adds no account manager of its own.
 10. **Plasma still works.** Log out, log into Plasma, and check that its
