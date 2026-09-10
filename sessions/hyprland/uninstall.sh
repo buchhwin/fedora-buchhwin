@@ -227,5 +227,12 @@ cat <<'EOF'
 
       sudo dnf remove hyprland xdg-desktop-portal-hyprland quickshell
 
+  The COPRs the installer may have enabled are left for the same reason, and
+  they stay in every dnf upgrade until you say otherwise:
+
+      sudo dnf copr disable sachesi/hyprland
+      sudo dnf copr disable atim/starship
+      sudo dnf copr disable atim/lazygit
+
   ~/Pictures/Wallpaper still holds the wallpapers that were copied there.
 EOF

@@ -172,14 +172,42 @@ print_plan() {
         "/etc/systemd/logind.conf.d/50-buchhwin.conf  (what closing the lid does)"
 
     section "System settings that change"
-    # ⚠️ NAMED, BECAUSE THEY WERE NOT. Both are ordinarily no-ops on a Fedora
-    # KDE machine — SDDM is already the display manager and the marking only
-    # touches packages that are already installed — but "ordinarily a no-op" is
-    # not the same as "does nothing", and this is the list somebody reads to
-    # decide whether to run it on a machine they work on.
+    # ⚠️ NAMED, BECAUSE THEY WERE NOT. The first two are ordinarily no-ops on a
+    # Fedora KDE machine — SDDM is already the display manager and the marking
+    # only touches packages that are already installed — but "ordinarily a
+    # no-op" is not the same as "does nothing", and this is the list somebody
+    # reads to decide whether to run it on a machine they work on.
+    #
+    # ⚠️⚠️ AND THE THREE COPRs WERE MISSING ENTIRELY, WHICH IS THE WORSE HALF.
+    # A COPR is a third-party repository added to the machine PERMANENTLY: it
+    # stays enabled after the install, its packages take part in every `dnf
+    # upgrade` from then on, and ./uninstall.sh does not take it off — the same
+    # rule as packages, for the same reason. That is a real decision, and it was
+    # being made on the reader's behalf without appearing anywhere in the plan
+    # they read in order to decide.
+    #
+    # `set-default graphical.target` was missing for the same reason the first
+    # two nearly were: it is what a KDE machine already boots into, so it looks
+    # like nothing. A plan that lists only the changes it expects to matter is a
+    # plan that decides for the reader what matters.
+    #
+    # ⚠️ AND THREE SYSTEM SERVICES, FOUND THE SAME WAY. They are enabled only if
+    # they exist and are not enabled already, which is why they read as nothing
+    # — but systemd-oomd decides what this machine kills when it runs out of
+    # memory, and that is not a window manager's call to make quietly.
     printf '      %s\n' \
         "systemctl enable sddm.service  (already enabled on Fedora KDE)" \
-        "dnf mark user, on packages we ship that the removal below could sweep up"
+        "systemctl set-default graphical.target  (already the default on KDE)" \
+        "systemctl enable udisks2.service      — mounting a stick from the file manager" \
+        "systemctl enable systemd-oomd.service — kills a runaway process instead of swapping" \
+        "systemctl enable tuned-ppd.service    — the power profiles the panel talks to" \
+        "  each only if it exists and is not already enabled" \
+        "dnf mark user, on packages we ship that the removal below could sweep up" \
+        "dnf copr enable sachesi/hyprland  — ONLY if Fedora has no Hyprland" \
+        "dnf copr enable atim/starship     — ONLY if starship is not installed" \
+        "dnf copr enable atim/lazygit      — ONLY if lazygit is not installed" \
+        "  a COPR stays enabled afterwards; uninstall.sh does not remove it" \
+        "  to take one off:  sudo dnf copr disable <owner/repo>"
 
     section "Changes to your account"
     # shellcheck disable=SC2088  # literal text for the reader, not a path

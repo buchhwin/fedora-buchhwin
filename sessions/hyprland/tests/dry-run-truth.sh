@@ -177,7 +177,66 @@ while IFS='|' read -r what pattern; do
     fi
 done <<'CHANGES'
 systemctl enable sddm|systemctl enable sddm
+systemctl set-default graphical.target|systemctl set-default graphical.target
 dnf mark user|dnf mark user
+dnf copr enable sachesi/hyprland|copr enable -y sachesi/hyprland
 CHANGES
+
+# ── 6 · and nothing changes the system that the plan has not named ──────────
+#
+# ⚠️⚠️ THREE COPRs AND A BOOT TARGET WERE BEING SET WITHOUT A WORD. The section
+# above is the plan→code direction and it only ever asks about lines somebody
+# thought to put in the table. This is the other way round, and it is the half
+# that catches the NEXT one: every `systemctl` verb and every `dnf copr enable`
+# in the executable code has to appear in the plan.
+#
+# A COPR is not a detail. It is a third-party repository added permanently,
+# taking part in every `dnf upgrade` afterwards, and uninstall.sh leaves it —
+# so a reader who was never told is a reader who cannot decide.
+plan_all="$(sed -n '/^print_plan()/,/^}/p' lib/common.sh | grep -v '^[[:space:]]*#')"
+
+unnamed=""
+while read -r change; do
+    [[ -n "$change" ]] || continue
+    grep -qF "$change" <<< "$plan_all" || unnamed+="$change"$'\n'
+done < <(
+    { grep -oE 'sudo systemctl (enable|disable|mask|set-default) (--now )?[a-z0-9_.-]+[.](service|target)' <<< "$code" \
+        | sed -e 's/^sudo //' -e 's/ --now / /'
+      grep -oE 'copr enable (-y )?[a-z0-9_.-]+/[a-z0-9_.-]+' <<< "$code" \
+        | sed -e 's/copr enable -\?y\? \?/dnf copr enable /'
+          # ⚠️ THE UNITS COME FROM A LOOP VARIABLE, so the verb alone says nothing:
+      # `sudo systemctl enable --now "$unit"` names no unit at all. Three of
+      # them — udisks2, systemd-oomd and tuned-ppd — were being enabled
+      # machine-wide with no mention anywhere, and systemd-oomd in particular
+      # changes what the machine kills when it runs out of memory. So the SYSTEM
+      # units are collected by name from the executable lines instead, and lines
+      # carrying `--user` are left out: those are this account's own units, they
+      # are already in the plan's account section, and they leave with it.
+      grep -E '^[[:space:]]*for [a-z_]+ in .*[.]service' <<< "$code" \
+        | grep -oE '\b[a-z0-9_-]+[.](service|target)\b' \
+        | sed 's/^/systemctl enable /'
+      # ⚠️ AND THE COPRs COME FROM A LOOP TOO — `dnf copr enable -y "$copr"`
+      # names no repository either, and the mutation that added a fourth one to
+      # the list stayed green until this line existed. Two of the three COPRs
+      # this installer enables are in that list, not in a literal call.
+      #
+      # ⚠️ THE LOOP VARIABLE IS NAMED `copr`, AND THAT IS THE ANCHOR. Matching
+      # any `for x in a/b` instead swept up `for f in packages/dnf-*.txt` and
+      # `for helper in scripts/buchhwin-*` and reported two source directories
+      # as third-party repositories. A pattern loose enough to catch everything
+      # reports things that are not true, which is how a checker gets ignored.
+      grep -E '^[[:space:]]*for [a-z_]*copr[a-z_]* in ' <<< "$code" \
+        | grep -oE '\b[a-z0-9_-]+/[a-z0-9_-]+\b' \
+        | sed 's|^|dnf copr enable |'
+    } | sort -u
+)
+
+if [[ -n "$unnamed" ]]; then
+    bad "the installer changes the system in ways the plan does not name:"
+    sed 's/^/        /' <<< "${unnamed%$'\n'}"
+    printf '        %s\n' "A COPR stays on the machine. So does a changed boot target."
+else
+    ok "every system change the code makes is in the plan"
+fi
 
 exit "$fail"
