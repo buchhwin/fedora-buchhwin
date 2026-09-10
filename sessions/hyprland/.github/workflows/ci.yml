@@ -167,7 +167,7 @@ jobs:
       # migration was code written against a compositor that is not installed
       # here, and all of it greps clean.
       - name: no trace of the previous compositor
-        run: bash tests/no-niri.sh
+        run: bash tests/no-old-compositor.sh
       - name: every bind action is one the generator can emit
         run: bash tests/bind-actions.sh
       # ⚠️ EXIT 2 IS NOT RED. This lane has no quickshell, so the functional

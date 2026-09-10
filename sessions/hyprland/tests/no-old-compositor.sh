@@ -24,15 +24,26 @@ cd "$(dirname "$0")/.." || exit 2
 printf '  %-42s ' "no trace of the previous compositor"
 
 # ⚠️ THE PATTERN IS BUILT FROM PIECES, AND THE CHECK EXCLUDES ITSELF.
-# Written out as a literal it matches this file and the CI step that calls it,
-# so the tripwire fails on its own existence — which it did, first run.
+# Written out as a literal it matches this file, so the tripwire fails on its
+# own existence — which it did, first run.
 needle="ni""ri"
 
 # --exclude-dir on .git; everything else in the tree is fair game, including the
-# wallpapers' filenames, the tests and the generated-file paths. This file and
-# the workflow that names it are the only exceptions, and only because they
-# have to say the word in order to look for it.
-hits="$(grep -rIni "$needle" . --exclude-dir=.git         --exclude=no-"$needle".sh --exclude=ci.yml 2>/dev/null || true)"
+# wallpapers' filenames, the tests and the generated-file paths. THIS FILE IS
+# THE ONLY EXCEPTION, and only because it has to say the word in order to look
+# for it.
+#
+# ⚠️⚠️ IT USED TO BE THREE, AND THE THIRD ARRIVED BY ACCIDENT. This file was
+# called no-<the name>.sh, so every place that had to RUN it — the CI step, and
+# a row in tests/tripwires.sh — said the word as well, and each needed its own
+# exemption. Adding a tripwire case for this very check is what made that
+# obvious: the row naming the suite turned the check red, and the reflex is to
+# add one more --exclude. The list was three files from the exemption the header
+# above says does not exist.
+#
+# So the FILE was renamed instead. Nothing has to spell the name to run it any
+# more, the two exemptions went with it, and the header means what it says.
+hits="$(grep -rIni "$needle" . --exclude-dir=.git --exclude=no-old-compositor.sh 2>/dev/null || true)"
 
 if [[ -z "$hits" ]]; then
     printf '\033[38;5;114mok\033[0m\n'
@@ -52,8 +63,15 @@ if [[ -z "$hits" ]]; then
     # the same allowance the paragraph at the top of this file makes for the
     # name, and for the same reason. What may not come back is a `.kdl` path in
     # something that RUNS: a writer, a reader, an installed path.
+    #
+    # ⚠️ tests/tripwires.sh IS EXCLUDED BECAUSE ITS JOB IS TO CONTAIN THE FAULT.
+    # Its table holds one sed expression per case, and the case that proves THIS
+    # check has to spell out the very path it is looking for. That is the same
+    # shape as the line above excluding this file, not a second exemption: a
+    # mutation table is data about faults, and it writes nothing.
     fmt="$(grep -rIn --include='*.qml' --include='*.sh' --include='*.lua' \
-             --exclude=no-"$needle".sh -e '[.]kdl' . 2>/dev/null \
+             --exclude=no-old-compositor.sh --exclude=tripwires.sh \
+             -e '[.]kdl' . 2>/dev/null \
            | grep -vE ':[[:space:]]*(//|#|--)' || true)"
 
     if [[ -n "$fmt" ]]; then
